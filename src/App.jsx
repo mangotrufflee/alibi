@@ -3,7 +3,6 @@ import React from "react";
 import { GameProvider, useGame } from "./state/GameContext";
 import HeaderNav from "./components/ui/HeaderNav";
 import InterrogationRoom from "./components/interrogation/InterrogationRoom";
-import GnaniPipelineVisualizer from "./components/gnani/GnaniPipelineVisualizer";
 import EvidenceBoard from "./components/evidence/EvidenceBoard";
 import CaseDossier from "./components/case/CaseDossier";
 import "./styles/noir-theme.css";
@@ -13,16 +12,15 @@ function GameMain() {
 
   return (
     <div className={`alibi-noir-app ${generatorFlicker ? "generator-dip" : ""}`}>
-      {/* MONSOON RAIN & SMOKE OVERLAY */}
+      {/* MONSOON RAIN ATMOSPHERE */}
       <div className="rain-atmosphere-layer" />
 
       {/* TOP HEADER */}
       <HeaderNav />
 
-      {/* TAB CONTENT CONTAINER */}
+      {/* GAME VIEW CONTENT */}
       <main className="alibi-main-content">
         {activeTab === "interrogation" && <InterrogationRoom />}
-        {activeTab === "gnani-pipeline" && <GnaniPipelineVisualizer />}
         {activeTab === "evidence" && <EvidenceBoard />}
         {activeTab === "dossier" && <CaseDossier />}
       </main>

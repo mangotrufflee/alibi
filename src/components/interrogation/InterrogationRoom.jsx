@@ -76,7 +76,7 @@ export default function InterrogationRoom() {
         <div className="suspect-profile-card">
           <div className="profile-badge-row">
             <span className="suspect-status-tag">{currentSuspect.status}</span>
-            <span className="voice-badge">Gnani: {voiceConfig.voice} ({voiceConfig.language})</span>
+            <span className="voice-badge">{currentSuspect.age} yrs • Rex Auditorium</span>
           </div>
 
           {/* SUSPECT PORTRAIT */}
@@ -164,27 +164,27 @@ export default function InterrogationRoom() {
             </div>
           </div>
 
-          {/* GNANI LIVE VOICE PIPELINE STATUS BAR */}
+          {/* LIVE VOICE STATUS BAR */}
           <div className="pipeline-live-status-bar">
             {isRecording ? (
               <div className="status-live recording">
                 <span className="pulse-rec-icon" />
-                <strong>GNANI MIC ACTIVE:</strong> Speak your interrogation query now... (Click Mic to Finish)
+                <strong>MIC RECORDING:</strong> Speak your question clearly... (Click Mic to Finish)
               </div>
             ) : isProcessing ? (
               <div className="status-live processing">
                 <span className="spinner-icon">⏳</span>
-                <strong>GNANI PRISMA STT:</strong> Transcribing speech into detective query...
+                <strong>TRANSCRIBING:</strong> Processing detective voice query...
               </div>
             ) : isSpeaking ? (
               <div className="status-live speaking">
                 <span className="speaker-icon">🔊</span>
-                <strong>GNANI TIMBRE TTS:</strong> {currentSuspect.name} is speaking in {voiceConfig.voice} voice...
+                <strong>SPEAKING:</strong> {currentSuspect.name} is responding...
               </div>
             ) : (
               <div className="status-live idle">
                 <span>🎙️ Push-to-Talk or select a cross-examination question below</span>
-                <span className="lang-pill">Gnani Language: {currentLanguage}</span>
+                <span className="lang-pill">{currentLanguage === "en-IN" ? "English (India)" : "Hindi"}</span>
               </div>
             )}
           </div>
@@ -223,7 +223,7 @@ export default function InterrogationRoom() {
                 <span className="mic-primary-text">
                   {isRecording ? "CLICK TO FINISH" : "PUSH TO TALK"}
                 </span>
-                <span className="mic-sub-text">Gnani.ai Speech STT</span>
+                <span className="mic-sub-text">Voice Interrogation</span>
               </div>
             </div>
 
