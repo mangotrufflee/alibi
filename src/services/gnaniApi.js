@@ -1,11 +1,6 @@
 // src/services/gnaniApi.js
-// Gnani.ai Voice Pipeline Integration (STT & TTS)
-// Base URL: https://api.vachana.ai
-// Documentation: https://api.vachana.ai / Timbre v2.5 & Prisma v2.5
+// Client-side voice client that communicates with the Gnani AI Backend Server
 
-const GNANI_BASE_URL = "https://api.vachana.ai";
-
-// Default voice mapping for Rex Talkies suspects
 export const SUSPECT_VOICE_MAP = {
   raju: {
     voice: "Pranav",
@@ -13,8 +8,7 @@ export const SUSPECT_VOICE_MAP = {
     language: "hi-IN",
     speed: 1.08,
     pitch: 1.05,
-    gender: "male",
-    displayName: "Pranav (Young / Urgent)"
+    gender: "male"
   },
   meera: {
     voice: "Nalini",
@@ -22,8 +16,7 @@ export const SUSPECT_VOICE_MAP = {
     language: "en-IN",
     speed: 0.95,
     pitch: 0.98,
-    gender: "female",
-    displayName: "Nalini (Poised / Authoritative)"
+    gender: "female"
   },
   arvind: {
     voice: "Pranav",
@@ -31,8 +24,7 @@ export const SUSPECT_VOICE_MAP = {
     language: "en-IN",
     speed: 0.88,
     pitch: 0.90,
-    gender: "male",
-    displayName: "Pranav (Elderly / Deliberate)"
+    gender: "male"
   },
   nusrat: {
     voice: "Yashvi",
@@ -40,8 +32,7 @@ export const SUSPECT_VOICE_MAP = {
     language: "en-IN",
     speed: 1.05,
     pitch: 1.02,
-    gender: "female",
-    displayName: "Yashvi (Sharp / Student)"
+    gender: "female"
   },
   bhola: {
     voice: "Pranav",
@@ -49,105 +40,54 @@ export const SUSPECT_VOICE_MAP = {
     language: "hi-IN",
     speed: 0.98,
     pitch: 0.95,
-    gender: "male",
-    displayName: "Pranav (Gravelly / Folksy)"
+    gender: "male"
   }
 };
 
-export class GnaniPipelineService {
+export class GnaniClientService {
   constructor() {
-    this.apiKey = localStorage.getItem("GNANI_API_KEY") || "";
     this.mediaRecorder = null;
     this.audioChunks = [];
-    this.audioContext = null;
     this.currentAudio = null;
+    this.stage = "IDLE"; // IDLE | RECORDING | PROCESSING | PLAYING
     this.listeners = new Set();
-    this.pipelineState = {
-      stage: "IDLE", // IDLE | RECORDING | STT_PROCESSING | REASONING | TTS_SYNTHESIZING | PLAYING | ERROR
-      lastLatency: null,
-      lastSttResult: null,
-      lastTtsResult: null,
-      lastRequestPayload: null,
-      isFallbackActive: !this.apiKey,
-      logs: []
-    };
-  }
-
-  setApiKey(key) {
-    this.apiKey = (key || "").trim();
-    if (this.apiKey) {
-      localStorage.setItem("GNANI_API_KEY", this.apiKey);
-      this.pipelineState.isFallbackActive = false;
-      this.addLog("API_KEY", `Configured Gnani API Key (${this.apiKey.slice(0, 4)}...${this.apiKey.slice(-4)})`);
-    } else {
-      localStorage.removeItem("GNANI_API_KEY");
-      this.pipelineState.isFallbackActive = true;
-      this.addLog("API_KEY", "Gnani API Key cleared. Dual-mode fallback active.");
-    }
-    this.notify();
-  }
-
-  getApiKey() {
-    return this.apiKey;
   }
 
   subscribe(callback) {
     this.listeners.add(callback);
-    callback(this.pipelineState);
+    callback({ stage: this.stage });
     return () => this.listeners.delete(callback);
   }
 
-  notify() {
-    this.listeners.forEach((cb) => cb({ ...this.pipelineState }));
+  setStage(stage) {
+    this.stage = stage;
+    this.listeners.forEach((cb) => cb({ stage }));
   }
 
-  addLog(type, message, details = null) {
-    const logEntry = {
-      id: Date.now() + Math.random().toString(36).substring(2, 6),
-      timestamp: new Date().toLocaleTimeString(),
-      type,
-      message,
-      details
-    };
-    this.pipelineState.logs = [logEntry, ...this.pipelineState.logs.slice(0, 49)];
-    this.notify();
-  }
-
-  // --- AUDIO RECORDING & WAV CONVERSION ---
-
+  // Audio Recording
   async startRecording() {
     try {
       this.audioChunks = [];
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.mediaStream = stream;
 
-      // Use standard supported mime types
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/mp4")
-        ? "audio/mp4"
         : "";
 
       this.mediaRecorder = mimeType
         ? new MediaRecorder(stream, { mimeType })
         : new MediaRecorder(stream);
 
-      this.mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          this.audioChunks.push(event.data);
-        }
+      this.mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) this.audioChunks.push(e.data);
       };
 
       this.mediaRecorder.start(100);
-      this.pipelineState.stage = "RECORDING";
-      this.addLog("MIC", "Detective microphone recording started...");
-      this.notify();
+      this.setStage("RECORDING");
       return true;
     } catch (err) {
-      console.warn("Microphone access denied or unavailable, switching to browser recognition:", err);
-      this.addLog("MIC_ERROR", "Microphone access failed: " + err.message);
-      this.pipelineState.stage = "ERROR";
-      this.notify();
+      console.warn("Microphone not available, using fallback interrogation queries:", err);
       return false;
     }
   }
@@ -155,18 +95,16 @@ export class GnaniPipelineService {
   async stopRecording() {
     return new Promise((resolve) => {
       if (!this.mediaRecorder || this.mediaRecorder.state === "inactive") {
-        this.pipelineState.stage = "IDLE";
-        this.notify();
+        this.setStage("IDLE");
         resolve(null);
         return;
       }
 
       this.mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(this.audioChunks, { type: this.mediaRecorder.mimeType || "audio/webm" });
+        const audioBlob = new Blob(this.audioChunks, { type: "audio/webm" });
         if (this.mediaStream) {
-          this.mediaStream.getTracks().forEach((track) => track.stop());
+          this.mediaStream.getTracks().forEach((t) => t.stop());
         }
-        this.addLog("MIC", `Recorded audio blob created (${Math.round(audioBlob.size / 1024)} KB)`);
         resolve(audioBlob);
       };
 
@@ -174,197 +112,121 @@ export class GnaniPipelineService {
     });
   }
 
-  // Helper to convert recorded audio blob to standard 16kHz mono WAV for Gnani Prisma STT
+  // Convert to 16kHz WAV
   async convertToWav(audioBlob) {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const arrayBuffer = await audioBlob.arrayBuffer();
       const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-      // Downsample to 16000Hz mono for telephony-grade STT
       const targetSampleRate = 16000;
-      const numChannels = 1;
-      const offlineCtx = new OfflineAudioContext(
-        numChannels,
-        audioBuffer.duration * targetSampleRate,
-        targetSampleRate
-      );
-
+      const offlineCtx = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
       const source = offlineCtx.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(offlineCtx.destination);
       source.start(0);
 
       const renderedBuffer = await offlineCtx.startRendering();
-      const wavBlob = this.encodeAudioBufferToWav(renderedBuffer);
       audioCtx.close();
-      return wavBlob;
+
+      return this.encodeWav(renderedBuffer);
     } catch (e) {
-      console.warn("WAV conversion fallback to raw blob:", e);
       return audioBlob;
     }
   }
 
-  encodeAudioBufferToWav(buffer) {
+  encodeWav(buffer) {
     const numChannels = 1;
     const sampleRate = buffer.sampleRate;
-    const format = 1; // PCM
-    const bitDepth = 16;
     const channelData = buffer.getChannelData(0);
-    const bytesPerSample = bitDepth / 8;
-    const blockAlign = numChannels * bytesPerSample;
-    const byteRate = sampleRate * blockAlign;
-    const dataSize = channelData.length * bytesPerSample;
-    const bufferSize = 44 + dataSize;
-    const arrayBuffer = new ArrayBuffer(bufferSize);
+    const dataSize = channelData.length * 2;
+    const arrayBuffer = new ArrayBuffer(44 + dataSize);
     const view = new DataView(arrayBuffer);
 
-    // RIFF identifier
-    this.writeString(view, 0, "RIFF");
+    const writeStr = (offset, str) => {
+      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    };
+
+    writeStr(0, "RIFF");
     view.setUint32(4, 36 + dataSize, true);
-    this.writeString(view, 8, "WAVE");
-    this.writeString(view, 12, "fmt ");
+    writeStr(8, "WAVE");
+    writeStr(12, "fmt ");
     view.setUint32(16, 16, true);
-    view.setUint16(20, format, true);
+    view.setUint16(20, 1, true);
     view.setUint16(22, numChannels, true);
     view.setUint32(24, sampleRate, true);
-    view.setUint32(28, byteRate, true);
-    view.setUint16(32, blockAlign, true);
-    view.setUint16(34, bitDepth, true);
-    this.writeString(view, 36, "data");
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeStr(36, "data");
     view.setUint32(40, dataSize, true);
 
-    // Write PCM 16-bit samples
     let offset = 44;
     for (let i = 0; i < channelData.length; i++, offset += 2) {
-      let s = Math.max(-1, Math.min(1, channelData[i]));
+      const s = Math.max(-1, Math.min(1, channelData[i]));
       view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
     }
 
     return new Blob([view], { type: "audio/wav" });
   }
 
-  writeString(view, offset, string) {
-    for (let i = 0; i < string.length; i++) {
-      view.setUint8(offset + i, string.charCodeAt(i));
-    }
-  }
-
-  // --- GNANI STT (Speech-to-Text) PIPELINE ---
-
+  // Transcribe detective audio via Backend
   async transcribeAudio(audioBlob, languageCode = "en-IN") {
-    const startTime = performance.now();
-    this.pipelineState.stage = "STT_PROCESSING";
-    this.notify();
+    this.setStage("PROCESSING");
+    try {
+      const wavBlob = await this.convertToWav(audioBlob);
+      const res = await fetch(`/api/stt?lang=${languageCode}`, {
+        method: "POST",
+        body: wavBlob
+      });
 
-    // If API key is present, attempt real Gnani STT API: POST /stt/v3
-    if (this.apiKey) {
-      try {
-        const wavBlob = await this.convertToWav(audioBlob);
-        const formData = new FormData();
-        formData.append("audio_file", wavBlob, "interrogation_query.wav");
-        formData.append("language_code", languageCode);
-        formData.append("preferred_language", languageCode);
-        formData.append("format", "transcribe");
-        formData.append("itn_native_numerals", "true");
-
-        this.pipelineState.lastRequestPayload = {
-          endpoint: `${GNANI_BASE_URL}/stt/v3`,
-          headers: { "X-API-Key-ID": `${this.apiKey.slice(0, 4)}...` },
-          params: { language_code: languageCode, format: "transcribe" }
-        };
-
-        this.addLog("GNANI_STT_REQ", `Calling Gnani Prisma STT v3 [${languageCode}]...`);
-
-        const response = await fetch(`${GNANI_BASE_URL}/stt/v3`, {
-          method: "POST",
-          headers: {
-            "X-API-Key-ID": this.apiKey
-          },
-          body: formData
-        });
-
-        if (!response.ok) {
-          throw new Error(`Gnani STT API error HTTP ${response.status}: ${await response.text()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.transcript) {
+          return data.transcript;
         }
-
-        const data = await response.json();
-        const latency = Math.round(performance.now() - startTime);
-        const transcript = data.transcript || data.text || data.transcription || "";
-
-        this.pipelineState.lastLatency = latency;
-        this.pipelineState.lastSttResult = { transcript, raw: data, latency };
-        this.addLog("GNANI_STT_RES", `Gnani STT Success (${latency}ms): "${transcript}"`, data);
-
-        return transcript;
-      } catch (err) {
-        console.warn("Gnani STT request failed, falling back to local speech engine:", err);
-        this.addLog("GNANI_STT_WARN", `API unreachable (${err.message}), engaging intelligent fallback.`);
       }
+    } catch (e) {
+      console.warn("Backend STT fetch error:", e);
     }
 
-    // --- FALLBACK STT ENGINE ---
-    // Uses Web Speech API if supported or intelligent interrogation query generator
-    return this.fallbackSpeechRecognition(languageCode, startTime);
+    // Local fallback if backend returns fallback or is offline
+    return this.fallbackQueryGenerator(languageCode);
   }
 
-  async fallbackSpeechRecognition(languageCode, startTime) {
+  fallbackQueryGenerator(languageCode) {
     return new Promise((resolve) => {
-      // 1. Try browser SpeechRecognition if available
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         try {
-          const recognizer = new SpeechRecognition();
-          recognizer.lang = languageCode;
-          recognizer.continuous = false;
-          recognizer.interimResults = false;
-
-          let resolved = false;
-          recognizer.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            resolved = true;
-            const latency = Math.round(performance.now() - startTime);
-            this.pipelineState.lastLatency = latency;
-            this.pipelineState.lastSttResult = { transcript, fallback: "WebSpeechAPI", latency };
-            this.addLog("FALLBACK_STT", `Browser STT recognized (${latency}ms): "${transcript}"`);
-            resolve(transcript);
+          const rec = new SpeechRecognition();
+          rec.lang = languageCode;
+          rec.continuous = false;
+          let done = false;
+          rec.onresult = (e) => {
+            done = true;
+            resolve(e.results[0][0].transcript);
           };
-
-          recognizer.onerror = () => {
-            if (!resolved) {
-              const fallbackQuery = this.getRandomInterrogationQuery();
-              const latency = Math.round(performance.now() - startTime);
-              this.pipelineState.lastSttResult = { transcript: fallbackQuery, fallback: "Simulated", latency };
-              this.addLog("FALLBACK_STT", `Simulated interrogation query selected: "${fallbackQuery}"`);
-              resolve(fallbackQuery);
-            }
+          rec.onerror = () => {
+            if (!done) resolve(this.getRandomQuery());
           };
-
-          recognizer.start();
+          rec.start();
           setTimeout(() => {
-            if (!resolved) {
-              recognizer.stop();
-              const fallbackQuery = this.getRandomInterrogationQuery();
-              resolve(fallbackQuery);
+            if (!done) {
+              rec.stop();
+              resolve(this.getRandomQuery());
             }
-          }, 4000);
+          }, 3500);
           return;
         } catch (e) {
-          // ignore and fall through
+          // fall through
         }
       }
-
-      // 2. Realistic Simulated Detective Query
-      const fallbackQuery = this.getRandomInterrogationQuery();
-      const latency = Math.round(performance.now() - startTime + 400);
-      this.pipelineState.lastLatency = latency;
-      this.pipelineState.lastSttResult = { transcript: fallbackQuery, fallback: "Simulated", latency };
-      this.addLog("FALLBACK_STT", `Interrogation audio transcribed (${latency}ms): "${fallbackQuery}"`);
-      setTimeout(() => resolve(fallbackQuery), 400);
+      setTimeout(() => resolve(this.getRandomQuery()), 300);
     });
   }
 
-  getRandomInterrogationQuery() {
+  getRandomQuery() {
     const queries = [
       "Where were you when the lights cut out at 8:45 PM?",
       "Why did you have Harbans Lal's duplicate projection booth key?",
@@ -375,90 +237,36 @@ export class GnaniPipelineService {
     return queries[Math.floor(Math.random() * queries.length)];
   }
 
-  // --- GNANI TTS (Text-to-Speech) PIPELINE ---
-
+  // Synthesize suspect speech via Backend
   async synthesizeSpeech(text, suspectId = "raju") {
-    const startTime = performance.now();
-    this.pipelineState.stage = "TTS_SYNTHESIZING";
-    this.notify();
-
+    this.setStage("PROCESSING");
     const voiceConfig = SUSPECT_VOICE_MAP[suspectId] || SUSPECT_VOICE_MAP.raju;
 
-    // Real Gnani TTS API: POST /api/v1/tts/inference
-    if (this.apiKey) {
-      try {
-        const payload = {
-          text,
-          voice: voiceConfig.voice,
-          model: voiceConfig.model,
-          language: voiceConfig.language,
-          speed: voiceConfig.speed,
-          audio_config: {
-            encoding: "linear_pcm",
-            container: "wav",
-            num_channels: 1,
-            sample_rate: 48000,
-            sample_width: 2
-          }
-        };
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voiceConfig })
+      });
 
-        this.pipelineState.lastRequestPayload = {
-          endpoint: `${GNANI_BASE_URL}/api/v1/tts/inference`,
-          headers: { "X-API-Key-ID": `${this.apiKey.slice(0, 4)}...` },
-          body: payload
-        };
-
-        this.addLog("GNANI_TTS_REQ", `Calling Gnani Timbre TTS [${voiceConfig.voice} / ${voiceConfig.language}]...`, payload);
-
-        const response = await fetch(`${GNANI_BASE_URL}/api/v1/tts/inference`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key-ID": this.apiKey
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-          throw new Error(`Gnani TTS error HTTP ${response.status}: ${await response.text()}`);
-        }
-
-        // Response is typically audio buffer / WAV binary or JSON with audio base64
-        const contentType = response.headers.get("content-type") || "";
-        let audioBlob;
-
-        if (contentType.includes("json")) {
-          const json = await response.json();
-          const audioBase64 = json.audio_content || json.audio || json.data;
-          const binary = atob(audioBase64);
-          const bytes = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-          audioBlob = new Blob([bytes], { type: "audio/wav" });
-        } else {
-          audioBlob = await response.blob();
-        }
-
-        const latency = Math.round(performance.now() - startTime);
-        this.pipelineState.lastTtsResult = { voice: voiceConfig.voice, latency, size: audioBlob.size };
-        this.addLog("GNANI_TTS_RES", `Gnani Timbre synthesized audio (${latency}ms, ${Math.round(audioBlob.size / 1024)} KB)`);
-
+      const contentType = res.headers.get("content-type") || "";
+      if (res.ok && contentType.includes("audio")) {
+        const audioBlob = await res.blob();
         await this.playAudioBlob(audioBlob);
         return true;
-      } catch (err) {
-        console.warn("Gnani TTS failed, engaging browser voice synthesis:", err);
-        this.addLog("GNANI_TTS_WARN", `Gnani TTS failed (${err.message}), falling back to browser speech synthesis.`);
       }
+    } catch (e) {
+      console.warn("Backend TTS fetch error:", e);
     }
 
-    // --- FALLBACK TTS (Browser SpeechSynthesis) ---
-    return this.fallbackSpeechSynthesis(text, voiceConfig, startTime);
+    // Local SpeechSynthesis fallback
+    return this.fallbackSpeechSynthesis(text, voiceConfig);
   }
 
-  async fallbackSpeechSynthesis(text, voiceConfig, startTime) {
+  fallbackSpeechSynthesis(text, voiceConfig) {
     return new Promise((resolve) => {
       if (!window.speechSynthesis) {
-        this.pipelineState.stage = "IDLE";
-        this.notify();
+        this.setStage("IDLE");
         resolve(false);
         return;
       }
@@ -469,31 +277,24 @@ export class GnaniPipelineService {
       utterance.rate = voiceConfig.speed;
       utterance.pitch = voiceConfig.pitch;
 
-      // Select matching Indian English or Hindi voice if available
       const voices = window.speechSynthesis.getVoices();
-      const matchedVoice = voices.find(
+      const matched = voices.find(
         (v) =>
           v.lang.toLowerCase().includes(voiceConfig.language.toLowerCase()) ||
           v.name.toLowerCase().includes("india") ||
           v.name.toLowerCase().includes("hindi")
       );
-      if (matchedVoice) utterance.voice = matchedVoice;
+      if (matched) utterance.voice = matched;
 
-      this.pipelineState.stage = "PLAYING";
-      const latency = Math.round(performance.now() - startTime);
-      this.pipelineState.lastTtsResult = { voice: voiceConfig.voice + " (Local Fallback)", latency };
-      this.addLog("FALLBACK_TTS", `Speaking via browser synthesizer [${voiceConfig.voice}]`);
-      this.notify();
+      this.setStage("PLAYING");
 
       utterance.onend = () => {
-        this.pipelineState.stage = "IDLE";
-        this.notify();
+        this.setStage("IDLE");
         resolve(true);
       };
 
       utterance.onerror = () => {
-        this.pipelineState.stage = "IDLE";
-        this.notify();
+        this.setStage("IDLE");
         resolve(false);
       };
 
@@ -507,28 +308,24 @@ export class GnaniPipelineService {
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       this.currentAudio = audio;
-      this.pipelineState.stage = "PLAYING";
-      this.notify();
+      this.setStage("PLAYING");
 
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
         this.currentAudio = null;
-        this.pipelineState.stage = "IDLE";
-        this.notify();
+        this.setStage("IDLE");
         resolve(true);
       };
 
       audio.onerror = () => {
         URL.revokeObjectURL(audioUrl);
         this.currentAudio = null;
-        this.pipelineState.stage = "IDLE";
-        this.notify();
+        this.setStage("IDLE");
         resolve(false);
       };
 
       audio.play().catch(() => {
-        this.pipelineState.stage = "IDLE";
-        this.notify();
+        this.setStage("IDLE");
         resolve(false);
       });
     });
@@ -542,46 +339,8 @@ export class GnaniPipelineService {
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
-    this.pipelineState.stage = "IDLE";
-    this.notify();
-  }
-
-  // Quick connection test for user API key
-  async testConnection(testKey = this.apiKey) {
-    if (!testKey) {
-      return { success: false, message: "No API Key provided. Please enter an X-API-Key-ID." };
-    }
-    try {
-      this.addLog("TEST", "Testing Gnani API authentication...");
-      // Perform light TTS inference check
-      const payload = {
-        text: "Testing Gnani pipeline connection.",
-        voice: "Pranav",
-        model: "timbre-v2.5",
-        language: "en-IN",
-        speed: 1,
-        audio_config: { encoding: "linear_pcm", container: "wav", num_channels: 1, sample_rate: 16000, sample_width: 2 }
-      };
-
-      const res = await fetch(`${GNANI_BASE_URL}/api/v1/tts/inference`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-API-Key-ID": testKey },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        this.addLog("TEST_SUCCESS", "Gnani API key successfully verified with https://api.vachana.ai!");
-        return { success: true, message: "Connected to Gnani.ai successfully! (HTTP 200)" };
-      } else {
-        const errorText = await res.text();
-        this.addLog("TEST_FAILED", `API check returned HTTP ${res.status}: ${errorText}`);
-        return { success: false, message: `Gnani API responded with HTTP ${res.status}. Check key permissions.` };
-      }
-    } catch (err) {
-      this.addLog("TEST_ERROR", `Network connection error: ${err.message}`);
-      return { success: false, message: `Network request error: ${err.message}` };
-    }
+    this.setStage("IDLE");
   }
 }
 
-export const gnaniPipeline = new GnaniPipelineService();
+export const gnaniPipeline = new GnaniClientService();

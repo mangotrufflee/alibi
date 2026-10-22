@@ -248,16 +248,6 @@ export function GameProvider({ children }) {
     gnaniPipeline.stopCurrentAudio();
   }, []);
 
-  // Update Gnani API Key
-  const setGnaniApiKey = useCallback((key) => {
-    gnaniPipeline.setApiKey(key);
-  }, []);
-
-  // Test Gnani Connection
-  const testGnaniConnection = useCallback(async (key) => {
-    return await gnaniPipeline.testConnection(key);
-  }, []);
-
   const value = {
     // Navigation
     activeTab,
@@ -289,12 +279,8 @@ export function GameProvider({ children }) {
     toggleRecording,
     stopAudio,
 
-    // Gnani Pipeline
-    pipelineState,
     currentLanguage,
     setCurrentLanguage,
-    setGnaniApiKey,
-    testGnaniConnection,
     gnaniPipeline,
 
     // Atmosphere
