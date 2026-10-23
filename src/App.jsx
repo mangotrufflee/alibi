@@ -3,12 +3,14 @@ import React from "react";
 import { GameProvider, useGame } from "./state/GameContext";
 import HeaderNav from "./components/ui/HeaderNav";
 import InterrogationRoom from "./components/interrogation/InterrogationRoom";
-import EvidenceBoard from "./components/evidence/EvidenceBoard";
-import CaseDossier from "./components/case/CaseDossier";
+import CaseFilesHub from "./components/case/CaseFilesHub";
 import "./styles/noir-theme.css";
 
 function GameMain() {
   const { activeTab, generatorFlicker } = useGame();
+
+  const isCaseFiles =
+    activeTab === "case_files" || activeTab === "evidence" || activeTab === "dossier";
 
   return (
     <div className={`alibi-noir-app ${generatorFlicker ? "generator-dip" : ""}`}>
@@ -21,8 +23,7 @@ function GameMain() {
       {/* GAME VIEW CONTENT */}
       <main className="alibi-main-content">
         {activeTab === "interrogation" && <InterrogationRoom />}
-        {activeTab === "evidence" && <EvidenceBoard />}
-        {activeTab === "dossier" && <CaseDossier />}
+        {isCaseFiles && <CaseFilesHub />}
       </main>
     </div>
   );

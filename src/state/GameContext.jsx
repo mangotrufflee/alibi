@@ -5,6 +5,15 @@ import { initialEvidenceItems } from "../data/evidence";
 import { caseInfo } from "../data/caseInfo";
 import { gnaniPipeline, SUSPECT_VOICE_MAP } from "../services/gnaniApi";
 import { interrogationEngine } from "../services/interrogationEngine";
+import { getActiveHints } from "../data/hintCards";
+import {
+  matchTranscriptToHintCards,
+  computeScoreUpdate,
+  SOLVE_THRESHOLD,
+  INITIAL_SCORE,
+  INITIAL_TRIES
+} from "../services/scoringEngine.js";
+import { INITIAL_CHECKLIST, INITIAL_INVESTIGATOR_NOTES } from "../data/caseTabsData.js";
 
 const GameContext = createContext(null);
 export const useGame = () => useContext(GameContext);
@@ -67,6 +76,44 @@ export function GameProvider({ children }) {
   const [lastTranscript, setLastTranscript] = useState("");
   const [currentLanguage, setCurrentLanguage] = useState("en-IN"); // "en-IN" | "hi-IN"
 
+  // ── Phase 1: Scoring, Hint Cards & Thin-Ice System ──────────────────────
+  const [score, setScore] = useState(INITIAL_SCORE);
+  const [remainingTries, setRemainingTries] = useState(INITIAL_TRIES);
+  const [isSolved, setIsSolved] = useState(false);
+  const [isFailed, setIsFailed] = useState(false);
+  // Map of suspectId -> array of scored hint-card IDs (prevents re-scoring)
+  const [scoredCardIds, setScoredCardIds] = useState({
+    raju: [], meera: [], arvind: [], nusrat: [], bhola: []
+  });
+  // Active hint cards for the currently selected suspect
+  const [activeHints, setActiveHints] = useState(() =>
+    getActiveHints("raju", [])
+  );
+  // Transient point popup: { delta, keyword, type } | null
+  const [pointPopup, setPointPopup] = useState(null);
+
+  // ── Phase 2: Complete Suite of 8 Case Tabs State ────────────────────────
+  const [caseSubTab, setCaseSubTab] = useState("evidence_list");
+  const [checklistGoals, setChecklistGoals] = useState(INITIAL_CHECKLIST);
+  const [investigatorNotes, setInvestigatorNotes] = useState(INITIAL_INVESTIGATOR_NOTES);
+  const [scoreLedger, setScoreLedger] = useState([]);
+  const [generatorCountdown, setGeneratorCountdown] = useState(2400); // 40 minutes
+
+  // 40-Minute Generator Real-Time Countdown
+  useEffect(() => {
+    if (isSolved || isFailed) return;
+    const interval = setInterval(() => {
+      setGeneratorCountdown((prev) => {
+        if (prev <= 1) {
+          setIsFailed(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isSolved, isFailed]);
+
   // Atmosphere
   const [generatorFlicker, setGeneratorFlicker] = useState(false);
   const audioWaveCanvasRef = useRef(null);
@@ -93,13 +140,20 @@ export function GameProvider({ children }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Select suspect
+  // Select suspect — also refreshes active hint cards for that suspect
   const selectSuspect = useCallback((suspectId) => {
     const suspect = suspects[suspectId];
     if (!suspect) return;
 
     gnaniPipeline.stopCurrentAudio();
     setSelectedSuspect(suspectId);
+
+    // Refresh hints for the newly selected suspect
+    setScoredCardIds((prev) => {
+      const alreadyScored = prev[suspectId] || [];
+      setActiveHints(getActiveHints(suspectId, alreadyScored));
+      return prev;
+    });
 
     const initialText = suspect.initialDialogue;
     setCurrentDialogue({
@@ -127,6 +181,7 @@ export function GameProvider({ children }) {
   const dispatchInterrogation = useCallback(
     async (queryText, isVoice = false) => {
       if (!queryText || !queryText.trim()) return;
+      if (isSolved || isFailed) return; // Game over — no more interrogation
 
       const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       const currentSuspectData = suspects[selectedSuspect] || suspects.raju;
@@ -143,10 +198,84 @@ export function GameProvider({ children }) {
         }
       ]);
 
-      // 2. Interrogation Engine processes question
+      // 2. Interrogation Engine processes question (stress, clues, response text)
       const result = interrogationEngine.processQuery(selectedSuspect, queryText);
 
-      // 3. Update stress and clues
+      // 3. Scoring Engine: match transcript against hint card keywords
+      setScoredCardIds((prevScored) => {
+        const alreadyScored = prevScored[selectedSuspect] || [];
+        const matchResult = matchTranscriptToHintCards(queryText, selectedSuspect, alreadyScored);
+
+        setScore((prevScore) => {
+          setRemainingTries((prevTries) => {
+            const update = computeScoreUpdate(matchResult, prevScore, prevTries);
+
+            // Fire point popup (auto-clears after 2.2s)
+            if (matchResult.matched) {
+              setPointPopup({
+                delta: update.delta,
+                keyword: matchResult.card.keyword,
+                type: matchResult.card.type
+              });
+              setTimeout(() => setPointPopup(null), 2200);
+
+              // Record to Chronological Score Ledger
+              setScoreLedger((prevLedger) => [
+                {
+                  id: "sc_" + Date.now(),
+                  timestamp: timeStr,
+                  suspect: currentSuspectData.name,
+                  keyword: matchResult.card.keyword,
+                  type: matchResult.card.type,
+                  delta: update.delta,
+                  scoreAfter: update.nextScore
+                },
+                ...prevLedger
+              ]);
+            }
+
+            if (update.isSolved) {
+              setIsSolved(true);
+              setChecklistGoals((prevG) =>
+                prevG.map((g) => (g.id === "confront_killer" ? { ...g, completed: true } : g))
+              );
+            }
+            if (update.isFailed) setIsFailed(true);
+
+            // Schedule next state update outside the reducer chain
+            setTimeout(() => setRemainingTries(update.nextTries), 0);
+            return update.nextTries;
+          });
+
+          return matchResult.matched
+            ? computeScoreUpdate(matchResult, prevScore, INITIAL_TRIES).nextScore
+            : prevScore;
+        });
+
+        // Auto-complete suspect whereabouts goal
+        setChecklistGoals((prevGoals) =>
+          prevGoals.map((goal) => {
+            if (goal.id === `whereabouts_${selectedSuspect}`) {
+              return { ...goal, completed: true };
+            }
+            return goal;
+          })
+        );
+
+        // Mark this card as scored so it won't repeat
+        let newScored = prevScored;
+        if (matchResult.matched) {
+          newScored = {
+            ...prevScored,
+            [selectedSuspect]: [...alreadyScored, matchResult.card.id]
+          };
+          // Refresh active hint cards (remove the scored one, slide next in)
+          setActiveHints(getActiveHints(selectedSuspect, newScored[selectedSuspect]));
+        }
+        return newScored;
+      });
+
+      // 4. Update stress and clues
       if (result.unlockedClue) {
         setDiscoveredClues((prev) => {
           if (!prev.includes(result.unlockedClue)) {
@@ -155,14 +284,39 @@ export function GameProvider({ children }) {
           return prev;
         });
         setInvestigationProgress((p) => Math.min(100, p + 15));
+
+        // Auto-record new clue into Investigator Notes
+        setInvestigatorNotes((prevNotes) => [
+          {
+            id: "auto_" + Date.now(),
+            timestamp: timeStr,
+            text: `[BREAKTHROUGH // ${currentSuspectData.name}]: ${result.unlockedClue}`,
+            tag: "Clue",
+            isAuto: true
+          },
+          ...prevNotes
+        ]);
+
+        // Auto-reveal or complete checklist goals tied to discovered clues
+        setChecklistGoals((prevGoals) =>
+          prevGoals.map((g) => {
+            const cLower = result.unlockedClue.toLowerCase();
+            if (cLower.includes("key") && g.id === "clue_key_origin") return { ...g, completed: true };
+            if (cLower.includes("tea") && g.id === "clue_sedative") return { ...g, completed: true };
+            if (cLower.includes("sale") && g.id === "clue_deed") return { ...g, completed: true, hidden: false };
+            if (cLower.includes("record") && g.id === "clue_erased_audio") return { ...g, completed: true, hidden: false };
+            return g;
+          })
+        );
       }
 
+      const nextStress = Math.min(100, (suspectStress[selectedSuspect] || 30) + result.stressDelta);
       setSuspectStress((prev) => ({
         ...prev,
-        [selectedSuspect]: Math.min(100, (prev[selectedSuspect] || 30) + result.stressDelta)
+        [selectedSuspect]: nextStress
       }));
 
-      // 4. Update Current Dialogue display
+      // 5. Update Current Dialogue display
       setCurrentDialogue({
         speaker: currentSuspectData.name,
         role: currentSuspectData.role,
@@ -170,7 +324,7 @@ export function GameProvider({ children }) {
         topics: currentSuspectData.topics || []
       });
 
-      // 5. Add Suspect reply to history
+      // 6. Add Suspect reply to history
       setDialogueHistory((prev) => [
         ...prev,
         {
@@ -184,10 +338,10 @@ export function GameProvider({ children }) {
         }
       ]);
 
-      // 6. Gnani TTS Audio Playback
-      await gnaniPipeline.synthesizeSpeech(result.response, selectedSuspect);
+      // 7. Gnani TTS Audio Playback with Custom Suspect Voice & Stress Modulation
+      await gnaniPipeline.synthesizeSpeech(result.response, selectedSuspect, nextStress);
     },
-    [selectedSuspect]
+    [selectedSuspect, suspectStress, isSolved, isFailed]
   );
 
   // Push-To-Talk Voice Recording Flow
@@ -248,6 +402,50 @@ export function GameProvider({ children }) {
     gnaniPipeline.stopCurrentAudio();
   }, []);
 
+  // ── Phase 2: Case Tabs Actions ──────────────────────────────────────────
+  const toggleChecklistGoal = useCallback((goalId) => {
+    setChecklistGoals((prev) =>
+      prev.map((g) => (g.id === goalId ? { ...g, completed: !g.completed } : g))
+    );
+  }, []);
+
+  const completeChecklistGoal = useCallback((goalId) => {
+    setChecklistGoals((prev) =>
+      prev.map((g) => (g.id === goalId ? { ...g, completed: true } : g))
+    );
+  }, []);
+
+  const addInvestigatorNote = useCallback((text, tag = "General") => {
+    if (!text || !text.trim()) return;
+    const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const newNote = {
+      id: "note_" + Date.now(),
+      timestamp: timeStr,
+      text: text.trim(),
+      tag,
+      isAuto: false
+    };
+    setInvestigatorNotes((prev) => [newNote, ...prev]);
+  }, []);
+
+  const deleteInvestigatorNote = useCallback((noteId) => {
+    setInvestigatorNotes((prev) => prev.filter((n) => n.id !== noteId));
+  }, []);
+
+  const presentEvidenceToSuspect = useCallback(
+    (evidenceId) => {
+      const item =
+        evidenceItems.find((e) => e.id === evidenceId) ||
+        initialEvidenceItems.find((e) => e.id === evidenceId);
+      if (!item) return;
+
+      setSelectedEvidence(item);
+      setActiveTab("interrogation");
+      dispatchInterrogation(`Look at this evidence: ${item.name}! How do you explain this?`);
+    },
+    [evidenceItems, dispatchInterrogation, setActiveTab, setSelectedEvidence]
+  );
+
   const value = {
     // Navigation
     activeTab,
@@ -284,7 +482,30 @@ export function GameProvider({ children }) {
     gnaniPipeline,
 
     // Atmosphere
-    generatorFlicker
+    generatorFlicker,
+
+    // ── Phase 1: Scoring & Hint Cards ─────────────────────────────────────
+    score,
+    solveThreshold: SOLVE_THRESHOLD,
+    remainingTries,
+    isSolved,
+    isFailed,
+    activeHints,
+    pointPopup,
+    scoredCardIds,
+
+    // ── Phase 2: Complete Suite of 8 Case Tabs ────────────────────────────
+    caseSubTab,
+    setCaseSubTab,
+    checklistGoals,
+    toggleChecklistGoal,
+    completeChecklistGoal,
+    investigatorNotes,
+    addInvestigatorNote,
+    deleteInvestigatorNote,
+    scoreLedger,
+    generatorCountdown,
+    presentEvidenceToSuspect
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
