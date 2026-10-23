@@ -42,6 +42,7 @@ export default function HintCards() {
     remainingTries,
     isSolved,
     isFailed,
+    failReason,
     scoredCardIds,
     selectedSuspect
   } = useGame();
@@ -150,7 +151,7 @@ export default function HintCards() {
       {/* FAILED BANNER */}
       {isFailed && (
         <div className="case-failed-banner">
-          ✘ CASE COLLAPSED — KILLER ESCAPES
+          ✘ CASE COLLAPSED — {failReason ? failReason.toUpperCase() : "KILLER ESCAPES"}
         </div>
       )}
     </div>

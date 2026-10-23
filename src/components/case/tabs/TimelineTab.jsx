@@ -161,6 +161,11 @@ export default function TimelineTab() {
           <div className="contradiction-cards-grid">
             {CONTRADICTIONS.map((c) => {
               const suspA = suspects[c.suspectA] || { name: c.suspectA };
+              const isSuspectWitness = c.suspectB && c.suspectB !== "evidence";
+              const witnessB = isSuspectWitness ? (suspects[c.suspectB] || { name: c.suspectB }) : null;
+              const sideBLabel = witnessB
+                ? `EYEWITNESS TESTIMONY // ${witnessB.name.toUpperCase()}`
+                : "CORROBORATING FORENSIC RECORD";
 
               return (
                 <div key={c.id} className="contradiction-clash-card">
@@ -178,7 +183,7 @@ export default function TimelineTab() {
                     <div className="clash-vs-divider">VS</div>
 
                     <div className="side-card evidence-side">
-                      <span className="side-label">CORROBORATING FORENSIC RECORD</span>
+                      <span className="side-label">{sideBLabel}</span>
                       <p className="side-quote">"{c.claimB}"</p>
                     </div>
                   </div>

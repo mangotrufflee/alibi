@@ -13,6 +13,7 @@ export default function CaseProgressTab() {
     generatorCountdown,
     isSolved,
     isFailed,
+    failReason,
     discoveredClues,
     investigationProgress
   } = useGame();
@@ -27,6 +28,11 @@ export default function CaseProgressTab() {
 
   return (
     <div className="tab-pane case-progress-pane">
+      {isFailed && (
+        <div className="case-failed-banner" style={{ marginBottom: "1.2rem" }}>
+          ✘ CASE FAILED: {failReason || "Killer escaped into the storm"}
+        </div>
+      )}
       {/* TOP DASHBOARD METRICS GRID */}
       <div className="progress-metrics-grid">
         {/* METRIC 1: CASE SCORE */}
@@ -101,7 +107,7 @@ export default function CaseProgressTab() {
           </div>
 
           <p className="thin-ice-explainer">
-            Triggering wrong leads or groundless accusations while score is $\le 0$ consumes tries.
+            Triggering wrong leads or groundless accusations while score is ≤ 0 consumes tries.
           </p>
         </div>
 

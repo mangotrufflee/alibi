@@ -1,5 +1,5 @@
 // src/data/hintCards.js
-// ALIBI � Hint Card Authoring Data
+// ALIBI -- Hint Card Authoring Data
 // Derived from interrogationEngine.js triggers.
 // Each hint card: { id, hint, keyword, type, points, synonyms }
 // type: "right" = +points, "wrong" = -points, "neutral" = 0 points
@@ -12,7 +12,7 @@ export const HINT_CARDS = {
       keyword: "key",
       type: "right",
       points: 10,
-      synonyms: ["key", "chabi", "lock", "duplicate", "brass key", "deadbolt", "booth key", "spare key", "duplicate key", "kholi ki chabi"]
+      synonyms: ["chabi", "lock", "duplicate", "brass key", "deadbolt", "booth key", "spare key", "duplicate key", "kholi ki chabi"]
     },
     {
       id: "raju_h2",
@@ -32,7 +32,7 @@ export const HINT_CARDS = {
     },
     {
       id: "raju_h4",
-      hint: "Point out the grease stains on Raju''s hands",
+      hint: "Point out the grease stains on Raju's hands",
       keyword: "grease",
       type: "right",
       points: 10,
@@ -56,11 +56,11 @@ export const HINT_CARDS = {
     },
     {
       id: "raju_h7",
-      hint: "Ask Raju what he was selling at the back stairwell",
-      keyword: "chai",
+      hint: "Ask Raju about selling snacks at the concession stall",
+      keyword: "snacks",
       type: "neutral",
       points: 0,
-      synonyms: ["chai", "tea", "selling", "stall", "snacks", "ticket", "food"]
+      synonyms: ["snacks", "selling", "stall", "concession", "food", "samosa", "refreshments"]
     }
   ],
 
@@ -75,7 +75,7 @@ export const HINT_CARDS = {
     },
     {
       id: "meera_h2",
-      hint: "Ask about Meera''s alibi � where was she during the blackout",
+      hint: "Ask about Meera's alibi -- where was she during the blackout",
       keyword: "phone call",
       type: "right",
       points: 10,
@@ -177,7 +177,7 @@ export const HINT_CARDS = {
     },
     {
       id: "nusrat_h3",
-      hint: "Challenge Nusrat''s alibi about being in the ladies'' washroom",
+      hint: "Challenge Nusrat's alibi about being in the ladies' washroom",
       keyword: "washroom",
       type: "right",
       points: 10,
@@ -204,7 +204,7 @@ export const HINT_CARDS = {
   bhola: [
     {
       id: "bhola_h1",
-      hint: "Ask Bhola about the cutting chai he delivered to Harbans � was there poison?",
+      hint: "Ask Bhola about the cutting chai he delivered to Harbans -- was there poison?",
       keyword: "chai",
       type: "right",
       points: 10,

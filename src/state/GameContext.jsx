@@ -81,6 +81,7 @@ export function GameProvider({ children }) {
   const [remainingTries, setRemainingTries] = useState(INITIAL_TRIES);
   const [isSolved, setIsSolved] = useState(false);
   const [isFailed, setIsFailed] = useState(false);
+  const [failReason, setFailReason] = useState(null);
   // Map of suspectId -> array of scored hint-card IDs (prevents re-scoring)
   const [scoredCardIds, setScoredCardIds] = useState({
     raju: [], meera: [], arvind: [], nusrat: [], bhola: []
@@ -106,6 +107,7 @@ export function GameProvider({ children }) {
       setGeneratorCountdown((prev) => {
         if (prev <= 1) {
           setIsFailed(true);
+          setFailReason("Auxiliary generator depleted: Rex Talkies plunged into permanent blackout and the killer fled.");
           return 0;
         }
         return prev - 1;
@@ -113,6 +115,12 @@ export function GameProvider({ children }) {
     }, 1000);
     return () => clearInterval(interval);
   }, [isSolved, isFailed]);
+
+  // Synchronize active hint cards whenever selected suspect or scored cards change
+  useEffect(() => {
+    const alreadyScored = (scoredCardIds && scoredCardIds[selectedSuspect]) || [];
+    setActiveHints(getActiveHints(selectedSuspect, alreadyScored));
+  }, [selectedSuspect, scoredCardIds]);
 
   // Atmosphere
   const [generatorFlicker, setGeneratorFlicker] = useState(false);
@@ -140,20 +148,13 @@ export function GameProvider({ children }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Select suspect — also refreshes active hint cards for that suspect
+  // Select suspect — switches focus and initial dialogue
   const selectSuspect = useCallback((suspectId) => {
     const suspect = suspects[suspectId];
     if (!suspect) return;
 
     gnaniPipeline.stopCurrentAudio();
     setSelectedSuspect(suspectId);
-
-    // Refresh hints for the newly selected suspect
-    setScoredCardIds((prev) => {
-      const alreadyScored = prev[suspectId] || [];
-      setActiveHints(getActiveHints(suspectId, alreadyScored));
-      return prev;
-    });
 
     const initialText = suspect.initialDialogue;
     setCurrentDialogue({
@@ -179,7 +180,7 @@ export function GameProvider({ children }) {
 
   // Process Interrogation Response (The core pipeline dispatch)
   const dispatchInterrogation = useCallback(
-    async (queryText, isVoice = false) => {
+    async (queryText, isVoice = false, isEvidence = false) => {
       if (!queryText || !queryText.trim()) return;
       if (isSolved || isFailed) return; // Game over — no more interrogation
 
@@ -191,7 +192,7 @@ export function GameProvider({ children }) {
         ...prev,
         {
           id: "d-" + Date.now(),
-          speaker: isVoice ? "Inspector (Voice STT)" : "Inspector (You)",
+          speaker: isVoice ? "Inspector (Voice STT)" : isEvidence ? "Inspector (Physical Evidence)" : "Inspector (You)",
           text: queryText,
           time: timeStr,
           type: "detective"
@@ -201,79 +202,73 @@ export function GameProvider({ children }) {
       // 2. Interrogation Engine processes question (stress, clues, response text)
       const result = interrogationEngine.processQuery(selectedSuspect, queryText);
 
-      // 3. Scoring Engine: match transcript against hint card keywords
-      setScoredCardIds((prevScored) => {
-        const alreadyScored = prevScored[selectedSuspect] || [];
+      // 3. Scoring Engine: match transcript against hint card keywords (only for non-evidence speech)
+      if (!isEvidence) {
+        const alreadyScored = (scoredCardIds && scoredCardIds[selectedSuspect]) || [];
         const matchResult = matchTranscriptToHintCards(queryText, selectedSuspect, alreadyScored);
 
-        setScore((prevScore) => {
-          setRemainingTries((prevTries) => {
-            const update = computeScoreUpdate(matchResult, prevScore, prevTries);
+        if (matchResult.matched && matchResult.card) {
+          const update = computeScoreUpdate(matchResult, score, remainingTries);
 
-            // Fire point popup (auto-clears after 2.2s)
-            if (matchResult.matched) {
-              setPointPopup({
-                delta: update.delta,
-                keyword: matchResult.card.keyword,
-                type: matchResult.card.type
-              });
-              setTimeout(() => setPointPopup(null), 2200);
-
-              // Record to Chronological Score Ledger
-              setScoreLedger((prevLedger) => [
-                {
-                  id: "sc_" + Date.now(),
-                  timestamp: timeStr,
-                  suspect: currentSuspectData.name,
-                  keyword: matchResult.card.keyword,
-                  type: matchResult.card.type,
-                  delta: update.delta,
-                  scoreAfter: update.nextScore
-                },
-                ...prevLedger
-              ]);
-            }
-
-            if (update.isSolved) {
-              setIsSolved(true);
-              setChecklistGoals((prevG) =>
-                prevG.map((g) => (g.id === "confront_killer" ? { ...g, completed: true } : g))
-              );
-            }
-            if (update.isFailed) setIsFailed(true);
-
-            // Schedule next state update outside the reducer chain
-            setTimeout(() => setRemainingTries(update.nextTries), 0);
-            return update.nextTries;
+          // Fire point popup (auto-clears after 2.2s)
+          setPointPopup({
+            delta: update.delta,
+            keyword: matchResult.matchedKeyword || matchResult.card.keyword,
+            type: matchResult.card.type
           });
+          setTimeout(() => setPointPopup(null), 2200);
 
-          return matchResult.matched
-            ? computeScoreUpdate(matchResult, prevScore, INITIAL_TRIES).nextScore
-            : prevScore;
-        });
+          // Update Score
+          setScore(update.nextScore);
 
-        // Auto-complete suspect whereabouts goal
-        setChecklistGoals((prevGoals) =>
-          prevGoals.map((goal) => {
-            if (goal.id === `whereabouts_${selectedSuspect}`) {
-              return { ...goal, completed: true };
-            }
-            return goal;
-          })
-        );
+          // Update remaining tries if reduced
+          if (update.nextTries !== remainingTries) {
+            setRemainingTries(update.nextTries);
+          }
 
-        // Mark this card as scored so it won't repeat
-        let newScored = prevScored;
-        if (matchResult.matched) {
-          newScored = {
-            ...prevScored,
-            [selectedSuspect]: [...alreadyScored, matchResult.card.id]
-          };
-          // Refresh active hint cards (remove the scored one, slide next in)
-          setActiveHints(getActiveHints(selectedSuspect, newScored[selectedSuspect]));
+          // Record to Chronological Score Ledger (including neutral cards)
+          setScoreLedger((prevLedger) => [
+            {
+              id: "sc_" + Date.now(),
+              timestamp: timeStr,
+              suspect: currentSuspectData.name,
+              keyword: matchResult.matchedKeyword || matchResult.card.keyword,
+              type: matchResult.card.type,
+              delta: update.delta,
+              scoreAfter: update.nextScore
+            },
+            ...prevLedger
+          ]);
+
+          // Mark this card as scored
+          setScoredCardIds((prev) => ({
+            ...prev,
+            [selectedSuspect]: [...(prev[selectedSuspect] || []), matchResult.card.id]
+          }));
+
+          if (update.isSolved) {
+            setIsSolved(true);
+            setChecklistGoals((prevG) =>
+              prevG.map((g) => (g.id === "confront_killer" ? { ...g, completed: true } : g))
+            );
+          }
+
+          if (update.isFailed) {
+            setIsFailed(true);
+            setFailReason("Investigation collapsed: 3 critical missteps while on thin-ice ruined the prosecution case.");
+          }
         }
-        return newScored;
-      });
+      }
+
+      // Auto-complete suspect whereabouts goal (matches by targetSuspect regardless of ID naming)
+      setChecklistGoals((prevGoals) =>
+        prevGoals.map((goal) => {
+          if (goal.targetSuspect === selectedSuspect && goal.category.includes("Whereabouts")) {
+            return { ...goal, completed: true };
+          }
+          return goal;
+        })
+      );
 
       // 4. Update stress and clues
       if (result.unlockedClue) {
@@ -301,10 +296,18 @@ export function GameProvider({ children }) {
         setChecklistGoals((prevGoals) =>
           prevGoals.map((g) => {
             const cLower = result.unlockedClue.toLowerCase();
-            if (cLower.includes("key") && g.id === "clue_key_origin") return { ...g, completed: true };
-            if (cLower.includes("tea") && g.id === "clue_sedative") return { ...g, completed: true };
-            if (cLower.includes("sale") && g.id === "clue_deed") return { ...g, completed: true, hidden: false };
-            if (cLower.includes("record") && g.id === "clue_erased_audio") return { ...g, completed: true, hidden: false };
+            if ((cLower.includes("booth key") || cLower.includes("office key") || cLower.includes("deadbolt")) && g.id === "clue_key_origin") {
+              return { ...g, completed: true };
+            }
+            if ((cLower.includes("tea was delivered") || cLower.includes("poison") || cLower.includes("sedative") || cLower.includes("datura")) && g.id === "clue_sedative") {
+              return { ...g, completed: true };
+            }
+            if ((cLower.includes("redevelopment deal") || cLower.includes("sale deed") || cLower.includes("18-crore")) && g.id === "clue_deed") {
+              return { ...g, completed: true, hidden: false };
+            }
+            if ((cLower.includes("erase") || cLower.includes("audio recorder") || cLower.includes("wiped") || cLower.includes("tampered")) && g.id === "clue_erased_audio") {
+              return { ...g, completed: true, hidden: false };
+            }
             return g;
           })
         );
@@ -341,7 +344,7 @@ export function GameProvider({ children }) {
       // 7. Gnani TTS Audio Playback with Custom Suspect Voice & Stress Modulation
       await gnaniPipeline.synthesizeSpeech(result.response, selectedSuspect, nextStress);
     },
-    [selectedSuspect, suspectStress, isSolved, isFailed]
+    [selectedSuspect, suspectStress, score, remainingTries, scoredCardIds, isSolved, isFailed]
   );
 
   // Push-To-Talk Voice Recording Flow
@@ -441,7 +444,7 @@ export function GameProvider({ children }) {
 
       setSelectedEvidence(item);
       setActiveTab("interrogation");
-      dispatchInterrogation(`Look at this evidence: ${item.name}! How do you explain this?`);
+      dispatchInterrogation(`Look at this evidence: ${item.name}! How do you explain this?`, false, true);
     },
     [evidenceItems, dispatchInterrogation, setActiveTab, setSelectedEvidence]
   );
@@ -490,6 +493,7 @@ export function GameProvider({ children }) {
     remainingTries,
     isSolved,
     isFailed,
+    failReason,
     activeHints,
     pointPopup,
     scoredCardIds,

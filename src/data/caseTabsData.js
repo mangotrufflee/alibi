@@ -15,7 +15,7 @@ export const INITIAL_CHECKLIST = [
     id: "whereabouts_meera",
     category: "Whereabouts at 8:45 PM",
     title: "Interrogate Meera regarding the office interval",
-    description: "Meera insists she was in her private office balancing accounts.",
+    description: "Meera insists she was in her private office on a landline call with her solicitor.",
     targetSuspect: "meera",
     completed: false,
     hidden: false
@@ -23,8 +23,8 @@ export const INITIAL_CHECKLIST = [
   {
     id: "whereabouts_sethi",
     category: "Whereabouts at 8:45 PM",
-    title: "Confirm Dr. Sethi's seat in Row 7",
-    description: "Dr. Sethi claims he was immersed in the film archive reel throughout the show.",
+    title: "Confirm Dr. Sethi's seat in Seat G-14 (Row 7)",
+    description: "Dr. Sethi claims he was in Seat G-14 (Row 7) immersed in the film archive reel throughout the show.",
     targetSuspect: "arvind",
     completed: false,
     hidden: false
@@ -163,17 +163,17 @@ export const MASTER_TIMELINE = [
 export const SUSPECT_CLAIMS = {
   raju: [
     { time: "08:35 PM", claim: "Standing at the balcony ticket barrier tearing stubs for late patrons." },
-    { time: "08:45 PM", claim: "Felt darkness and stayed completely frozen by the exit curtain." },
-    { time: "08:50 PM", claim: "Ran to the lobby to check on Meera Madam." }
+    { time: "08:45 PM", claim: "In the concession foyer lighting emergency hurricane lanterns near Bhola's stall." },
+    { time: "08:50 PM", claim: "Ran to the lobby to alert Meera Madam after hearing the scream." }
   ],
   meera: [
-    { time: "08:25 PM", claim: "Reviewing theatre accounts and lease papers inside her private office." },
-    { time: "08:45 PM", claim: "Remained behind her desk lighting emergency kerosene lantern." },
+    { time: "08:25 PM", claim: "On a landline telephone call with solicitor Chawla regarding lease injunctions in her private office." },
+    { time: "08:45 PM", claim: "The landline dropped when the generator tripped; remained at desk lighting emergency kerosene lantern." },
     { time: "08:52 PM", claim: "Came out to the auditorium after hearing shouts from the hall." }
   ],
   arvind: [
-    { time: "08:30 PM", claim: "Taking detailed academic notes on the print quality from Row 7." },
-    { time: "08:45 PM", claim: "Sat still in the dark, reciting cinematic trivia to calm patrons." },
+    { time: "08:30 PM", claim: "Taking detailed academic notes on the print quality from Seat G-14 (Row 7)." },
+    { time: "08:45 PM", claim: "Sat still in Seat G-14 in the dark, reciting cinematic trivia to calm patrons." },
     { time: "08:53 PM", claim: "Walked toward the projection booth to inspect the vintage projector." }
   ],
   nusrat: [
@@ -193,7 +193,7 @@ export const CONTRADICTIONS = [
     id: "clash_raju_key",
     title: "Raju's Ticket Post vs Duplicate Key Location",
     suspectA: "raju",
-    claimA: "Claims he stayed at the balcony curtain during the blackout.",
+    claimA: "Claims he was in the concession foyer lighting lanterns when the blackout hit.",
     suspectB: "evidence",
     claimB: "Freshly cut duplicate key P-1 found in main auditorium aisle seat D-4.",
     resolved: false
@@ -208,12 +208,12 @@ export const CONTRADICTIONS = [
     resolved: false
   },
   {
-    id: "clash_nusrat_bhola",
-    title: "Nusrat's Balcony Video vs Dr. Sethi's Movement",
+    id: "clash_arvind_bhola",
+    title: "Dr. Sethi's Seat G-14 Alibi vs Bhola's Stairwell Sighting",
     suspectA: "arvind",
-    claimA: "Dr. Sethi claims he never left Row 7 during the blackout.",
+    claimA: "Dr. Sethi claims he never left Seat G-14 (Row 7) during the blackout.",
     suspectB: "bhola",
-    claimB: "Bhola observed Sethi descending the booth spiral stairs at 8:50 PM.",
+    claimB: "Bhola observed Sethi descending the booth spiral stairs at 8:50 PM wiping his hands.",
     resolved: false
   }
 ];
