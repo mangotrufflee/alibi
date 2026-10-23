@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useGame } from "../../state/GameContext";
 import { suspects } from "../../data/suspects";
+import HintCards from "./HintCards";
 
 export default function InterrogationRoom() {
   const {
@@ -20,7 +21,9 @@ export default function InterrogationRoom() {
     stopAudio,
     currentLanguage,
     setCurrentLanguage,
-    suspectVoiceMap
+    suspectVoiceMap,
+    isSolved,
+    isFailed
   } = useGame();
 
   const [textInput, setTextInput] = useState("");
@@ -28,6 +31,7 @@ export default function InterrogationRoom() {
   const currentSuspect = suspects[selectedSuspect] || suspects.raju;
   const stressLevel = suspectStress[selectedSuspect] || 30;
   const voiceConfig = suspectVoiceMap[selectedSuspect] || suspectVoiceMap.raju;
+  const isGameOver = isSolved || isFailed;
 
   // Auto scroll transcript to latest entry
   useEffect(() => {
@@ -164,6 +168,9 @@ export default function InterrogationRoom() {
             </div>
           </div>
 
+          {/* HINT CARDS & SCORING BAR — Phase 1 */}
+          <HintCards />
+
           {/* LIVE VOICE STATUS BAR */}
           <div className="pipeline-live-status-bar">
             {isRecording ? (
@@ -213,7 +220,7 @@ export default function InterrogationRoom() {
               <button
                 className={`gnani-mic-trigger-btn ${isRecording ? "is-recording" : ""}`}
                 onClick={toggleRecording}
-                disabled={isProcessing}
+                disabled={isProcessing || isGameOver}
                 title="Click to toggle Voice Interrogation via Gnani STT"
               >
                 <div className="mic-halo-ring" />
@@ -232,15 +239,15 @@ export default function InterrogationRoom() {
               <input
                 type="text"
                 className="query-input-field"
-                placeholder={`Ask ${currentSuspect.name} anything about the 8:45 PM blackout, keys, or Harbans...`}
+                placeholder={isGameOver ? "Case concluded." : `Ask ${currentSuspect.name} anything about the 8:45 PM blackout, keys, or Harbans...`}
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
-                disabled={isRecording || isProcessing}
+                disabled={isRecording || isProcessing || isGameOver}
               />
               <button
                 type="submit"
                 className="query-submit-btn"
-                disabled={!textInput.trim() || isRecording || isProcessing}
+                disabled={!textInput.trim() || isRecording || isProcessing || isGameOver}
               >
                 Interrogate ➔
               </button>
