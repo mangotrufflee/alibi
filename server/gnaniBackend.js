@@ -1,9 +1,10 @@
 // server/gnaniBackend.js
 // Dedicated Backend Service for Gnani.ai Voice Pipeline
-// Keeps API keys securely on the server and handles STT & TTS communication.
+// Manages API keys securely on the server and applies custom voices for each suspect.
 
 import fs from "fs";
 import path from "path";
+import { getCustomVoiceConfig } from "./suspectVoices.js";
 
 const GNANI_BASE_URL = "https://api.vachana.ai";
 
@@ -73,26 +74,26 @@ export async function handleBackendSTT(audioBuffer, languageCode = "en-IN") {
   };
 }
 
-// Backend TTS Handler
-export async function handleBackendTTS(text, voiceConfig) {
+// Backend TTS Handler with Custom Suspect Voices
+export async function handleBackendTTS(text, suspectId = "raju", stressLevel = 30) {
   const apiKey = getGnaniApiKey();
+  const voiceConfig = getCustomVoiceConfig(suspectId, stressLevel);
 
   if (apiKey) {
     try {
+      // Gnani speed range: 0.85 (slow) to 1.15 (fast)
+      const clampedSpeed = Math.min(1.15, Math.max(0.85, voiceConfig.speed));
+
       const payload = {
         text,
-        voice: voiceConfig.voice || "Pranav",
-        model: voiceConfig.model || "timbre-v2.5",
-        language: voiceConfig.language || "en-IN",
-        speed: voiceConfig.speed || 1,
-        audio_config: {
-          encoding: "linear_pcm",
-          container: "wav",
-          num_channels: 1,
-          sample_rate: 48000,
-          sample_width: 2
-        }
+        voice: voiceConfig.voice,
+        model: voiceConfig.model,
+        language: voiceConfig.language,
+        speed: clampedSpeed,
+        audio_config: voiceConfig.audioConfig
       };
+
+      console.log(`[Gnani TTS] ${voiceConfig.displayName} | voice=${voiceConfig.voice} speed=${clampedSpeed} lang=${voiceConfig.language}`);
 
       const res = await fetch(`${GNANI_BASE_URL}/api/v1/tts/inference`, {
         method: "POST",
@@ -106,29 +107,24 @@ export async function handleBackendTTS(text, voiceConfig) {
       if (!res.ok) {
         const errText = await res.text();
         console.warn(`[Gnani Backend TTS] Error HTTP ${res.status}: ${errText}`);
-        return { success: false, fallback: true, error: errText };
+        return { success: false, fallback: true, voiceConfig, error: errText };
       }
 
-      const contentType = res.headers.get("content-type") || "";
-      if (contentType.includes("json")) {
-        const json = await res.json();
-        const base64Audio = json.audio_content || json.audio || json.data;
-        const buffer = Buffer.from(base64Audio, "base64");
-        return { success: true, audioBuffer: buffer, contentType: "audio/wav" };
-      } else {
-        const arrayBuffer = await res.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        return { success: true, audioBuffer: buffer, contentType: contentType || "audio/wav" };
-      }
+      // Gnani always returns raw binary audio on 200 — never JSON
+      const contentType = res.headers.get("content-type") || "audio/wav";
+      const arrayBuffer = await res.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      return { success: true, audioBuffer: buffer, contentType, voiceConfig };
     } catch (err) {
       console.warn("[Gnani Backend TTS] Network failure:", err.message);
-      return { success: false, fallback: true, error: err.message };
+      return { success: false, fallback: true, voiceConfig, error: err.message };
     }
   }
 
   return {
     success: false,
     fallback: true,
+    voiceConfig,
     message: "No GNANI_API_KEY configured in .env. Engaging local speech synthesis."
   };
 }

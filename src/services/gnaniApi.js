@@ -1,47 +1,104 @@
 // src/services/gnaniApi.js
 // Client-side voice client that communicates with the Gnani AI Backend Server
 
+// Voice speed is clamped to Gnani's allowed range: 0.85–1.15
+// Language codes MUST match the voice's preferred language (from Gnani voice catalog)
+// Pitch is only used in browser TTS fallback (Gnani API ignores it)
 export const SUSPECT_VOICE_MAP = {
   raju: {
-    voice: "Pranav",
+    voice: "Shlok",         // Male, en-IN (conversational, warm — but we use hi-IN text)
     model: "timbre-v2.5",
-    language: "hi-IN",
-    speed: 1.08,
-    pitch: 1.05,
+    language: "hi-IN",      // Raju speaks Hindi
+    speed: 1.15,            // Fast (nervous teen) — Gnani max
+    pitch: 1.40,            // Browser fallback only
     gender: "male"
   },
   meera: {
-    voice: "Nalini",
+    voice: "Urmila",        // Female, hi-IN (refined, formal — cold aristocrat)
     model: "timbre-v2.5",
-    language: "en-IN",
-    speed: 0.95,
-    pitch: 0.98,
+    language: "en-IN",      // Meera speaks English
+    speed: 0.85,            // Very slow (cold, deliberate) — Gnani min
+    pitch: 0.60,            // Browser fallback only
     gender: "female"
   },
   arvind: {
-    voice: "Pranav",
+    voice: "Deepak",        // Male, hi-IN (professional, measured — elderly professor)
     model: "timbre-v2.5",
-    language: "en-IN",
-    speed: 0.88,
-    pitch: 0.90,
+    language: "en-IN",      // Arvind speaks English
+    speed: 0.85,            // Slowest (scholarly, deliberate)
+    pitch: 0.40,            // Browser fallback only
     gender: "male"
   },
   nusrat: {
-    voice: "Yashvi",
+    voice: "Kaveri",        // Female, en-IN (firm, professional — sharp student)
     model: "timbre-v2.5",
-    language: "en-IN",
-    speed: 1.05,
-    pitch: 1.02,
+    language: "en-IN",      // Nusrat speaks English
+    speed: 1.15,            // Fast (quick, defensive)
+    pitch: 1.50,            // Browser fallback only
     gender: "female"
   },
   bhola: {
-    voice: "Pranav",
+    voice: "Vikrant",       // Male, hi-IN (warm, conversational — old chaiwala)
     model: "timbre-v2.5",
-    language: "hi-IN",
-    speed: 0.98,
-    pitch: 0.95,
+    language: "hi-IN",      // Bhola speaks Hindi
+    speed: 0.90,            // Slightly slow (earthy, unhurried)
+    pitch: 0.50,            // Browser fallback only
     gender: "male"
   }
+};
+
+// Cached browser voices indexed by gender, loaded once
+let _browserVoiceCache = null;
+
+function loadBrowserVoices() {
+  if (_browserVoiceCache) return _browserVoiceCache;
+  if (!window.speechSynthesis) return { male: [], female: [], all: [] };
+
+  const voices = window.speechSynthesis.getVoices();
+  const all = voices;
+  const male = voices.filter(
+    (v) =>
+      v.name.toLowerCase().includes("male") ||
+      v.name.toLowerCase().includes("man") ||
+      ["david", "mark", "daniel", "alex", "thomas", "ravi", "deepak", "pranav", "fred", "jorge"].some((n) =>
+        v.name.toLowerCase().includes(n)
+      )
+  );
+  const female = voices.filter(
+    (v) =>
+      v.name.toLowerCase().includes("female") ||
+      v.name.toLowerCase().includes("woman") ||
+      ["samantha", "victoria", "karen", "moira", "fiona", "nalini", "veena", "lekha", "zira", "hazel", "tessa", "yashvi"].some((n) =>
+        v.name.toLowerCase().includes(n)
+      )
+  );
+
+  _browserVoiceCache = { male, female, all };
+  return _browserVoiceCache;
+}
+
+// Pick the Nth distinct voice from a gender pool (wraps around)
+function pickVoiceForSuspect(gender, slotIndex, lang) {
+  const voices = loadBrowserVoices();
+  const pool = gender === "female" ? voices.female : voices.male;
+
+  // Prefer language-matching voices, then fall back to any pool voice
+  const langFiltered = pool.filter((v) => v.lang.toLowerCase().startsWith(lang.slice(0, 2).toLowerCase()));
+
+  // Try lang-specific pool first, then gender pool, then all voices
+  const candidates = langFiltered.length > 0 ? langFiltered : pool.length > 0 ? pool : voices.all;
+
+  if (candidates.length === 0) return null;
+  return candidates[slotIndex % candidates.length];
+}
+
+// Slot indices so suspects get different voice slots even within same gender
+const SUSPECT_VOICE_SLOTS = {
+  raju: 0,
+  bhola: 1,
+  arvind: 2,
+  meera: 0,
+  nusrat: 1,
 };
 
 export class GnaniClientService {
@@ -51,6 +108,12 @@ export class GnaniClientService {
     this.currentAudio = null;
     this.stage = "IDLE"; // IDLE | RECORDING | PROCESSING | PLAYING
     this.listeners = new Set();
+    // Pre-warm voice cache after browser voices load
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      const warmup = () => { _browserVoiceCache = null; loadBrowserVoices(); };
+      window.speechSynthesis.onvoiceschanged = warmup;
+      setTimeout(warmup, 500);
+    }
   }
 
   subscribe(callback) {
@@ -237,8 +300,8 @@ export class GnaniClientService {
     return queries[Math.floor(Math.random() * queries.length)];
   }
 
-  // Synthesize suspect speech via Backend
-  async synthesizeSpeech(text, suspectId = "raju") {
+  // Synthesize suspect speech via Backend Custom Voice
+  async synthesizeSpeech(text, suspectId = "raju", stressLevel = 30) {
     this.setStage("PROCESSING");
     const voiceConfig = SUSPECT_VOICE_MAP[suspectId] || SUSPECT_VOICE_MAP.raju;
 
@@ -246,7 +309,7 @@ export class GnaniClientService {
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, voiceConfig })
+        body: JSON.stringify({ text, suspectId, stressLevel })
       });
 
       const contentType = res.headers.get("content-type") || "";
@@ -259,11 +322,11 @@ export class GnaniClientService {
       console.warn("Backend TTS fetch error:", e);
     }
 
-    // Local SpeechSynthesis fallback
-    return this.fallbackSpeechSynthesis(text, voiceConfig);
+    // Local SpeechSynthesis fallback — pass suspectId so we can pick distinct voices
+    return this.fallbackSpeechSynthesis(text, voiceConfig, stressLevel, suspectId);
   }
 
-  fallbackSpeechSynthesis(text, voiceConfig) {
+  fallbackSpeechSynthesis(text, voiceConfig, stressLevel = 30, suspectId = "raju") {
     return new Promise((resolve) => {
       if (!window.speechSynthesis) {
         this.setStage("IDLE");
@@ -274,17 +337,27 @@ export class GnaniClientService {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = voiceConfig.language;
-      utterance.rate = voiceConfig.speed;
-      utterance.pitch = voiceConfig.pitch;
 
-      const voices = window.speechSynthesis.getVoices();
-      const matched = voices.find(
-        (v) =>
-          v.lang.toLowerCase().includes(voiceConfig.language.toLowerCase()) ||
-          v.name.toLowerCase().includes("india") ||
-          v.name.toLowerCase().includes("hindi")
-      );
-      if (matched) utterance.voice = matched;
+      // Apply strongly differentiated rate + pitch from voice fingerprint
+      // stressBonus adds a little extra nervousness at high stress levels
+      const stressBonus = Math.max((stressLevel - 30) / 100, 0) * 0.10;
+      utterance.rate = Math.min(2.0, +(voiceConfig.speed + stressBonus).toFixed(2));
+      utterance.pitch = Math.max(0.1, Math.min(2.0, +(voiceConfig.pitch).toFixed(2)));
+
+      // Pick a distinct browser voice per suspect (gender-aware, slotted so they differ)
+      const slotIndex = SUSPECT_VOICE_SLOTS[suspectId] ?? 0;
+      const pickedVoice = pickVoiceForSuspect(voiceConfig.gender, slotIndex, voiceConfig.language);
+      if (pickedVoice) {
+        utterance.voice = pickedVoice;
+        console.log(`[Fallback TTS] ${suspectId} → browser voice: "${pickedVoice.name}" rate=${utterance.rate} pitch=${utterance.pitch}`);
+      } else {
+        // Last-resort: just pick any available voice and apply rate/pitch fingerprint
+        const allVoices = window.speechSynthesis.getVoices();
+        if (allVoices.length > 0) {
+          utterance.voice = allVoices[slotIndex % allVoices.length];
+        }
+        console.log(`[Fallback TTS] ${suspectId} → fallback voice slot ${slotIndex} rate=${utterance.rate} pitch=${utterance.pitch}`);
+      }
 
       this.setStage("PLAYING");
 

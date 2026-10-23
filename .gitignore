@@ -25,3 +25,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Game Design Docs
+ALIBI Game Design Doc.docx
+doc_text.txt

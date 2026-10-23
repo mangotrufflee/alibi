@@ -39,9 +39,9 @@ function gnaniBackendPlugin() {
           req.on('end', async () => {
             try {
               const bodyStr = Buffer.concat(chunks).toString('utf-8');
-              const { text, voiceConfig } = JSON.parse(bodyStr || '{}');
+              const { text, suspectId, stressLevel } = JSON.parse(bodyStr || '{}');
 
-              const result = await handleBackendTTS(text, voiceConfig || {});
+              const result = await handleBackendTTS(text, suspectId || 'raju', stressLevel || 30);
               if (result.success && result.audioBuffer) {
                 res.setHeader('Content-Type', result.contentType || 'audio/wav');
                 res.end(result.audioBuffer);
