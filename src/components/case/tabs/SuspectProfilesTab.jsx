@@ -5,12 +5,16 @@ import React, { useState } from "react";
 import { useGame } from "../../../state/GameContext";
 import { suspects } from "../../../data/suspects";
 import { SUSPECT_RELATIONSHIPS } from "../../../data/caseTabsData";
+import { TRUTH_GATES, SUSPECT_CHARACTER_SHEETS } from "../../../data/truthGatesData";
 
 export default function SuspectProfilesTab() {
   const {
     selectedSuspect,
     selectSuspect,
     suspectStress,
+    suspectTrust,
+    suspectLiveState,
+    unlockedGateIds,
     setActiveTab
   } = useGame();
 
@@ -18,6 +22,11 @@ export default function SuspectProfilesTab() {
 
   const suspectData = suspects[activeProfileId] || suspects.raju;
   const stress = suspectStress[activeProfileId] || 30;
+  const trust = (suspectTrust && suspectTrust[activeProfileId]) ?? 50;
+  const liveInfo = (suspectLiveState && suspectLiveState[activeProfileId]) || {};
+  const contradictionsCaught = liveInfo.contradictionsCaught || 0;
+  const activeGates = TRUTH_GATES.filter((g) => g.suspectId === activeProfileId);
+  const characterSheet = SUSPECT_CHARACTER_SHEETS[activeProfileId] || {};
 
   // Derive demeanor qualitative read based on stress
   let demeanorText = "Calm & Composed";
@@ -104,6 +113,32 @@ export default function SuspectProfilesTab() {
             <span className="stress-numeric">{stress}% Stress Pressure</span>
           </div>
 
+          {/* PHASE 4: DETECTIVE TRUST & CONTRADICTIONS */}
+          <div className="stress-gauge-block" style={{ marginTop: "0.8rem" }}>
+            <div className="gauge-label-row">
+              <span className="gauge-title">DETECTIVE TRUST</span>
+              <span className="gauge-status-tag" style={{ color: trust > 60 ? "#10b981" : "#f59e0b" }}>
+                {trust}% Trust
+              </span>
+            </div>
+
+            <div className="stress-bar-track">
+              <div
+                className="trust-bar-fill"
+                style={{
+                  width: `${trust}%`,
+                  backgroundColor: trust > 60 ? "#10b981" : trust > 35 ? "#f59e0b" : "#ef4444",
+                  height: "100%",
+                  borderRadius: "2px"
+                }}
+              />
+            </div>
+            <div style={{ marginTop: "0.4rem", display: "flex", justifyContent: "space-between", fontSize: "0.78rem" }}>
+              <span style={{ color: "#94a3b8" }}>Alibi Lies Broken:</span>
+              <strong style={{ color: "#e2b170" }}>⚔️ {contradictionsCaught} Contradictions</strong>
+            </div>
+          </div>
+
           {/* STATS & BACKGROUND */}
           <div className="identity-details-list">
             <div className="detail-row">
@@ -186,6 +221,40 @@ export default function SuspectProfilesTab() {
               </div>
             </div>
           )}
+
+          {/* PHASE 4: PSYCHOLOGICAL TRUTH GATES STATUS */}
+          <div className="relationships-network-box" style={{ marginTop: "1.2rem" }}>
+            <h4 className="section-label">PSYCHOLOGICAL TRUTH GATES (GDD §8)</h4>
+            <div className="relations-list">
+              {activeGates.map((gate) => {
+                const isUnlocked = unlockedGateIds && unlockedGateIds.includes(gate.id);
+                return (
+                  <div
+                    key={gate.id}
+                    className="relation-item-card"
+                    style={{
+                      borderLeft: isUnlocked ? "3px solid #10b981" : "3px solid #64748b",
+                      background: isUnlocked ? "rgba(16, 185, 129, 0.08)" : "rgba(15, 23, 42, 0.6)"
+                    }}
+                  >
+                    <div className="relation-header">
+                      <span className="relation-type-tag" style={{ background: isUnlocked ? "#10b981" : "#475569" }}>
+                        {isUnlocked ? "🔓 CRACKED (+" + gate.points + " PTS)" : "🔒 LOCKED"}
+                      </span>
+                      <strong style={{ color: isUnlocked ? "#34d399" : "#e2e8f0" }}>
+                        {gate.title}
+                      </strong>
+                    </div>
+                    <p className="relation-desc-text" style={{ fontStyle: isUnlocked ? "italic" : "normal" }}>
+                      {isUnlocked
+                        ? `"${gate.secretFact}"`
+                        : `Defending secret. Unlock condition: > ${gate.conditions.minStress}% stress or physical corroboration.`}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>

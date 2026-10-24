@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useGame } from "../../state/GameContext";
 import { suspects } from "../../data/suspects";
 import HintCards from "./HintCards";
+import TruthGateIndicator from "./TruthGateIndicator";
 
 export default function InterrogationRoom() {
   const {
@@ -139,6 +140,9 @@ export default function InterrogationRoom() {
               />
             </div>
           </div>
+
+          {/* PHASE 4: TRUTH GATES & LIVE TRUST */}
+          <TruthGateIndicator />
         </div>
 
         {/* RIGHT: INTERROGATION TRANSCRIPT & CONTROLS */}

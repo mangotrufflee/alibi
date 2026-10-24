@@ -3850,3 +3850,221 @@ body {
   color: #f1f5f9;
   font-weight: 700;
 }
+
+
+/* ==========================================================================
+   ALIBI — Phase 4: Truth Gates, Live Trust & Contradiction System (GDD §8)
+   ========================================================================== */
+
+.truth-gate-indicator-card {
+  margin-top: 1rem;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(226, 177, 112, 0.2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.truth-gate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trust-meter-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trust-meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono, monospace);
+}
+
+.trust-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.trust-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
+}
+
+.contradictions-badge-box {
+  display: flex;
+  align-items: center;
+}
+
+.contradictions-count-chip {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.gates-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.07);
+  padding-top: 8px;
+}
+
+.gates-list-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.62rem;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gates-chips-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.truth-gate-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  transition: all 0.25s ease;
+}
+
+.gate-locked {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+}
+
+.gate-unlocked {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.gate-icon {
+  margin-right: 6px;
+  font-size: 0.75rem;
+}
+
+.gate-title {
+  flex: 1;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.gate-badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.58rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.gate-unlocked .gate-badge {
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.gate-locked .gate-badge {
+  color: #64748b;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* TRUTH GATE BREAKTHROUGH OVERLAY / TOAST */
+.truth-breakthrough-overlay {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+  animation: breakthroughBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes breakthroughBounce {
+  0% { transform: translate(-50%, -30px) scale(0.8); opacity: 0; }
+  100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+}
+
+.truth-breakthrough-modal {
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.98), rgba(35, 28, 18, 0.98));
+  border: 2px solid #fbbf24;
+  box-shadow: 0 0 35px rgba(251, 191, 36, 0.35), 0 10px 40px rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  padding: 16px 24px;
+  text-align: center;
+  max-width: 520px;
+}
+
+.breakthrough-badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.breakthrough-title {
+  font-size: 1.15rem;
+  color: #f8fafc;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
+}
+
+.breakthrough-fact {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.breakthrough-fact em {
+  color: #fde68a;
+  font-style: italic;
+}
+
+/* CONTRADICTION CLASHES RESOLVED STATE */
+.clash-resolved {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  background: rgba(16, 185, 129, 0.04) !important;
+}
+
+.badge-resolved {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+
+.clash-resolved-chip {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: #34d399;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}

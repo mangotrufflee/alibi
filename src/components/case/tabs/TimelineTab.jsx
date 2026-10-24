@@ -7,9 +7,16 @@ import { MASTER_TIMELINE, SUSPECT_CLAIMS, CONTRADICTIONS } from "../../../data/c
 import { suspects } from "../../../data/suspects";
 
 export default function TimelineTab() {
-  const { selectSuspect, setActiveTab } = useGame();
+  const {
+    selectSuspect,
+    setActiveTab,
+    contradictions,
+    confrontSuspectWithContradiction
+  } = useGame();
   const [viewMode, setViewMode] = useState("master"); // "master" | "claims" | "clashes"
   const [selectedSuspectFilter, setSelectedSuspectFilter] = useState("all");
+
+  const activeContradictions = contradictions || CONTRADICTIONS;
 
   const handleJumpToSuspect = (suspectId) => {
     selectSuspect(suspectId);
@@ -159,7 +166,7 @@ export default function TimelineTab() {
           </div>
 
           <div className="contradiction-cards-grid">
-            {CONTRADICTIONS.map((c) => {
+            {activeContradictions.map((c) => {
               const suspA = suspects[c.suspectA] || { name: c.suspectA };
               const isSuspectWitness = c.suspectB && c.suspectB !== "evidence";
               const witnessB = isSuspectWitness ? (suspects[c.suspectB] || { name: c.suspectB }) : null;
@@ -168,9 +175,11 @@ export default function TimelineTab() {
                 : "CORROBORATING FORENSIC RECORD";
 
               return (
-                <div key={c.id} className="contradiction-clash-card">
+                <div key={c.id} className={`contradiction-clash-card ${c.resolved ? "clash-resolved" : ""}`}>
                   <div className="clash-card-top">
-                    <span className="clash-badge">⚠️ CONTRADICTION DETECTED</span>
+                    <span className={`clash-badge ${c.resolved ? "badge-resolved" : ""}`}>
+                      {c.resolved ? "✔ CONTRADICTION BROKEN" : "⚠️ CONTRADICTION DETECTED"}
+                    </span>
                     <h3 className="clash-title">{c.title}</h3>
                   </div>
 
@@ -189,13 +198,19 @@ export default function TimelineTab() {
                   </div>
 
                   <div className="clash-footer">
-                    <button
-                      type="button"
-                      className="confront-contradiction-btn"
-                      onClick={() => handleJumpToSuspect(c.suspectA)}
-                    >
-                      Confront {suspA.name} with Contradiction ➔
-                    </button>
+                    {c.resolved ? (
+                      <span className="clash-resolved-chip">
+                        ✔ ALIBI DISMANTLED // Confession Extracted (+20 pts)
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="confront-contradiction-btn"
+                        onClick={() => confrontSuspectWithContradiction(c.id)}
+                      >
+                        Confront {suspA.name} with Contradiction ➔
+                      </button>
+                    )}
                   </div>
                 </div>
               );
