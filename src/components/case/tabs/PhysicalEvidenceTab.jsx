@@ -92,6 +92,8 @@ export default function PhysicalEvidenceTab() {
                   {item.placeholderType === "gauge" && "⚡"}
                   {item.placeholderType === "canister" && "🛢️"}
                   {item.placeholderType === "cord" && "🪢"}
+                  {item.placeholderType === "certificate" && "📜"}
+                  {item.placeholderType === "bell" && "🔔"}
                 </div>
                 <div className="exhibit-info">
                   <span className="exhibit-name">{item.name}</span>

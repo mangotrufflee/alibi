@@ -1,7 +1,5 @@
-// src/assets/placeholders/PlaceholderProp.jsx
 import React, { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
 
 /**
  * Procedural 3D primitive geometry for all evidence objects.
@@ -229,6 +227,38 @@ export function PlaceholderProp({
           <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
             <cylinderGeometry args={[0.08, 0.08, 0.014, 8]} />
             <meshStandardMaterial color={highlightColor || "#d97706"} metalness={0.85} roughness={0.25} />
+          </mesh>
+        </group>
+      );
+
+    case "certificate":
+      return (
+        <group ref={meshRef}>
+          {/* Certificate paper sheet */}
+          <mesh castShadow>
+            <boxGeometry args={[0.3, 0.005, 0.42]} />
+            <meshStandardMaterial color={highlightColor || "#fef9c3"} roughness={0.8} />
+          </mesh>
+          {/* Official red ink stamp */}
+          <mesh position={[0.06, 0.004, 0.1]}>
+            <cylinderGeometry args={[0.035, 0.035, 0.002, 16]} />
+            <meshStandardMaterial color="#991b1b" />
+          </mesh>
+        </group>
+      );
+
+    case "bell":
+      return (
+        <group ref={meshRef}>
+          {/* Bell dome */}
+          <mesh castShadow>
+            <cylinderGeometry args={[0.04, 0.1, 0.12, 16]} />
+            <meshStandardMaterial color={highlightColor || "#eab308"} metalness={0.9} roughness={0.2} />
+          </mesh>
+          {/* Bell clapper pin */}
+          <mesh position={[0, -0.07, 0]}>
+            <sphereGeometry args={[0.02, 8, 8]} />
+            <meshStandardMaterial color="#713f12" metalness={0.8} />
           </mesh>
         </group>
       );
