@@ -1,262 +1,262 @@
 // src/data/hintCards.js
-// ALIBI -- Hint Card Authoring Data
-// Derived from interrogationEngine.js triggers.
-// Each hint card: { id, hint, keyword, type, points, synonyms }
-// type: "right" = +points, "wrong" = -points, "neutral" = 0 points
+// ALIBI — Canonical Hint Cards Supporting Storylines A, B, and C
 
 export const HINT_CARDS = {
   raju: [
     {
       id: "raju_h1",
-      hint: "Ask Raju who has the key to the projection booth",
+      hint: "Ask Raju why the duplicate back-door key had fresh latch grease",
       keyword: "key",
       type: "right",
       points: 10,
-      synonyms: ["chabi", "lock", "duplicate", "brass key", "deadbolt", "booth key", "spare key", "duplicate key", "kholi ki chabi"]
+      synonyms: ["chabi", "lock", "duplicate", "back door", "deadbolt", "booth key", "grease", "latch", "kholi"]
     },
     {
       id: "raju_h2",
-      hint: "Ask about Raju's gambling debts and money problems",
-      keyword: "debt",
+      hint: "Ask if Raju heard the projection booth bell ring at 9:21 PM",
+      keyword: "bell",
       type: "right",
       points: 10,
-      synonyms: ["debt", "money", "loan", "gamble", "gambling", "rupee", "cash", "4000", "paise", "karza", "udhar", "borrow"]
+      synonyms: ["bell", "booth bell", "ring", "ghanti", "9:21", "metallic chime", "door bell", "sound"]
     },
     {
       id: "raju_h3",
-      hint: "Ask where Raju was when the lights went out at 8:45",
+      hint: "Ask where Raju was between 9:17 PM and 9:32 PM during the blackout",
       keyword: "blackout",
       type: "right",
       points: 10,
-      synonyms: ["blackout", "lights", "8:45", "dark", "generator", "power cut", "andhere", "bijli", "where were you", "time", "interval"]
+      synonyms: ["blackout", "lights", "power cut", "andhera", "bijli", "generator", "time", "where were you", "lantern", "foyer"]
     },
     {
       id: "raju_h4",
-      hint: "Point out the grease stains on Raju's hands",
-      keyword: "grease",
-      type: "right",
-      points: 10,
-      synonyms: ["grease", "oil", "stain", "hands", "machine", "smell", "projector", "sprocket", "lubricant", "haath"]
+      hint: "Suggest Raju climbed to the booth to steal money from Harbans",
+      keyword: "steal money",
+      type: "wrong",
+      points: -10,
+      synonyms: ["steal", "chori", "loot", "take cash", "rob", "steal money", "bribe"]
     },
     {
       id: "raju_h5",
-      hint: "Ask Raju about the heavy iron reel clamp from the booth",
-      keyword: "clamp",
-      type: "right",
-      points: 15,
-      synonyms: ["clamp", "reel clamp", "iron", "weapon", "strike", "hit", "blow", "murder weapon", "loha", "patta"]
-    },
-    {
-      id: "raju_h6",
-      hint: "Suggest Raju planned to steal from the cinema sale money",
-      keyword: "steal",
-      type: "wrong",
-      points: -10,
-      synonyms: ["steal", "theft", "chori", "rob", "take money", "sale money", "developer", "crore"]
-    },
-    {
-      id: "raju_h7",
-      hint: "Ask Raju about selling snacks at the concession stall",
-      keyword: "snacks",
+      hint: "Ask Raju about torn ticket stubs at the balcony barrier",
+      keyword: "ticket",
       type: "neutral",
       points: 0,
-      synonyms: ["snacks", "selling", "stall", "concession", "food", "samosa", "refreshments"]
+      synonyms: ["ticket", "stub", "punches", "seat b12", "rt-0847", "admission", "balcony"]
     }
   ],
 
   meera: [
     {
       id: "meera_h1",
-      hint: "Ask Meera about the demolition and cinema redevelopment deal",
-      keyword: "sale",
+      hint: "Confront Meera with private ledger page 47 and payments on Oct 14/16",
+      keyword: "ledger",
       type: "right",
-      points: 10,
-      synonyms: ["sale", "demolition", "redevelopment", "deed", "dlf", "mall", "crore", "18 crore", "cinema sale", "developer", "bechna"]
+      points: 15,
+      synonyms: ["ledger", "page 47", "accounts", "payments", "october 14", "october 16", "h lal", "private accounts", "bribe", "hisaab"]
     },
     {
       id: "meera_h2",
-      hint: "Ask about Meera's alibi -- where was she during the blackout",
-      keyword: "phone call",
+      hint: "Challenge Meera's office alibi with the 9:26 PM corridor footage",
+      keyword: "corridor",
       type: "right",
-      points: 10,
-      synonyms: ["alibi", "phone", "call", "lawyer", "office", "blackout", "where were you", "solicitor", "chawla", "telephone", "landline"]
+      points: 15,
+      synonyms: ["corridor", "footage", "bangles", "video", "staff passage", "phone", "alibi", "9:26", "caught on tape", "hallway"]
     },
     {
       id: "meera_h3",
-      hint: "Ask Meera who else had a key to the projection booth",
-      keyword: "master key",
+      hint: "Ask Meera why the film was cut at 9:24 PM after the motor stopped",
+      keyword: "film cut",
       type: "right",
-      points: 10,
-      synonyms: ["key", "master key", "booth", "desk", "drawer", "mahogany", "office key", "duplicate", "lock", "chabi"]
+      points: 15,
+      synonyms: ["film cut", "cut", "shears", "9:24", "manual cut", "staged accident", "spindle", "sliced", "celluloid"]
     },
     {
       id: "meera_h4",
-      hint: "Confront Meera about the coal mud on her saree hem",
-      keyword: "mud",
+      hint: "Ask Meera about the altered property inspection certificate OD-P/1847/26",
+      keyword: "certificate",
       type: "right",
-      points: 15,
-      synonyms: ["mud", "coal", "boiler", "saree", "alley", "stain", "hem", "dirty", "ganda", "fire escape", "stairwell", "outside"]
+      points: 10,
+      synonyms: ["certificate", "inspection", "altered date", "property transfer", "commercial sale", "clearance", "pending inventory"]
     },
     {
       id: "meera_h5",
-      hint: "Accuse Meera of ordering Raju to let the killer in",
-      keyword: "hired",
+      hint: "Accuse Meera of poisoning Harbans Lal's tea with Datura",
+      keyword: "poison",
       type: "wrong",
       points: -15,
-      synonyms: ["hired", "paid raju", "bribe", "accomplice", "ordered", "told him", "plan together", "conspiracy"]
+      synonyms: ["poison", "datura", "toxic", "sedative", "chemical", "poisoned tea", "powder", "dregs"]
     },
     {
       id: "meera_h6",
-      hint: "Ask Meera what she thinks of Harbans Lal as a person",
-      keyword: "harbans",
+      hint: "Ask Meera about the historical legacy of Rex Talkies cinema",
+      keyword: "heritage",
       type: "neutral",
       points: 0,
-      synonyms: ["harbans", "masterji", "projectionist", "victim", "dead man", "opinion"]
+      synonyms: ["heritage", "legacy", "cinema history", "old delhi", "father", "multiplex"]
     }
   ],
 
   arvind: [
     {
       id: "arvind_h1",
-      hint: "Ask Dr. Sethi about the vintage print thefts from the archive vaults",
-      keyword: "print",
+      hint: "Ask Dr. Sethi about catalogue RT-17-Z and his sister Zohra Sen",
+      keyword: "zohra",
       type: "right",
-      points: 10,
-      synonyms: ["print", "film", "pyaasa", "1957", "nitrate", "archive", "vintage", "reel", "canister", "collector", "vault", "stolen print"]
+      points: 15,
+      synonyms: ["zohra", "zohra sen", "rt-17-z", "sister", "credit", "uncredited", "acknowledgement", "behen", "print"]
     },
     {
       id: "arvind_h2",
-      hint: "Ask about the gold biscuits hidden in the Mughal-e-Azam reel can",
-      keyword: "gold",
+      hint: "Ask about the replacement label pasted over the original canister tag",
+      keyword: "replacement label",
       type: "right",
-      points: 10,
-      synonyms: ["gold", "biscuit", "sona", "canister", "dubai", "passport", "flight", "smuggle", "mughal e azam", "reel can", "hidden"]
+      points: 15,
+      synonyms: ["label", "replacement label", "canister", "rt-archive", "general stock", "sticker", "pasted", "conceal label"]
     },
     {
       id: "arvind_h3",
-      hint: "Ask Dr. Sethi exactly where he was when the murder blow landed",
-      keyword: "seat",
+      hint: "Confront Dr. Sethi about the 3-splice pattern (12mm-19mm-12mm)",
+      keyword: "splice",
       type: "right",
-      points: 10,
-      synonyms: ["seat", "alibi", "where", "blackout", "scream", "g14", "g-14", "auditorium", "sound", "hiss", "noise", "blow", "thud"]
+      points: 15,
+      synonyms: ["splice", "three splices", "12mm", "19mm", "joins", "splice pattern", "tape", "film strip", "celluloid joins"]
     },
     {
       id: "arvind_h4",
-      hint: "Accuse Dr. Sethi of killing Harbans to steal the Pyaasa print for himself",
-      keyword: "steal print",
-      type: "wrong",
-      points: -15,
-      synonyms: ["steal print", "killed for film", "wanted the reel", "collector murder", "film obsession", "killed to get", "reel thief"]
+      hint: "Ask Dr. Sethi about the manual reel movement at 9:21 PM in the logbook",
+      keyword: "reel movement",
+      type: "right",
+      points: 10,
+      synonyms: ["reel movement", "9:21", "take-up spindle", "maintenance log", "manual advancement", "turned reel"]
     },
     {
       id: "arvind_h5",
-      hint: "Ask Dr. Sethi about his opinion on the cinema being demolished",
-      keyword: "demolition",
+      hint: "Accuse Dr. Sethi of smuggling gold biscuits inside a film canister to Dubai",
+      keyword: "gold biscuits",
+      type: "wrong",
+      points: -15,
+      synonyms: ["gold", "gold biscuits", "dubai", "passport", "smuggling", "palam airport", "sona"]
+    },
+    {
+      id: "arvind_h6",
+      hint: "Ask Dr. Sethi about his academic thesis on Guru Dutt's lighting",
+      keyword: "guru dutt",
       type: "neutral",
       points: 0,
-      synonyms: ["demolition", "sale", "cinema closing", "heritage", "development", "sad", "end of era"]
+      synonyms: ["guru dutt", "lighting", "academic", "analysis", "notes", "cinematography"]
     }
   ],
 
   nusrat: [
     {
       id: "nusrat_h1",
-      hint: "Ask Nusrat about her audio recorder and the erased 12-minute tape",
-      keyword: "recording",
+      hint: "Challenge Nusrat about the 58-second gap on her phone (9:22:10–9:23:08 PM)",
+      keyword: "recording gap",
       type: "right",
-      points: 10,
-      synonyms: ["recording", "recorder", "audio", "mic", "zoom", "h4n", "tape", "erased", "deleted", "12 minutes", "wiped", "record kar"]
+      points: 15,
+      synonyms: ["gap", "recording gap", "58 seconds", "missing minute", "9:22", "deleted", "trimmed", "rex_1710", "waveform"]
     },
     {
       id: "nusrat_h2",
-      hint: "Ask about the threatening phone memo Nusrat heard on the mezzanine",
-      keyword: "threat",
+      hint: "Ask Nusrat about the fresh 35mm film dust inside her phone case",
+      keyword: "film dust",
       type: "right",
-      points: 10,
-      synonyms: ["threat", "whisper", "phone", "handover", "stairs", "mezzanine", "outside man", "cornered", "dhamma", "frightened", "warning"]
+      points: 15,
+      synonyms: ["dust", "film dust", "phone case", "acetate dust", "microscopic", "casing", "powder", "particles"]
     },
     {
       id: "nusrat_h3",
-      hint: "Challenge Nusrat's alibi about being in the ladies' washroom",
-      keyword: "washroom",
+      hint: "Ask Nusrat why she entered the projection booth with her camera",
+      keyword: "mother",
       type: "right",
-      points: 10,
-      synonyms: ["washroom", "restroom", "toilet", "ladies", "bathroom", "umbrella", "wet", "cardigan", "alibi", "bathroom attendant", "washroom attendant"]
+      points: 15,
+      synonyms: ["mother", "maa", "thesis", "photograph", "splice photo", "notes", "proof", "credit", "trespassing"]
     },
     {
       id: "nusrat_h4",
-      hint: "Accuse Nusrat of being the one who entered the booth and struck Harbans",
-      keyword: "killer",
-      type: "wrong",
-      points: -15,
-      synonyms: ["nusrat killed", "nusrat did it", "you killed him", "you struck", "nusrat murderer", "film student killer"]
+      hint: "Ask about the pitch shift in the generator hum when her audio cuts out",
+      keyword: "generator hum",
+      type: "right",
+      points: 10,
+      synonyms: ["generator hum", "audio pitch", "hum", "frequency", "sound", "waveform", "engine sound"]
     },
     {
       id: "nusrat_h5",
-      hint: "Ask Nusrat what kind of film project she is working on",
-      keyword: "documentary",
+      hint: "Suggest an outside mobster in heavy rubber boots threatened Harbans",
+      keyword: "mobster",
+      type: "wrong",
+      points: -15,
+      synonyms: ["mobster", "heavy boots", "outside man", "gangster", "enforcer", "hired thug", "punjabi voice"]
+    },
+    {
+      id: "nusrat_h6",
+      hint: "Ask Nusrat what camera settings she used for shooting in the dark",
+      keyword: "camera settings",
       type: "neutral",
       points: 0,
-      synonyms: ["documentary", "film project", "thesis", "jamia", "student film", "dissertation", "research", "cinema study"]
+      synonyms: ["settings", "shutter", "iso", "focal length", "lens", "foley mic"]
     }
   ],
 
   bhola: [
     {
       id: "bhola_h1",
-      hint: "Ask Bhola about the cutting chai he delivered to Harbans -- was there poison?",
-      keyword: "chai",
+      hint: "Present paper token #026 to earn Bhola's full confidence",
+      keyword: "token",
       type: "right",
-      points: 10,
-      synonyms: ["chai", "tea", "poison", "datura", "glass", "cutting chai", "deliver", "upstairs", "bhola ki chai", "ginger", "adrak chai", "dregs", "sedative"]
+      points: 15,
+      synonyms: ["token", "paper token", "026", "tea token", "paid", "trust", "tea tin", "parcha"]
     },
     {
       id: "bhola_h2",
-      hint: "Ask Bhola about the argument and shouting he heard behind the screen",
-      keyword: "argument",
+      hint: "Ask Bhola about the booth bell at 9:21 PM and footsteps at 9:29 PM",
+      keyword: "footsteps",
       type: "right",
-      points: 10,
-      synonyms: ["argument", "shout", "quarrel", "fight", "dispute", "behind screen", "heavy boots", "punjabi", "burn", "threaten", "agreement", "signed", "jhagda", "awaaz"]
+      points: 15,
+      synonyms: ["footsteps", "steps", "wet shoes", "9:29", "9:21", "sounds", "corridor", "cup clink", "tumbler", "awaaz"]
     },
     {
       id: "bhola_h3",
-      hint: "Ask who held the VIP brass chai tokens at Rex Talkies tonight",
-      keyword: "brass token",
+      hint: "Ask Bhola what he saw when he delivered tea upstairs at 9:10 PM",
+      keyword: "tea delivery",
       type: "right",
       points: 10,
-      synonyms: ["token", "brass", "vip", "special patron", "refill", "17", "number", "chai token", "tin token", "coin"]
+      synonyms: ["tea", "chai", "delivery", "9:10", "cutting chai", "upstairs", "harbans hale", "cardamom"]
     },
     {
       id: "bhola_h4",
-      hint: "Accuse Bhola of poisoning the chai himself to kill Harbans",
-      keyword: "bhola poisoned",
+      hint: "Accuse Bhola of slipping sedatives into Harbans' tea glass",
+      keyword: "sedative",
       type: "wrong",
       points: -15,
-      synonyms: ["bhola poisoned", "you poisoned", "bhola killed", "you added datura", "bhola is the killer", "bhola did it", "chai wala murderer"]
+      synonyms: ["sedative", "poisoned", "sleeping pill", "drug", "datura", "tampered tea"]
     },
     {
       id: "bhola_h5",
-      hint: "Ask Bhola how long he has known Harbans Lal",
-      keyword: "years",
+      hint: "Ask Bhola about the monsoon storm flooding Chandni Chowk outside",
+      keyword: "storm",
       type: "neutral",
       points: 0,
-      synonyms: ["years", "how long", "kitne saal", "friendship", "old friend", "knew him", "relationship", "history"]
+      synonyms: ["storm", "rain", "monsoon", "flood", "barish", "chandni chowk", "water"]
     }
   ]
 };
 
-// How many hint cards to show at a time per suspect
 export const HINTS_PER_SCREEN = 3;
 
-// Retrieve hint cards for a suspect, excluding already-scored ones
-export function getActiveHints(suspectId, scoredKeywordIds = []) {
+/**
+ * Retrieve hint cards for a suspect, prioritized and filtered by active storyline.
+ */
+export function getActiveHints(suspectId, scoredKeywordIds = [], storylineId = "A") {
   const cards = HINT_CARDS[suspectId] || [];
   const available = cards.filter((c) => !scoredKeywordIds.includes(c.id));
+
   // Prioritize "right" and "wrong" over "neutral"
   const prioritized = [
     ...available.filter((c) => c.type === "right"),
     ...available.filter((c) => c.type === "wrong"),
     ...available.filter((c) => c.type === "neutral")
   ];
+
   return prioritized.slice(0, HINTS_PER_SCREEN);
 }

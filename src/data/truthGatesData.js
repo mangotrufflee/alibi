@@ -1,5 +1,5 @@
 // src/data/truthGatesData.js
-// ALIBI — Phase 4: Suspect AI Character Sheets, Live State & Truth Gates (GDD §8)
+// ALIBI — Suspect Character Sheets, Live State & Canonical Truth Gates for Storylines A, B, and C
 
 export const SUSPECT_CHARACTER_SHEETS = {
   raju: {
@@ -13,14 +13,14 @@ export const SUSPECT_CHARACTER_SHEETS = {
       pace: "fast",
       tone: "nervous, defensive, deferential ('Sahab', 'Masterji')",
       codeSwitching: "Frequent Hinglish with Old Delhi colloquialisms ('Bhai', 'kholi', 'chabi')",
-      deflectionPattern: "Babbles about his innocence, brings up his sick sister, pivots to Bhola's stall."
+      deflectionPattern: "Babbles about his sister, swears on his mother, pivots to Bhola's stall."
     },
     secrets: [
-      "Accepted 4,000 rupees from Meera to duplicate Harbans Lal's deadbolt key.",
-      "Saw a woman in a silk saree slipping towards the projection booth stairs at 8:42 PM."
+      "Took 500 rupees to leave the back staff passage unlatched before the screening.",
+      "Heard the mechanical booth bell ring at 9:21 PM while lighting hurricane lanterns."
     ],
-    fears: "Being framed for murder by Meera Kapoor and her high-court lawyers.",
-    protects: "His sister Parveen and the memory of Harbans Lal's generosity."
+    fears: "Being framed by the police for murder because of his poverty and access to the doors.",
+    protects: "His sister Parveen and the memory of Harbans Lal's past kindness."
   },
 
   meera: {
@@ -32,38 +32,37 @@ export const SUSPECT_CHARACTER_SHEETS = {
     baseStress: 20,
     speakingStyle: {
       pace: "measured, cold, haughty",
-      tone: "authoritative, condescending, legalistic",
-      codeSwitching: "Formal British-Indian English, occasional sharp Urdu/Hindi terms ('fazool', 'auditing')",
+      tone: "controlled, authoritative British-Indian English, clipped Hindi when angry",
+      codeSwitching: "Formal legalistic English, occasional sharp Hindi terms ('fazool', 'hisaab')",
       deflectionPattern: "Counter-questions the detective, threatens legal action, cites commercial necessity."
     },
     secrets: [
-      "Paid Raju 4,000 rupees to copy the booth key to bypass Harbans' deadlock.",
-      "Tore page 142 from Harbans' logbook to destroy his historical tenancy injunction.",
-      "Tampered with Harbans' tea glass with sedative powder outside her office."
+      "Concealed unlicensed film prints in the back vaults to inflate the commercial valuation.",
+      "Met Harbans in the booth after 9:12 PM to retrieve ledger page 47 and stop his disclosure."
     ],
-    fears: "The 18-crore DLF commercial mall sale expiring at midnight if heritage injunction is stamped.",
-    protects: "Her family's commercial empire and her social standing in New Delhi."
+    fears: "The cinema sale falling through, exposing her debts and destroying her family legacy.",
+    protects: "The commercial transaction and her social reputation."
   },
 
   arvind: {
     id: "arvind",
     name: "Dr. Arvind Sethi",
-    role: "Retired Film Historian",
+    role: "Retired Professor & Regular Patron",
     age: 68,
     baseTrust: 50,
     baseStress: 15,
     speakingStyle: {
       pace: "slow, professorial, pedantic",
-      tone: "philosophical, melancholic, detached",
-      codeSwitching: "Rich literary English with classic Hindi cinema terminology ('Guru Dutt', 'halide', 'nitrate')",
+      tone: "formal Hindi with English film terminology and quotations",
+      codeSwitching: "Classic literary Hindi with English cinematic terms ('carbon arc', 'emulsion', 'splice')",
       deflectionPattern: "Diverts concrete questions into film aesthetics and historical anecdotes."
     },
     secrets: [
-      "Ascended the booth spiral stairs at 8:50 PM to steal the 1957 'Pyaasa' nitrate negative.",
-      "Found Harbans Lal dying, checked his pulse, smeared grease on his hands, and fled in panic."
+      "His late sister, Zohra Sen, was an unacknowledged contributor to the film on tonight's reel.",
+      "Knew the print carried catalogue code RT-17-Z and was determined to protect it from exploitation."
     ],
-    fears: "Being arrested as an illegal film trafficker and having his private archive seized.",
-    protects: "His pristine academic reputation and his vintage film reels."
+    fears: "Being forgotten, and having his sister's artistic contribution permanently erased.",
+    protects: "Zohra Sen's memory and the surviving 35mm physical reel."
   },
 
   nusrat: {
@@ -75,16 +74,16 @@ export const SUSPECT_CHARACTER_SHEETS = {
     baseStress: 40,
     speakingStyle: {
       pace: "sharp, guarded, articulate",
-      tone: "skeptical, defensive, media-savvy",
-      codeSwitching: "Contemporary college English with media studies jargon ('Foley', 'ambient soundscape')",
-      deflectionPattern: "Invokes student rights, blames faulty tech equipment, demands her phone back."
+      tone: "defensive, media-savvy English with Hindi surfacing under stress",
+      codeSwitching: "Contemporary college English with film analysis terms ('frame rate', 'foley', 'splice')",
+      deflectionPattern: "Invokes student rights, blames tech glitches, demands to call her department head."
     },
     secrets: [
-      "Her Zoom recorder captured a violent threat against Harbans by Meera's associate at 8:35 PM.",
-      "Her tape was wiped by someone who cornered her in the dark foyer right after the blackout."
+      "Entered the projection booth to photograph the splice pattern and archival notes.",
+      "Her phone contains a missing 58-second interval (9:22:10–9:23:08 PM) during the fatal confrontation."
     ],
-    fears: "Losing her Jamia university thesis and facing criminal accessory charges.",
-    protects: "Her academic career and documentary audio files."
+    fears: "Being arrested for trespassing, losing her phone footage, and ruining her family name.",
+    protects: "Her documentary research and proof of her mother's erased cinematic work."
   },
 
   bhola: {
@@ -95,206 +94,228 @@ export const SUSPECT_CHARACTER_SHEETS = {
     baseTrust: 75,
     baseStress: 25,
     speakingStyle: {
-      pace: "warm, rhythmic, deliberate",
-      tone: "humble, observant, maternal",
-      codeSwitching: "Bhojpuri-inflected Old Delhi Hindi with respectful salutations ('Babu ji', 'Ram-Ram')",
-      deflectionPattern: "Offers chai, invokes thirty years of honest work, tells stories of the old days."
+      pace: "warm, rhythmic, deliberate, long pauses",
+      tone: "humble, observant, story-shaped answers in local Old Delhi Hindi",
+      codeSwitching: "Warm colloquial Hindi with respectful salutations ('Babu ji', 'Sahab')",
+      deflectionPattern: "Offers chai, reminisces about forty years of cinema history, speaks in parables."
     },
     secrets: [
-      "Saw Meera Kapoor lean over Harbans' tea glass with white powder outside her office at 8:12 PM.",
-      "Saw Dr. Sethi frantically descending the booth stairs wiping his hands at 8:50 PM."
+      "Keeps a paid paper token (#026) that proves he served tea upstairs at 9:10 PM.",
+      "Clearly heard the 9:21 PM bell, the 9:23 PM thud, and wet footsteps at 9:29 PM."
     ],
-    fears: "Rex Talkies being demolished and losing his livelihood and old brotherhood.",
-    protects: "The truth for his brother Harbans Lal."
+    fears: "Rex Talkies being demolished and his lifelong home vanishing forever.",
+    protects: "The truth for his fallen brother Harbans Lal."
   }
 };
 
 export const INITIAL_SUSPECT_LIVE_STATE = {
-  raju: {
-    trust: 45,
-    stress: 35,
-    contradictionsCaught: 0,
-    revealedFacts: [],
-    seenEvidence: []
-  },
-  meera: {
-    trust: 30,
-    stress: 20,
-    contradictionsCaught: 0,
-    revealedFacts: [],
-    seenEvidence: []
-  },
-  arvind: {
-    trust: 50,
-    stress: 15,
-    contradictionsCaught: 0,
-    revealedFacts: [],
-    seenEvidence: []
-  },
-  nusrat: {
-    trust: 60,
-    stress: 40,
-    contradictionsCaught: 0,
-    revealedFacts: [],
-    seenEvidence: []
-  },
-  bhola: {
-    trust: 75,
-    stress: 25,
-    contradictionsCaught: 0,
-    revealedFacts: [],
-    seenEvidence: []
-  }
+  raju: { trust: 45, stress: 35, contradictionsCaught: 0, revealedFacts: [], seenEvidence: [] },
+  meera: { trust: 30, stress: 20, contradictionsCaught: 0, revealedFacts: [], seenEvidence: [] },
+  arvind: { trust: 50, stress: 15, contradictionsCaught: 0, revealedFacts: [], seenEvidence: [] },
+  nusrat: { trust: 60, stress: 40, contradictionsCaught: 0, revealedFacts: [], seenEvidence: [] },
+  bhola: { trust: 75, stress: 25, contradictionsCaught: 0, revealedFacts: [], seenEvidence: [] }
 };
 
 /**
- * Truth Gates Catalog (GDD §8):
- * Each Truth Gate holds a secret that can only be unlocked under verified engine conditions.
+ * Canonical Truth Gates Catalog partitioned by active storyline.
  */
 export const TRUTH_GATES = [
-  // ── RAJU'S TRUTH GATES ──────────────────────────────────────────────────
+  // ── SHARED TRUTH GATES ──────────────────────────────────────────────────
   {
     id: "gate_raju_key",
     suspectId: "raju",
-    title: "Who Ordered the Duplicate Key",
-    secretFact: "Raju was bribed by Meera Kapoor to cut the duplicate projection booth key.",
-    conditions: {
-      minStress: 50,
-      requiredEvidence: ["duplicate_key"],
-      requiredContradiction: "clash_raju_key",
-      matchKeyword: "duplicate"
-    },
-    lockedResponse: "Sahab, I told you! Masterji's hands were shivering from malaria! He gave me the key himself. Why are you harassing a poor boy?!",
-    unlockedAdmission: "Alright! Please don't call the police beat constables! Meera Ma'am gave me four thousand rupees last Thursday! She said she needed to inspect the acoustic ceiling tiles before the commercial buyers arrived! I swear by my mother, I had no idea she would hurt Masterji!",
-    unlockedClue: "Raju confesses: Meera Kapoor paid him 4,000 rupees to duplicate the projection booth deadbolt key.",
-    checklistGoalId: "clue_key_origin",
-    points: 20,
-    stressDelta: 25,
-    trustDelta: -10,
-    unlocked: false
-  },
-  {
-    id: "gate_raju_alibi",
-    suspectId: "raju",
-    title: "Shadow on the Spiral Stairwell",
-    secretFact: "Raju saw a woman in a silk saree slip past towards the booth spiral stairs right before 8:45 PM.",
-    conditions: {
-      minStress: 65,
-      requiredContradiction: "clash_raju_key",
-      matchKeyword: "blackout"
-    },
-    lockedResponse: "I was frozen at the concession counter! Bhola bhai saw me! I didn't see anyone enter or leave!",
-    unlockedAdmission: "I lied about staying at the counter the entire interval! At 8:42 PM, right before the generator tripped, I saw a woman's shadow in an expensive silk saree slip through the back velvet drape towards the booth spiral stairs! I was trembling so badly I didn't dare speak!",
-    unlockedClue: "Raju admits seeing a woman in a silk saree sneaking towards the projection booth stairs at 8:42 PM.",
-    checklistGoalId: "whereabouts_raju",
-    points: 20,
-    stressDelta: 20,
-    trustDelta: 5,
-    unlocked: false
-  },
-
-  // ── MEERA'S TRUTH GATES ─────────────────────────────────────────────────
-  {
-    id: "gate_meera_mud",
-    suspectId: "meera",
-    title: "Boiler Alley Stairwell Intrusion",
-    secretFact: "Meera ascended the boiler stairwell to steal page 142 from Harbans' logbook.",
+    storylines: ["A", "B", "C"],
+    title: "The Unlatched Back Door",
+    secretFact: "Raju took money to leave the back staff door unlatched before the screening.",
     conditions: {
       minStress: 45,
-      requiredEvidence: ["maintenance_log"],
-      requiredContradiction: "clash_meera_office",
-      matchKeyword: "mud"
+      requiredEvidence: ["duplicate_key"],
+      requiredContradiction: "clash_raju_key",
+      matchKeyword: "key"
     },
-    lockedResponse: "Inspector, Rex Talkies has a leaking roof. Stepping near an alleyway drain does not constitute a criminal offense. Speak to my solicitor.",
-    unlockedAdmission: "Harbans threatened to present his lifelong tenancy injunction to the Delhi Heritage Council tonight! That injunction would have bankrupted me! Yes, I climbed the boiler alley fire escape at 8:30 PM and tore page 142 from his register! But he was screaming at someone else behind the screen when I left! He was alive!",
-    unlockedClue: "Meera confesses to climbing the boiler stairwell to tear page 142 from the maintenance register.",
-    checklistGoalId: "whereabouts_meera",
-    points: 25,
-    stressDelta: 22,
-    trustDelta: -15,
-    unlocked: false
+    lockedResponse:
+      "Sahab, I'm just tearing tickets! Masterji had his own keys. Why are you questioning me about locks?!",
+    unlockedAdmission:
+      "Please don't arrest me, Inspector! Someone pressed five hundred rupees into my palm before the show and told me to leave the iron back door unlatched! They said they were only delivering projector spare valves! I never knew anyone would climb up to hurt Masterji!",
+    unlockedClue:
+      "Raju confesses: He left the rear passage unlatched after receiving cash, allowing unauthorised access to the booth stairs.",
+    checklistGoalId: "clue_key_origin",
+    points: 20,
+    stressDelta: 20,
+    trustDelta: -5
   },
   {
-    id: "gate_meera_deed",
-    suspectId: "meera",
-    title: "18-Crore Mall Demolition Deadline",
-    secretFact: "The 18-crore commercial deed required vacant possession before midnight.",
+    id: "gate_bhola_trust",
+    suspectId: "bhola",
+    storylines: ["A", "B", "C"],
+    title: "Bhola's Corroborating Account",
+    secretFact: "Bhola heard the metallic bell at 9:21 PM and hurried footsteps at 9:29 PM.",
     conditions: {
-      minStress: 60,
-      requiredEvidence: ["sale_ledger"],
-      matchKeyword: "sale"
+      minStress: 20,
+      requiredEvidence: ["bhola_token", "tea_glass"],
+      matchKeyword: "token"
     },
-    lockedResponse: "Commercial agreements are private business affairs protected by non-disclosure agreements.",
-    unlockedAdmission: "You want the truth?! DLF's consortium clause expires at midnight tonight! If Harbans' heritage covenant remained active, the 18-crore buyout was completely dead. Harbans was an obstinate fossil who lived in 1955 while this cinema accrued two lakhs of electric debt every month!",
-    unlockedClue: "Meera admits the 18-crore sale required vacant possession before midnight, giving her an urgent motive.",
-    checklistGoalId: "clue_deed",
+    lockedResponse:
+      "Babu ji, forty years I brewed tea beneath these cinema horns. A tea seller sees much, but speaking brings storm upon poor folk.",
+    unlockedAdmission:
+      "You have my paper token... You treat an old tea vendor with honor, Inspector. Listen closely: At 9:21 PM, through the hum of the backup engine, I heard the sharp brass clink of the booth bell ring upstairs! Then silence. And at 9:29 PM, wet leather soles came down the staff corridor, and someone set a glass down right by the passage stool!",
+    unlockedClue:
+      "Bhola's verified account: Booth bell chimed at 9:21 PM, followed by wet footsteps and a glass set down at 9:29 PM.",
+    checklistGoalId: "whereabouts_bhola",
     points: 25,
-    stressDelta: 18,
-    trustDelta: -10,
-    unlocked: false
+    stressDelta: 10,
+    trustDelta: 25
   },
 
-  // ── ARVIND'S TRUTH GATES ────────────────────────────────────────────────
+  // ── STORYLINE A: MEERA KAPOOR TRUTH GATES ────────────────────────────────
   {
-    id: "gate_arvind_stairs",
-    suspectId: "arvind",
-    title: "Booth Visit & Grease Smeared Hands",
-    secretFact: "Dr. Sethi climbed into the booth at 8:50 PM, discovered the body, and fled without reporting.",
+    id: "gate_meera_ledger",
+    suspectId: "meera",
+    storylines: ["A"],
+    title: "Private Meeting & October Payments",
+    secretFact: "Meera met Harbans in the booth after 9:12 PM regarding ledger payments.",
     conditions: {
       minStress: 40,
-      requiredEvidence: ["film_strip"],
-      requiredContradiction: "clash_arvind_bhola",
-      matchKeyword: "seat"
+      requiredEvidence: ["sale_ledger"],
+      requiredContradiction: "clash_meera_ledger",
+      matchKeyword: "ledger"
     },
-    lockedResponse: "A scholar does not wander into machinery booths during a blackout, Inspector. I remained seated in Row 7 contemplating cinema history.",
-    unlockedAdmission: "Enough! I will not have my reputation dragged through the gutter! Harbans promised to hand me the original 1957 nitrate reel of 'Pyaasa' tonight in exchange for twenty-five thousand rupees. When the power died, I climbed the spiral stairs at 8:50 PM. The door was ajar... I felt around in the dark, touched his arm, and realized he was dead! I panicked, wiped the grease from my hands, and returned to my seat!",
-    unlockedClue: "Dr. Sethi confesses to finding Harbans' body in the booth at 8:50 PM and fleeing to protect his film purchase.",
-    checklistGoalId: "whereabouts_sethi",
-    points: 20,
+    lockedResponse:
+      "Our business dealings concluded on the tenth of October. My private corporate accounts are entirely confidential.",
+    unlockedAdmission:
+      "Very well, Inspector. There is no point denying the ledger. Yes, I paid Harbans eighteen thousand rupees on the fourteenth, and another six thousand on the sixteenth. He discovered the unlicensed reels in the archive room and threatened to hand page 47 to the heritage preservation board! I met him in the booth after 9:12 PM to plead for time!",
+    unlockedClue:
+      "Meera admits: She met Harbans in the booth after 9:12 PM to recover the ledger page and stop his disclosure.",
+    checklistGoalId: "whereabouts_meera",
+    points: 25,
     stressDelta: 25,
-    trustDelta: 10,
-    unlocked: false
+    trustDelta: -10
+  },
+  {
+    id: "gate_meera_cut",
+    suspectId: "meera",
+    storylines: ["A"],
+    title: "The Manual Film Cut & Fatal Fall",
+    secretFact: "Meera struck Harbans during the argument and staged the projector accident.",
+    conditions: {
+      minStress: 65,
+      requiredEvidence: ["maintenance_log", "film_strip", "reel_clamp", "nusrat_phone"],
+      requiredContradiction: "clash_meera_corridor",
+      matchKeyword: "corridor"
+    },
+    lockedResponse:
+      "You have no proof of what occurred in that booth! The projector malfunctioned under the power surge!",
+    unlockedAdmission:
+      "It wasn't murder! He refused to listen! He held the ledger page over the arc lamp! I grabbed the metal reel clamp to pull his arm back—he pulled away, stumbled in the dark, and his head struck the iron rail with a sickening crack! I panicked... I saw the projector motor had stopped, so I took the shears and sliced the film across the gate at 9:24 PM to make it look like an equipment jam! God forgive me, I only wanted the sale to go through!",
+    unlockedClue:
+      "Meera's Full Confession: Harbans died from a fall against the rail after she struck him with the clamp; she manually cut the film at 9:24 PM to stage an accident.",
+    checklistGoalId: "clue_manual_cut",
+    points: 35,
+    stressDelta: 30,
+    trustDelta: -15
   },
 
-  // ── NUSRAT'S TRUTH GATES ────────────────────────────────────────────────
+  // ── STORYLINE B: DR. ARVIND SETHI TRUTH GATES ────────────────────────────
   {
-    id: "gate_nusrat_audio",
-    suspectId: "nusrat",
-    title: "The Threat Recorded on Zoom H4n",
-    secretFact: "Nusrat recorded a confrontation outside the booth before her audio card was wiped.",
+    id: "gate_arvind_catalogue",
+    suspectId: "arvind",
+    storylines: ["B"],
+    title: "RT-17-Z & Zohra Sen's Erased Credit",
+    secretFact: "The print on the projector was catalogue RT-17-Z, featuring his sister Zohra.",
     conditions: {
-      minStress: 50,
+      minStress: 40,
+      requiredEvidence: ["film_canister", "film_strip"],
+      requiredContradiction: "clash_arvind_catalogue",
+      matchKeyword: "catalogue"
+    },
+    lockedResponse:
+      "An old cinema patron merely observes the flickering shadows, Inspector. The catalogue numbers of vintage stock are of no consequence.",
+    unlockedAdmission:
+      "You looked beneath the paper label... Yes! RT-17-Z was the master archive print of the 1968 classic. And the assistant director whose name was struck from the credits was my sister, Zohra Sen! For fifty years, commercial distributors erased her labor from history. Harbans found the original print in the vault and told me he was going to project her name tonight!",
+    unlockedClue:
+      "Dr. Sethi admits: Print RT-17-Z carries the unacknowledged work of his sister Zohra Sen, and Harbans intended to reveal it.",
+    checklistGoalId: "clue_splice_identity",
+    points: 25,
+    stressDelta: 25,
+    trustDelta: 10
+  },
+  {
+    id: "gate_arvind_label",
+    suspectId: "arvind",
+    storylines: ["B"],
+    title: "The Replaced Label & Fatal Confrontation",
+    secretFact: "Sethi confronted Harbans to seize the reel, causing his fatal fall, and removed the label.",
+    conditions: {
+      minStress: 65,
+      requiredEvidence: ["film_canister", "maintenance_log", "reel_clamp"],
+      requiredContradiction: "clash_arvind_audio",
+      matchKeyword: "splice"
+    },
+    lockedResponse:
+      "I was in Seat G-14! I could never commit violence inside a sanctuary of cinema!",
+    unlockedAdmission:
+      "Harbans was going to hand the reel over to the new commercial developers! They were going to sell it as scrap acetate! When the bell rang at 9:21 PM, I climbed into the booth. I demanded the canister! Harbans shouted that it belonged to the cinema. We grappled over the take-up reel—I shoved him away, and he struck his temple against the booth safety rail! I froze... When he didn't move, I peeled the RT-17-Z label from the canister and slapped on the general archive tag so no one would know why I came for it!",
+    unlockedClue:
+      "Dr. Sethi's Full Confession: Shoved Harbans into the booth rail during a struggle over the Zohra print, then replaced the canister label to conceal its identity.",
+    checklistGoalId: "whereabouts_sethi",
+    points: 35,
+    stressDelta: 30,
+    trustDelta: -10
+  },
+
+  // ── STORYLINE C: NUSRAT ALI TRUTH GATES ──────────────────────────────────
+  {
+    id: "gate_nusrat_gap",
+    suspectId: "nusrat",
+    storylines: ["C"],
+    title: "The Missing 58-Second Phone Recording",
+    secretFact: "Nusrat deleted the 58-second gap between 9:22:10 and 9:23:08 PM.",
+    conditions: {
+      minStress: 45,
       requiredEvidence: ["nusrat_phone"],
+      requiredContradiction: "clash_nusrat_gap",
       matchKeyword: "recording"
     },
-    lockedResponse: "My audio gear is sensitive equipment! The blackout triggered a power surge that corrupted the SD card sector!",
-    unlockedAdmission: "Stop pressuring me! I didn't wipe the card! At 8:35 PM, my Zoom mic captured an outside man with heavy boots cornering Harbans by the mezzanine! He told Harbans: 'Sign the handover or you won't walk down those stairs alive.' When the lights dipped, someone pushed me in the foyer and snatched the recorder! I managed to back up the final 8 seconds to my phone cloud!",
-    unlockedClue: "Nusrat reveals her audio captured a man threatening Harbans to 'sign the handover or die' at 8:35 PM.",
-    checklistGoalId: "clue_erased_audio",
+    lockedResponse:
+      "My phone simply ran out of buffer space! A student filmmaker does not have high-end broadcast servers, Inspector!",
+    unlockedAdmission:
+      "Stop looking at the audio waveform! Fine... I didn't have a buffer crash! I deleted fifty-eight seconds from the recording file! From 9:22:10 PM until 9:23:08 PM! Because I was inside the projection booth! I went up there to photograph the splice joint that proved my mother worked on that print! I was terrified the police would seize my camera and think I was a thief!",
+    unlockedClue:
+      "Nusrat admits: She intentionally deleted the 58 seconds on her phone because she was inside the booth during the confrontation.",
+    checklistGoalId: "clue_missing_minute",
     points: 25,
-    stressDelta: 20,
-    trustDelta: 15,
-    unlocked: false
-  },
-
-  // ── BHOLA'S TRUTH GATES ─────────────────────────────────────────────────
-  {
-    id: "gate_bhola_poison",
-    suspectId: "bhola",
-    title: "Powder Tampering at the Office Door",
-    secretFact: "Bhola witnessed Meera tampering with Harbans' tea glass at 8:12 PM.",
-    conditions: {
-      minStress: 35,
-      requiredEvidence: ["cutting_chai_glass"],
-      matchKeyword: "chai"
-    },
-    lockedResponse: "Babu ji, my cardamom chai has nourished the patrons of Old Delhi for thirty-two years. I would never taint my own tea.",
-    unlockedAdmission: "Bhagwan is my witness! When I carried the brass tray upstairs at 8:12 PM, Meera Madam called me to her office doorway. She asked for an extra saucer, paid me five hundred rupees, and lingered directly over the glasses! I saw fine white dust clinging to the emerald stone on her index finger! Harbans was already groggy by 8:30 PM!",
-    unlockedClue: "Bhola eyewitness testimony: Meera Kapoor tampered with Harbans Lal's cutting chai at 8:12 PM.",
-    checklistGoalId: "clue_sedative",
-    points: 30,
     stressDelta: 25,
-    trustDelta: 20,
-    unlocked: false
+    trustDelta: -5
+  },
+  {
+    id: "gate_nusrat_fall",
+    suspectId: "nusrat",
+    storylines: ["C"],
+    title: "The Shove Near the Rail & Moved Clamp",
+    secretFact: "Harbans grabbed Nusrat's wrist; her shove caused his fatal fall against the rail.",
+    conditions: {
+      minStress: 65,
+      requiredEvidence: ["nusrat_phone", "reel_clamp", "film_strip"],
+      requiredContradiction: "clash_nusrat_dust",
+      matchKeyword: "dust"
+    },
+    lockedResponse:
+      "I was in the restroom! You cannot link me to what happened near that railing!",
+    unlockedAdmission:
+      "I never meant to hurt him! I was leaning over the projector taking close-up macro shots of the splice! Suddenly the lights snapped off. A heavy hand seized my wrist—it was Harbans in the dark! He screamed 'Who's touching the reel?!' I panicked, pulled my arm with all my strength, and shoved him backwards! He lost his footing in the dark and fell against the booth railing! He didn't get up... I dropped the clamp, ran down the fire passage, and edited the video before anyone saw me!",
+    unlockedClue:
+      "Nusrat's Full Confession: Harbans grabbed her wrist while she photographed the reel; she shoved him back in panic, causing his fatal fall, then altered her recording.",
+    checklistGoalId: "whereabouts_nusrat",
+    points: 35,
+    stressDelta: 30,
+    trustDelta: -10
   }
 ];
+
+/**
+ * Filter truth gates by active storyline (includes shared gates and route-specific gates).
+ */
+export function getTruthGatesForStoryline(storylineId = "A") {
+  const route = storylineId || "A";
+  return TRUTH_GATES.filter((gate) => !gate.storylines || gate.storylines.includes(route));
+}
