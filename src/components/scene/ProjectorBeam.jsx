@@ -12,7 +12,7 @@ import { useGame } from "../../state/GameContext";
 export function ProjectorBeam() {
   const beamRef = useRef();
   const dustRef = useRef();
-  const { generatorFlicker } = useGame();
+  const generatorFlicker = useGame((s) => s.generatorFlicker);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();

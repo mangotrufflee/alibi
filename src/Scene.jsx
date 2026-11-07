@@ -7,13 +7,14 @@ import { CameraController } from "./components/scene/CameraController";
 import { useGame } from "./state/GameContext";
 
 export default function Scene() {
-  const { debugMode } = useGame();
+  const { debugMode, cameraState } = useGame();
+  const enableOrbit = debugMode || cameraState === "FREE_ORBIT";
 
   return (
     <div className="canvas-container">
       <Canvas
         shadows
-        camera={{ position: [0, 1.8, 0.5], fov: 48 }}
+        camera={{ position: [0, 1.8, 1.0], fov: 48 }}
         style={{ width: "100%", height: "100%", background: "#06090a" }}
         gl={{ antialias: true, alpha: false }}
       >
@@ -23,9 +24,10 @@ export default function Scene() {
         {/* 3D THEATRE ENVIRONMENT */}
         <Theatre />
 
-        {/* DEVELOPMENT FREE-CAMERA CONTROLS (Only active if free-cam debug mode enabled) */}
-        {debugMode && (
+        {/* FREE-CAMERA ORBIT CONTROLS */}
+        {enableOrbit && (
           <OrbitControls
+            makeDefault
             enablePan={true}
             enableZoom={true}
             enableRotate={true}

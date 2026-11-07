@@ -8,6 +8,9 @@ import { suspects } from "../../data/suspects";
 export const CAMERA_STATES = {
   MAIN_THEATRE: "MAIN_THEATRE",
   SUSPECT_FOCUS: "SUSPECT_FOCUS",
+  BOOTH_VIEW: "BOOTH_VIEW",
+  SCREEN_VIEW: "SCREEN_VIEW",
+  FREE_ORBIT: "FREE_ORBIT",
   EVIDENCE_INSPECTION: "EVIDENCE_INSPECTION",
   CUTSCENE: "CUTSCENE"
 };
@@ -16,17 +19,30 @@ export function CameraController() {
   const { cameraState, selectedSuspect, reducedMotion } = useGame();
 
   // Target camera position and lookAt vectors
-  const targetPos = useRef(new THREE.Vector3(0, 1.8, 0.5));
+  const targetPos = useRef(new THREE.Vector3(0, 1.8, 1.0));
   const targetLook = useRef(new THREE.Vector3(0, 1.0, -5.2));
   const currentLook = useRef(new THREE.Vector3(0, 1.0, -5.2));
 
   useFrame((state, delta) => {
+    // If player is in free orbit mode, let OrbitControls have full control
+    if (cameraState === CAMERA_STATES.FREE_ORBIT) {
+      return;
+    }
+
     // Determine target coordinates based on cameraState
     if (cameraState === CAMERA_STATES.SUSPECT_FOCUS && selectedSuspect && suspects[selectedSuspect]) {
       const seat = suspects[selectedSuspect].seat?.position || [0, 0, -5];
       // Frame the selected suspect while keeping the rest of the theatre visible
       targetPos.current.set(seat[0] * 0.55, 1.45, seat[2] + 2.4);
       targetLook.current.set(seat[0], seat[1] + 0.65, seat[2]);
+    } else if (cameraState === CAMERA_STATES.BOOTH_VIEW) {
+      // Look back and up at the projection booth aperture & brass plaque
+      targetPos.current.set(0, 1.5, -8.0);
+      targetLook.current.set(0, 4.6, 2.0);
+    } else if (cameraState === CAMERA_STATES.SCREEN_VIEW) {
+      // Look forward and up at the silver screen & stage
+      targetPos.current.set(0, 1.2, -2.5);
+      targetLook.current.set(0, 3.8, -15.0);
     } else if (cameraState === CAMERA_STATES.EVIDENCE_INSPECTION) {
       targetPos.current.set(0, 2.2, 1.4);
       targetLook.current.set(0, 0.8, -5.5);
@@ -35,7 +51,7 @@ export function CameraController() {
       targetLook.current.set(0, 1.2, -6.0);
     } else {
       // Default: MAIN_THEATRE
-      targetPos.current.set(0, 1.8, 0.5);
+      targetPos.current.set(0, 1.8, 1.0);
       targetLook.current.set(0, 1.0, -5.2);
     }
 

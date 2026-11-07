@@ -1,31 +1,31 @@
 // src/components/scene/CinemaSeats.jsx
-import React from "react";
+import React, { useMemo } from "react";
 import * as THREE from "three";
 
 // Seat layout constants
 const ROW_COUNT = 4;
 const SEATS_PER_ROW = 6;
-const SEAT_WIDTH = 0.9;
 const SEAT_SPACING = 1.1;
 const ROW_SPACING = 1.5;
 
 export function CinemaSeats() {
-  const seatCushionGeo = new THREE.BoxGeometry(0.75, 0.12, 0.6);
-  const seatBackGeo = new THREE.BoxGeometry(0.75, 0.7, 0.1);
-  const armrestGeo = new THREE.BoxGeometry(0.08, 0.45, 0.55);
-  const legGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.4, 8);
+  // Memoized shared geometries — created once, reused across all 24 seats
+  const seatCushionGeo = useMemo(() => new THREE.BoxGeometry(0.75, 0.12, 0.6), []);
+  const seatBackGeo = useMemo(() => new THREE.BoxGeometry(0.75, 0.7, 0.1), []);
+  const armrestGeo = useMemo(() => new THREE.BoxGeometry(0.08, 0.45, 0.55), []);
+  const legGeo = useMemo(() => new THREE.CylinderGeometry(0.02, 0.02, 0.4, 8), []);
 
-  const burgundyMaterial = new THREE.MeshStandardMaterial({
+  const burgundyMaterial = useMemo(() => new THREE.MeshStandardMaterial({
     color: "#6b2128", // faded burgundy velvet
     roughness: 0.9,
     metalness: 0.05
-  });
+  }), []);
 
-  const ironMaterial = new THREE.MeshStandardMaterial({
+  const ironMaterial = useMemo(() => new THREE.MeshStandardMaterial({
     color: "#18181b", // cast-iron frame
     roughness: 0.6,
     metalness: 0.8
-  });
+  }), []);
 
   const rows = [];
 

@@ -7,7 +7,7 @@ export function LightingRig() {
   const ceilingLight1 = useRef();
   const ceilingLight2 = useRef();
   const generatorFill = useRef();
-  const { generatorFlicker } = useGame();
+  const generatorFlicker = useGame((s) => s.generatorFlicker);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();

@@ -1,5 +1,5 @@
 // src/assets/placeholders/PlaceholderCharacter.jsx
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -37,23 +37,30 @@ export function PlaceholderCharacter({
     }
   });
 
-  // Base materials with noir styling
-  const primaryMaterial = new THREE.MeshStandardMaterial({
-    color: isSelected ? "#f59e0b" : isHovered ? "#38bdf8" : color,
-    roughness: 0.75,
-    metalness: 0.1,
+  // Stylized Noir Silhouettes — Deep mysterious black & charcoal tones
+  const noirBlack = "#07090c";
+  const noirCharcoal = "#0e1117";
+  const noirShadow = "#151821";
+
+  // Memoized materials for Noir Silhouettes
+  const primaryMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+    color: isSelected ? "#f59e0b" : isHovered ? "#38bdf8" : noirBlack,
+    roughness: 0.85,
+    metalness: 0.05,
     wireframe: debug
-  });
+  }), [isSelected, isHovered, debug]);
 
-  const skinToneMaterial = new THREE.MeshStandardMaterial({
-    color: isSelected ? "#fed7aa" : "#8d705c",
-    roughness: 0.85
-  });
+  const skinToneMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+    color: isSelected ? "#fed7aa" : isHovered ? "#7dd3fc" : noirCharcoal,
+    roughness: 0.9,
+    metalness: 0.05
+  }), [isSelected, isHovered]);
 
-  const accentMaterial = new THREE.MeshStandardMaterial({
-    color: isSelected ? "#ef4444" : "#1e293b",
-    roughness: 0.6
-  });
+  const accentMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+    color: isSelected ? "#ef4444" : isHovered ? "#0284c7" : noirShadow,
+    roughness: 0.85,
+    metalness: 0.05
+  }), [isSelected, isHovered]);
 
   return (
     <group ref={groupRef}>
@@ -291,6 +298,36 @@ export function PlaceholderCharacter({
             <meshStandardMaterial color="#d97706" roughness={0.9} />
           </mesh>
         </group>
+      )}
+
+      {/* 3D SUSPECT SILHOUETTE HOVER / SELECTION TAG */}
+      {(isHovered || isSelected) && (
+        <Html position={[0, 0.95, 0]} center distanceFactor={14}>
+          <div
+            style={{
+              background: isSelected ? "rgba(245, 158, 11, 0.95)" : "rgba(10, 15, 20, 0.92)",
+              color: isSelected ? "#0a0a0a" : "#38bdf8",
+              border: `1px solid ${isSelected ? "#f59e0b" : "#38bdf8"}`,
+              padding: "4px 10px",
+              borderRadius: "16px",
+              fontSize: "11px",
+              fontWeight: "600",
+              letterSpacing: "0.5px",
+              whiteSpace: "nowrap",
+              boxShadow: isSelected ? "0 0 16px rgba(245, 158, 11, 0.5)" : "0 4px 12px rgba(0,0,0,0.8)",
+              pointerEvents: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px"
+            }}
+          >
+            <span>👤</span>
+            <span>{name}</span>
+            <span style={{ opacity: 0.8, fontSize: "10px" }}>
+              {isSelected ? "● INTERROGATING" : "CLICK TO INTERROGATE"}
+            </span>
+          </div>
+        </Html>
       )}
 
       {/* DEVELOPMENT OVERLAY BADGE */}
