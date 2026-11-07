@@ -66,4 +66,25 @@ function gnaniBackendPlugin() {
 
 export default defineConfig({
   plugins: [react(), gnaniBackendPlugin()],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Rolldown requires manualChunks as a function (not an object like Rollup)
+        manualChunks(id) {
+          if (id.includes("node_modules/react-dom") || id.includes("node_modules/react/")) {
+            return "react-vendor";
+          }
+          if (id.includes("node_modules/three/")) {
+            return "three-core";
+          }
+          if (id.includes("node_modules/@react-three/")) {
+            return "three-react";
+          }
+          if (id.includes("node_modules/zustand/")) {
+            return "state";
+          }
+        }
+      }
+    }
+  }
 });

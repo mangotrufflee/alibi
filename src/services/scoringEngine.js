@@ -100,14 +100,15 @@ export function computeScoreUpdate(matchResult, currentScore, currentTries) {
     nextTries = Math.max(0, currentTries - 1);
   }
 
-  const isSolved = nextScore >= SOLVE_THRESHOLD;
+  const isProsecutionReady = nextScore >= SOLVE_THRESHOLD;
   const isFailed = nextTries <= 0;
 
   return {
     delta,
     nextScore,
     nextTries,
-    isSolved,
+    isProsecutionReady,
+    isSolved: false, // Case must be solved by deterministic proof-chain indictment
     isFailed
   };
 }

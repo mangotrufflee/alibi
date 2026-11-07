@@ -1,11 +1,14 @@
 // src/components/case/tabs/CaseProgressTab.jsx
-// ALIBI — Phase 2: Case Progress, Score Log & Generator Monitor (GDD §7, §12)
+// ALIBI — Case Progress, Score Log & Formal Murder Indictment Station
 
-import React from "react";
+import React, { useState } from "react";
 import { useGame } from "../../../state/GameContext";
+import { suspects } from "../../../data/suspects";
 
 export default function CaseProgressTab() {
   const {
+    activeStoryline,
+    storylines,
     score,
     solveThreshold,
     remainingTries,
@@ -15,8 +18,15 @@ export default function CaseProgressTab() {
     isFailed,
     failReason,
     discoveredClues,
-    investigationProgress
+    investigationProgress,
+    checkProofChain,
+    indictSuspect,
+    verdictResult,
+    openCutscene
   } = useGame();
+
+  const [accusedSuspect, setAccusedSuspect] = useState("meera");
+  const [selectedWeapon, setSelectedWeapon] = useState("reel_clamp");
 
   const minutes = Math.floor(generatorCountdown / 60);
   const seconds = generatorCountdown % 60;
@@ -26,6 +36,14 @@ export default function CaseProgressTab() {
   const scorePct = Math.max(0, Math.min(100, (score / (solveThreshold || 50)) * 100));
   const isThinIce = score <= 0;
 
+  const currentRoute = storylines[activeStoryline] || storylines.A;
+  const proofStatus = checkProofChain(accusedSuspect);
+
+  const handleIndict = (e) => {
+    e.preventDefault();
+    indictSuspect(accusedSuspect, selectedWeapon);
+  };
+
   return (
     <div className="tab-pane case-progress-pane">
       {isFailed && (
@@ -33,31 +51,57 @@ export default function CaseProgressTab() {
           ✘ CASE FAILED: {failReason || "Killer escaped into the storm"}
         </div>
       )}
+
+      {isSolved && verdictResult && (
+        <div className="case-solved-banner" style={{ marginBottom: "1.2rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>✔ {verdictResult.title}</span>
+            <button
+              type="button"
+              className="replay-verdict-btn"
+              onClick={() => openCutscene("cutscene_final_confrontation")}
+              style={{
+                background: "#0c191c",
+                color: "#10b981",
+                border: "1px solid #10b981",
+                padding: "0.4rem 0.8rem",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontWeight: 600
+              }}
+            >
+              🎬 Watch Final Confrontation
+            </button>
+          </div>
+          <p style={{ marginTop: "0.6rem", fontSize: "0.9rem", color: "#e2e8f0" }}>
+            {verdictResult.summary}
+          </p>
+        </div>
+      )}
+
       {/* TOP DASHBOARD METRICS GRID */}
       <div className="progress-metrics-grid">
         {/* METRIC 1: CASE SCORE */}
         <div className="metric-card score-metric-card">
           <div className="metric-header">
-            <span className="metric-label">SOLVE PROGRESS</span>
+            <span className="metric-label">SOLVE READINESS</span>
             <span className="metric-status">
-              {isSolved ? "CASE CRACKED" : `${score} / ${solveThreshold} PTS`}
+              {score >= solveThreshold ? "PROSECUTION READY" : `${score} / ${solveThreshold} PTS`}
             </span>
           </div>
 
           <div className="metric-big-value">
-            <span className={score < 0 ? "value-negative" : "value-positive"}>
-              {score}
-            </span>
+            <span className={score < 0 ? "value-negative" : "value-positive"}>{score}</span>
             <span className="metric-subtext">points earned</span>
           </div>
 
           <div className="metric-track">
             <div
-              className={`metric-fill score-fill ${isSolved ? "fill-solved" : ""}`}
+              className={`metric-fill score-fill ${score >= solveThreshold ? "fill-solved" : ""}`}
               style={{ width: `${scorePct}%` }}
             />
           </div>
-          <span className="track-caption">Threshold to solve: {solveThreshold} pts</span>
+          <span className="track-caption">Threshold to indict: {solveThreshold} pts</span>
         </div>
 
         {/* METRIC 2: DIESEL GENERATOR TIMER */}
@@ -85,13 +129,11 @@ export default function CaseProgressTab() {
           <span className="track-caption">Diesel fuel remaining: {Math.round(fuelPct)}%</span>
         </div>
 
-        {/* METRIC 3: THIN-ICE TRIES & INTEGRITY */}
+        {/* METRIC 3: THIN-ICE TRIES */}
         <div className="metric-card thin-ice-metric-card">
           <div className="metric-header">
             <span className="metric-label">THIN-ICE INTEGRITY</span>
-            <span className="metric-status">
-              {isThinIce ? "⚠ ACTIVE WARNING" : "STABLE"}
-            </span>
+            <span className="metric-status">{isThinIce ? "⚠ ACTIVE WARNING" : "STABLE"}</span>
           </div>
 
           <div className="metric-big-value">
@@ -107,7 +149,7 @@ export default function CaseProgressTab() {
           </div>
 
           <p className="thin-ice-explainer">
-            Triggering wrong leads or groundless accusations while score is ≤ 0 consumes tries.
+            Triggering groundless accusations or wrong leads while on thin-ice consumes integrity tries.
           </p>
         </div>
 
@@ -133,8 +175,107 @@ export default function CaseProgressTab() {
         </div>
       </div>
 
+      {/* FORMAL MURDER INDICTMENT CHAMBER */}
+      <div className="accusation-box" style={{ marginTop: "1.5rem" }}>
+        <div className="accusation-header">
+          <div className="dossier-tag">MAGISTRATE'S COURT // FORMAL INDICTMENT</div>
+          <h3 className="accusation-title">⚖️ Issue Formal Murder Indictment</h3>
+          <p className="accusation-intro">
+            Active Storyline: <strong>{currentRoute.title}</strong>. To secure a murder warrant, you must formulate your accusation with the 3 pillars of proof: a verified physical clue, an established timeline contradiction, and corroborating eyewitness or confession.
+          </p>
+        </div>
+
+        {/* LIVE PROOF-CHAIN CHECKLIST */}
+        <div className="proof-chain-status-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", margin: "1rem 0" }}>
+          <div className={`proof-card ${proofStatus.physicalSatisfied ? "proof-pass" : "proof-missing"}`} style={{ padding: "0.8rem", border: "1px solid", borderRadius: "6px" }}>
+            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>PILLAR 1: PHYSICAL EVIDENCE</span>
+            <p style={{ margin: "0.3rem 0 0", fontWeight: 600 }}>
+              {proofStatus.physicalSatisfied ? "✔ Verified Physical Clue Discovered" : "○ Physical Clue Missing"}
+            </p>
+          </div>
+
+          <div className={`proof-card ${proofStatus.contradictionSatisfied ? "proof-pass" : "proof-missing"}`} style={{ padding: "0.8rem", border: "1px solid", borderRadius: "6px" }}>
+            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>PILLAR 2: TIMELINE CONTRADICTION</span>
+            <p style={{ margin: "0.3rem 0 0", fontWeight: 600 }}>
+              {proofStatus.contradictionSatisfied ? "✔ Alibi Contradiction Broken" : "○ Contradiction Unresolved"}
+            </p>
+          </div>
+
+          <div className={`proof-card ${proofStatus.confessionSatisfied ? "proof-pass" : "proof-missing"}`} style={{ padding: "0.8rem", border: "1px solid", borderRadius: "6px" }}>
+            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>PILLAR 3: CORROBORATION / CONFESSION</span>
+            <p style={{ margin: "0.3rem 0 0", fontWeight: 600 }}>
+              {proofStatus.confessionSatisfied ? "✔ Corroborating Evidence Secured" : "○ Eyewitness/Confession Pending"}
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleIndict} className="accusation-form">
+          <div className="accuse-row" style={{ display: "flex", gap: "1rem", alignItems: "flex-end" }}>
+            <div className="accuse-field" style={{ flex: 1 }}>
+              <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "0.3rem" }}>
+                1. Accuse Suspect:
+              </label>
+              <select
+                className="suspect-select-dropdown"
+                value={accusedSuspect}
+                onChange={(e) => setAccusedSuspect(e.target.value)}
+                disabled={isSolved || isFailed}
+                style={{ width: "100%", padding: "0.6rem" }}
+              >
+                {Object.values(suspects).map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="accuse-field" style={{ flex: 1 }}>
+              <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "0.3rem" }}>
+                2. Murder Trauma / Lethal Mechanism:
+              </label>
+              <select
+                className="suspect-select-dropdown"
+                value={selectedWeapon}
+                onChange={(e) => setSelectedWeapon(e.target.value)}
+                disabled={isSolved || isFailed}
+                style={{ width: "100%", padding: "0.6rem" }}
+              >
+                <option value="reel_clamp">Heavy Steel Reel Clamp & Booth Rail Impact</option>
+                <option value="film_strip">Manually Severed 35mm Celluloid Strip (Staged Accident)</option>
+                <option value="duplicate_key">Unlatched Passage & Forced Entry</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              className="submit-indictment-btn"
+              disabled={isSolved || isFailed}
+              style={{
+                background: "#991b1b",
+                color: "#fef2f2",
+                border: "none",
+                padding: "0.7rem 1.4rem",
+                borderRadius: "4px",
+                fontWeight: 700,
+                cursor: "pointer"
+              }}
+            >
+              ⚖️ Formulate Indictment ➔
+            </button>
+          </div>
+        </form>
+
+        {verdictResult && !verdictResult.success && (
+          <div className="indictment-failure-notice" style={{ marginTop: "1rem", padding: "0.8rem", background: "#450a0a", border: "1px solid #dc2626", borderRadius: "4px", color: "#fca5a5" }}>
+            <strong>{verdictResult.title}</strong>
+            <p style={{ margin: "0.3rem 0 0", fontSize: "0.85rem" }}>{verdictResult.summary}</p>
+          </div>
+        )}
+      </div>
+
       {/* CHRONOLOGICAL SCORE LEDGER TABLE */}
-      <div className="score-ledger-card">
+      <div className="score-ledger-card" style={{ marginTop: "1.5rem" }}>
         <div className="ledger-header">
           <h3 className="ledger-title">CHRONOLOGICAL SCORE LEDGER</h3>
           <span className="ledger-subtitle">
@@ -162,22 +303,20 @@ export default function CaseProgressTab() {
                 </tr>
               </thead>
               <tbody>
-                {scoreLedger.map((entry) => (
-                  <tr key={entry.id}>
-                    <td className="cell-time">{entry.timestamp}</td>
-                    <td className="cell-suspect">{entry.suspect}</td>
-                    <td className="cell-keyword">
-                      <code>{entry.keyword}</code>
-                    </td>
-                    <td className="cell-type">
-                      <span className={`ledger-type-pill type-${entry.type}`}>
-                        {entry.type.toUpperCase()}
+                {scoreLedger.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.timestamp}</td>
+                    <td>{row.suspect}</td>
+                    <td><code>{row.keyword}</code></td>
+                    <td>
+                      <span className={`badge-pill ${row.type === "right" ? "badge-success" : "badge-danger"}`}>
+                        {row.type.toUpperCase()}
                       </span>
                     </td>
-                    <td className={`cell-delta ${entry.delta > 0 ? "delta-pos" : entry.delta < 0 ? "delta-neg" : ""}`}>
-                      {entry.delta > 0 ? `+${entry.delta}` : entry.delta}
+                    <td className={row.delta > 0 ? "delta-pos" : "delta-neg"}>
+                      {row.delta > 0 ? `+${row.delta}` : row.delta}
                     </td>
-                    <td className="cell-total">{entry.scoreAfter}</td>
+                    <td><strong>{row.scoreAfter}</strong></td>
                   </tr>
                 ))}
               </tbody>

@@ -1,5 +1,5 @@
 // src/services/truthGateEngine.js
-// ALIBI — Phase 4: Truth Gates & Contradiction Evaluation Engine (GDD §8)
+// ALIBI — Canonical Truth Gates & Contradiction Evaluation Engine Supporting Storylines A, B, and C
 
 import { SUSPECT_CHARACTER_SHEETS, TRUTH_GATES } from "../data/truthGatesData.js";
 import { CONTRADICTIONS } from "../data/caseTabsData.js";
@@ -10,11 +10,23 @@ export class TruthGateEngine {
   }
 
   /**
-   * Evaluates an interrogation query against active truth gates for the suspect.
+   * Evaluates an interrogation query against active truth gates for the suspect in the active storyline.
    */
-  evaluateQuery(suspectId, queryText, liveState, unlockedGateIds = [], seenEvidence = [], resolvedContradictions = []) {
+  evaluateQuery(
+    suspectId,
+    queryText,
+    liveState,
+    unlockedGateIds = [],
+    seenEvidence = [],
+    resolvedContradictions = [],
+    activeStoryline = "A"
+  ) {
     const cleanText = (queryText || "").toLowerCase();
-    const suspectGates = this.gates.filter((g) => g.suspectId === suspectId);
+    const suspectGates = this.gates.filter(
+      (g) =>
+        g.suspectId === suspectId &&
+        (!g.storylines || g.storylines.includes(activeStoryline))
+    );
     const suspectState = liveState[suspectId] || { stress: 30, trust: 50 };
 
     for (const gate of suspectGates) {
@@ -30,7 +42,7 @@ export class TruthGateEngine {
             unlockedNow: false,
             alreadyUnlocked: true,
             gate,
-            response: `As I already confessed: ${gate.unlockedAdmission}`,
+            response: `As I already explained: ${gate.unlockedAdmission}`,
             stressDelta: 4,
             trustDelta: 0
           };
@@ -38,9 +50,11 @@ export class TruthGateEngine {
 
         // Evaluate unlock conditions
         const stressMet = suspectState.stress >= (gate.conditions.minStress || 50);
-        const evidenceMet = gate.conditions.requiredEvidence &&
+        const evidenceMet =
+          gate.conditions.requiredEvidence &&
           gate.conditions.requiredEvidence.some((e) => seenEvidence.includes(e));
-        const contradictionMet = gate.conditions.requiredContradiction &&
+        const contradictionMet =
+          gate.conditions.requiredContradiction &&
           resolvedContradictions.includes(gate.conditions.requiredContradiction);
 
         if (stressMet || evidenceMet || contradictionMet) {
@@ -63,7 +77,7 @@ export class TruthGateEngine {
             unlockedNow: false,
             gate,
             response: gate.lockedResponse,
-            stressDelta: 8, // pressing on a locked secret still raises pressure
+            stressDelta: 8,
             trustDelta: -3,
             deflection: true
           };
@@ -78,7 +92,7 @@ export class TruthGateEngine {
    * Evaluates a direct Contradiction Challenge (GDD §8).
    * Verifies the clash against logged evidence and timelines.
    */
-  evaluateContradictionChallenge(contradictionId, liveState, unlockedGateIds = []) {
+  evaluateContradictionChallenge(contradictionId, liveState, unlockedGateIds = [], activeStoryline = "A") {
     const contradiction = CONTRADICTIONS.find((c) => c.id === contradictionId);
     if (!contradiction) {
       return {
@@ -90,10 +104,20 @@ export class TruthGateEngine {
     }
 
     const suspectId = contradiction.suspectA;
-    // Find associated truth gate for this contradiction
-    const associatedGate = this.gates.find(
-      (g) => g.suspectId === suspectId && g.conditions.requiredContradiction === contradictionId
-    ) || this.gates.find((g) => g.suspectId === suspectId && !unlockedGateIds.includes(g.id));
+    // Find associated truth gate for this contradiction matching active storyline
+    const associatedGate =
+      this.gates.find(
+        (g) =>
+          g.suspectId === suspectId &&
+          g.conditions.requiredContradiction === contradictionId &&
+          (!g.storylines || g.storylines.includes(activeStoryline))
+      ) ||
+      this.gates.find(
+        (g) =>
+          g.suspectId === suspectId &&
+          !unlockedGateIds.includes(g.id) &&
+          (!g.storylines || g.storylines.includes(activeStoryline))
+      );
 
     if (associatedGate) {
       return {
@@ -127,12 +151,16 @@ export class TruthGateEngine {
   /**
    * Formats the LLM Prompt Context following GDD §8.
    */
-  buildPromptContext(suspectId, liveState, unlockedGateIds = []) {
+  buildPromptContext(suspectId, liveState, unlockedGateIds = [], activeStoryline = "A") {
     const sheet = SUSPECT_CHARACTER_SHEETS[suspectId];
     if (!sheet) return "";
 
     const suspectState = liveState[suspectId] || { stress: 30, trust: 50 };
-    const suspectGates = this.gates.filter((g) => g.suspectId === suspectId);
+    const suspectGates = this.gates.filter(
+      (g) =>
+        g.suspectId === suspectId &&
+        (!g.storylines || g.storylines.includes(activeStoryline))
+    );
 
     const allowedFacts = suspectGates
       .filter((g) => unlockedGateIds.includes(g.id))
@@ -144,6 +172,7 @@ export class TruthGateEngine {
 
     return `
 === SUSPECT CHARACTER SHEET: ${sheet.name.toUpperCase()} (${sheet.role}) ===
+Active Storyline: ${activeStoryline}
 Speaking Style: ${sheet.speakingStyle.tone}. Pace: ${sheet.speakingStyle.pace}.
 Deflection Pattern: ${sheet.speakingStyle.deflectionPattern}
 Fears: ${sheet.fears}

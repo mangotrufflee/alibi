@@ -1,144 +1,218 @@
 // src/services/interrogationEngine.js
-// Suspect Interrogation Intelligence & Dialogue Processing
-import { suspects } from "../data/suspects";
+// Canonical Interrogation Intelligence & Suspect Response Triggers
 
-// Suspect interrogation patterns & NLP keywords
 const SUSPECT_KNOWLEDGE_BASE = {
   raju: {
     name: "Raju Ansari",
-    defaultResponse: "Sahab, I'm just a ticket boy! I don't know anything about high-level cinema business or who struck Masterji!",
+    defaultResponse:
+      "Sahab, I'm just the ticket boy! I don't know high-level cinema business or what happened in the booth!",
     triggers: [
       {
-        keywords: ["key", "lock", "duplicate", "booth", "deadbolt", "door", "brass"],
-        response: "Masterji gave me the spare key yesterday morning! His hands were shivering from malaria chills, and he couldn't turn the heavy iron deadbolt himself. I swear, I never copied it!",
+        keywords: ["key", "lock", "duplicate", "back door", "deadbolt", "door", "brass", "chabi"],
+        response:
+          "Someone gave me five hundred rupees to leave the back staff passage unlatched before the show! They told me it was only for delivery of sound equipment. I swear on my mother, I never copied it!",
         stressDelta: 18,
-        unlockedClue: "Raju admits having physical possession of the projection booth key before the blackout."
+        unlockedClue: "Raju admits leaving the rear staff passage unlatched after receiving cash."
       },
       {
-        keywords: ["debt", "money", "gamble", "gambling", "4000", "rupee", "cash", "loan"],
-        response: "It wasn't gambling debts! My younger sister in Old Delhi needed penicillin for pneumonia! Harbans Masterji was like a father to me—he lent me the four thousand with no interest! Why would I harm him?!",
-        stressDelta: 25,
-        unlockedClue: "Raju owed Harbans Lal money, but insists it was a benevolent family medical loan."
+        keywords: ["bell", "ring", "9:21", "ghanti", "chime", "sound"],
+        response:
+          "Yes! At 9:21 PM, right over the generator drone, that brass spring bell on Masterji's booth door rang out! Someone pushed that door open!",
+        stressDelta: 15,
+        unlockedClue: "Raju corroborates the projection booth door opened at 9:21 PM."
       },
       {
-        keywords: ["8:45", "blackout", "generator", "time", "where", "scream", "thud", "dark"],
-        response: "When the lights died, the whole auditorium gasped. I ran to the foyer to light the kerosene hurricane lanterns. Bhola was right there by his stove! You can ask him!",
-        stressDelta: 12,
+        keywords: ["8:45", "9:17", "9:32", "blackout", "generator", "time", "where", "dark", "lantern"],
+        response:
+          "When the lights died at 9:17 PM, the whole hall gasped. I ran to the foyer to light the hurricane lanterns. Bhola bhai was right there by his stove! You can ask him!",
+        stressDelta: 10,
         unlockedClue: "Raju claims Bhola Prasad can corroborate his whereabouts in the concession foyer."
       },
       {
-        keywords: ["grease", "oil", "hands", "smell", "machine", "stain"],
-        response: "Of course my hands have machine oil! Masterji made me grease the projector sprockets at 7:30 PM before the opening reel of 'Guide'. That doesn't make me a murderer!",
-        stressDelta: 15,
-        unlockedClue: "Raju's grease stains match the Peerless projector mechanisms."
+        keywords: ["grease", "oil", "latch", "hands", "stain"],
+        response:
+          "The grease on that key matches the heavy booth latch. Whoever took it from under the blotter used it to get through the corridor unnoticed!",
+        stressDelta: 16,
+        unlockedClue: "Duplicate key grease connects directly to the projection booth door latch."
       },
       {
-        keywords: ["clamp", "weapon", "iron", "strike", "head", "blood"],
-        response: "The heavy take-up reel clamp?! That stays on the shelf above the carbon arc lamp! Anyone who walked into the booth could have picked it up in the dark!",
-        stressDelta: 30,
-        unlockedClue: "Raju knows the exact location of the iron reel clamp inside the dark booth."
+        keywords: ["clamp", "weapon", "rail", "strike", "blood"],
+        response:
+          "The heavy reel clamp?! That stays on the take-up spindle shelf above the rewind table! Anyone who entered the booth could have grabbed it!",
+        stressDelta: 22,
+        unlockedClue: "Raju confirms the reel clamp was kept on the take-up spindle shelf."
       }
     ]
   },
+
   meera: {
     name: "Meera Kapoor",
-    defaultResponse: "Inspector, let us not waste each other's time with theatrics. Ask questions grounded in verified fact.",
+    defaultResponse:
+      "Inspector, let us not waste time with baseless theatrics. Ask questions grounded in verified fact.",
     triggers: [
       {
-        keywords: ["demolition", "sale", "deed", "dlf", "mall", "crore", "money", "18"],
-        response: "Single-screen cinema in Old Delhi is a financial corpse. Yes, I signed a preliminary memorandum for redevelopment. Harbans thought he was protecting art; he was merely hoarding bankruptcy.",
-        stressDelta: 14,
-        unlockedClue: "Meera admits to the 18-crore commercial redevelopment deal that Harbans Lal obstructed."
+        keywords: ["ledger", "page 47", "payment", "october", "h lal", "18,500", "6,000", "advance"],
+        response:
+          "Harbans threatened to bring private records before the municipal board! Yes, I paid him eighteen thousand on the fourteenth, and six thousand on the sixteenth to keep the inventory quiet until the deed was executed!",
+        stressDelta: 24,
+        unlockedClue: "Meera admits to October ledger payments to delay Harbans' inventory disclosure."
       },
       {
-        keywords: ["lawyer", "office", "phone", "alibi", "call", "blackout"],
-        response: "I was on the landline phone with my solicitor, Mr. Chawla, regarding the heritage injunction. When the generator popped, the line went dead. You are welcome to subpoena telephone exchange logs.",
-        stressDelta: 10,
-        unlockedClue: "Meera claims she was on a landline phone in her ground floor manager's office."
-      },
-      {
-        keywords: ["key", "master", "booth", "desk", "lock"],
-        response: "The second master key is supposed to be in my office mahogany desk drawer. Whether someone picked that drawer during interval is something your forensic team should tell me.",
+        keywords: ["sale", "deed", "developer", "transfer", "certificate", "inspection", "inventory"],
+        response:
+          "Single-screen cinema is a financial corpse. The property inspection certificate required a cleared inventory. If Harbans revealed the unlicensed prints, the entire transaction would collapse!",
         stressDelta: 20,
-        unlockedClue: "Meera's spare office key may have been compromised or accessed."
+        unlockedClue: "Meera admits the altered property inspection certificate was contingent on unlisted prints."
       },
       {
-        keywords: ["mud", "boiler", "coal", "saree", "hem", "alley"],
-        response: "...A minor accident. I stepped into the boiler alleyway around 8:20 PM to inspect the roof drainage leak. It rains inside this decrepit cinema as much as it does outside.",
+        keywords: ["corridor", "video", "bangles", "footage", "phone", "alibi", "9:26"],
+        response:
+          "That phone video... A silhouette in a corridor proves nothing! Rex Talkies is full of shadows during a blackout!",
         stressDelta: 28,
-        unlockedClue: "Meera's saree coal mud places her directly near the exterior booth fire escape stairwell."
+        unlockedClue: "Nusrat's 9:26 PM phone footage shatters Meera's manager's office alibi."
+      },
+      {
+        keywords: ["cut", "film cut", "shears", "manual", "9:24", "malfunction", "staged"],
+        response:
+          "The maintenance log says the motor stopped at 9:19 PM... If the film was sliced at 9:24 PM, that is... a matter for mechanical technicians, not homicide investigators!",
+        stressDelta: 30,
+        unlockedClue: "Evidence establishes the 35mm film was cut manually 5 minutes after the projector motor stopped."
+      },
+      {
+        keywords: ["clamp", "rail", "struggle", "fall", "harbans", "struck"],
+        response:
+          "He grabbed the ledger sheet! He was going to burn it! It was an argument, nothing more! No one intended for him to fall!",
+        stressDelta: 35,
+        unlockedClue: "Meera admits to a physical struggle with Harbans near the booth safety rail."
       }
     ]
   },
+
   arvind: {
     name: "Dr. Arvind Sethi",
-    defaultResponse: "Cinema history is written in cellulose and silver halide, Inspector. One must look closely at what is missing from the frame.",
+    defaultResponse:
+      "Cinema history is written in cellulose and silver halide, Inspector. One must look closely at what is missing from the frame.",
     triggers: [
       {
-        keywords: ["print", "pyaasa", "1957", "nitrate", "sell", "collector", "archive", "film"],
-        response: "Harbans Lal was systematically peeling vintage prints from the private vaults. The original 1957 negative cans of 'Pyaasa' were replaced with blank lead weight fillers. He had a collector meeting tonight.",
-        stressDelta: 16,
-        unlockedClue: "Dr. Sethi discovered Harbans Lal was trafficking vintage 35mm nitrate reels."
+        keywords: ["zohra", "zohra sen", "sister", "credit", "uncredited", "acknowledgement"],
+        response:
+          "Zohra Sen gave her youth, her vision, and her health to that 1968 film! The studio producers erased her name from the print. Harbans found the original reel RT-17-Z and promised her name would be screened tonight!",
+        stressDelta: 25,
+        unlockedClue: "Dr. Sethi reveals print RT-17-Z holds the uncredited work of his late sister Zohra Sen."
       },
       {
-        keywords: ["canister", "gold", "dubai", "passport", "flight"],
-        response: "Four gold biscuits hidden in a Mughal-e-Azam reel can? That explains the nervous phone call I overheard him take behind the confection stall at 8:10 PM.",
-        stressDelta: 12,
-        unlockedClue: "Dr. Sethi heard Harbans arranging flight departure logistics."
+        keywords: ["canister", "label", "replacement", "rt-archive", "general stock", "rt-17-z"],
+        response:
+          "The replacement label reading 'RT-ARCHIVE / GENERAL STOCK' was pasted over the true code. Someone wanted that reel to disappear into commercial liquidation!",
+        stressDelta: 22,
+        unlockedClue: "The film canister label was deliberately replaced to conceal its archival value."
       },
       {
-        keywords: ["seat", "alibi", "blackout", "scream", "notes"],
-        response: "I never left Seat G-14. When the blackout occurred, the arc extinguished with an unmistakable electric hiss, followed five seconds later by the sound of brass striking bone.",
-        stressDelta: 10,
-        unlockedClue: "Dr. Sethi heard the murder blow land approximately 5 seconds after the arc extinguished."
+        keywords: ["splice", "three splices", "12mm", "19mm", "film strip", "joins"],
+        response:
+          "Three tape joins with exactly twelve and nineteen millimeter spacing! That was my sister's personal splicing signature from the vintage studio cutting room!",
+        stressDelta: 20,
+        unlockedClue: "The three-splice strip pattern uniquely identifies the surviving print tied to Zohra."
+      },
+      {
+        keywords: ["reel movement", "9:21", "motor", "spindle", "log"],
+        response:
+          "At 9:21 PM the motor was dead, yet the take-up spindle was turned by hand... I knew that reel could not be replaced. If commercial scavengers took it, it would be melted for scrap!",
+        stressDelta: 26,
+        unlockedClue: "Log confirms manual reel movement at 9:21 PM during the blackout."
+      },
+      {
+        keywords: ["seat", "alibi", "g14", "dark", "booth"],
+        response:
+          "I wanted to protect that reel, Inspector! When the power died, I could not bear to see Zohra's legacy destroyed. But Harbans refused to let me take it!",
+        stressDelta: 32,
+        unlockedClue: "Dr. Sethi admits he confronted Harbans in the booth over the possession of the print."
       }
     ]
   },
+
   nusrat: {
     name: "Nusrat Ali",
-    defaultResponse: "I am a post-graduate film student from Jamia, not a criminal. Please allow me to call my department head.",
+    defaultResponse:
+      "I am a post-graduate film student from Jamia, not a criminal. Please allow me to call my department head.",
     triggers: [
       {
-        keywords: ["audio", "recorder", "mic", "zoom", "h4n", "tape", "recording"],
-        response: "Harbans let me clamp my Zoom H4n recorder near the motor drive to capture ambient 35mm flutter. I stepped out to the balcony before the interval! I never wiped those 12 minutes—someone else did!",
-        stressDelta: 22,
-        unlockedClue: "Nusrat claims an intruder tampered with her audio recorder to erase the 12-minute murder window."
+        keywords: ["gap", "58 seconds", "recording", "rex_1710", "video", "missing", "trimmed"],
+        response:
+          "Fine! Look at the timestamp! Fifty-eight seconds missing from 9:22:10 to 9:23:08 PM! Because I was inside the booth! I was filming the splice note and I panicked when the lights failed!",
+        stressDelta: 28,
+        unlockedClue: "Nusrat admits deleting the 58 seconds on her phone because she was inside the booth."
       },
       {
-        keywords: ["threat", "whisper", "handover", "stairs", "phone"],
-        response: "You listened to the phone memo?! That wasn't me making threats! That was an outside man who cornered Harbans on the mezzanine stairwell at 8:35 PM!",
-        stressDelta: 26,
-        unlockedClue: "Nusrat heard a mysterious visitor confronting Harbans on the mezzanine."
+        keywords: ["dust", "film dust", "phone case", "casing", "particles"],
+        response:
+          "The film dust on my phone case... I leaned over the rewind table to take macro photographs of the splice joint! I didn't touch the reel clamp to hurt anyone!",
+        stressDelta: 24,
+        unlockedClue: "Film dust inside Nusrat's phone case proves direct physical contact with the reel."
       },
       {
-        keywords: ["washroom", "umbrella", "where", "alibi", "blackout"],
-        response: "My umbrella broke in the Chandni Chowk storm. I was inside the ladies' restroom wringing out my cardigan when the lights dipped. Ask the washroom attendant if you don't trust me!",
-        stressDelta: 14,
-        unlockedClue: "Nusrat's alibi depends on verifying wet clothes and washroom timing."
+        keywords: ["mother", "credit", "note", "notes", "archive", "thesis", "proof", "photograph", "reel"],
+        response:
+          "My mother worked uncredited in the sound mixing rooms of Rex Talkies for three years. Harbans had her original handwritten cue notes in that booth! I had to document them!",
+        stressDelta: 20,
+        unlockedClue: "Nusrat entered the booth to retrieve proof of her mother's erased cinema contributions."
+      },
+      {
+        keywords: ["booth", "inside", "glance", "carbon", "arc lamp", "lamp", "rewind table", "access", "earlier"],
+        response:
+          "Harbans let me glance at the carbon arc lamp before the show started! He was proud of the vintage machinery. I didn't touch anything on the rewind table!",
+        stressDelta: 18,
+        unlockedClue: "Nusrat admits being inside the projection booth before the blackout."
+      },
+      {
+        keywords: ["clamp", "wrist", "grabbed", "shove", "rail", "fall"],
+        response:
+          "He grabbed my wrist in the dark! I was terrified! I jerked backward and shoved him away—he lost balance and hit the railing! It was an accident! I froze and ran!",
+        stressDelta: 35,
+        unlockedClue: "Nusrat confesses Harbans grabbed her wrist and her shove caused his fatal fall against the rail."
+      },
+      {
+        keywords: ["washroom", "alibi", "umbrella", "restroom"],
+        response:
+          "I made up the broken umbrella excuse because I was terrified of being expelled from university and charged with trespassing!",
+        stressDelta: 16,
+        unlockedClue: "Nusrat admits her washroom alibi was completely fabricated."
       }
     ]
   },
+
   bhola: {
     name: "Bhola Prasad",
-    defaultResponse: "Babu ji, tea vendor sees all, speaks little. But Harbans was my brother for thirty-two years in this hall.",
+    defaultResponse:
+      "Babu ji, tea vendor sees all, speaks little. But Harbans was my brother for forty-one years in this hall.",
     triggers: [
       {
-        keywords: ["tea", "chai", "glass", "datura", "poison", "almond", "dregs"],
-        response: "Ram-Ram! Poison in the tea?! Babu ji, I poured Harbans his ginger brew with my own hands at 8:15! But when I took the glass upstairs, Raju was standing right outside the booth door!",
-        stressDelta: 24,
-        unlockedClue: "Bhola states Raju was lingering near the booth door when the tea was delivered."
-      },
-      {
-        keywords: ["argument", "shout", "quarrel", "screen", "visitor", "man"],
-        response: "Between 8:25 and 8:35, someone with heavy boots was cursing at Harbans behind the silver screen. Heavy Punjabi accent. Demanding the signed agreement or else 'this theatre burns tonight'.",
-        stressDelta: 18,
-        unlockedClue: "Bhola heard an aggressive enforcer threatening to burn the theatre if the agreement wasn't signed."
-      },
-      {
-        keywords: ["token", "brass", "vip", "refill", "17"],
-        response: "The brass chai tokens are for special patrons. Only three people had them tonight: Meera Ma'am, the old Professor sahab, and poor Harbans.",
+        keywords: ["token", "026", "paper token", "tea tin", "paid"],
+        response:
+          "You found my token... Token twenty-six. Harbans put it in my tea tin at 9:10 PM with his own hands. That token means you seek the honest truth, Babu ji.",
         stressDelta: 10,
-        unlockedClue: "Bhola narrows down the brass token ownership to three specific individuals."
+        unlockedClue: "Bhola's paper token unlocks his complete trust and eyewitness testimony."
+      },
+      {
+        keywords: ["bell", "9:21", "sound", "chime", "door"],
+        response:
+          "At 9:21 PM, right when the generator pitch changed, the spring bell on the booth door chimed clear as temple brass. Someone opened that door!",
+        stressDelta: 12,
+        unlockedClue: "Bhola heard the booth door bell ring at exactly 9:21 PM."
+      },
+      {
+        keywords: ["footsteps", "9:29", "steps", "glass", "corridor", "clink"],
+        response:
+          "At 9:29 PM, I heard hurried wet soles coming down the staff corridor. And then the sharp clink of a tea glass being set down on the passage stool.",
+        stressDelta: 14,
+        unlockedClue: "Bhola heard hurried footsteps and a glass set down near the staff passage at 9:29 PM."
+      },
+      {
+        keywords: ["tea delivery", "9:10", "upstairs", "cutting chai"],
+        response:
+          "I took two hot glasses up at 9:10 PM. Harbans had his green desk lamp on and was inspecting the take-up spindle. Perfectly alive and calm.",
+        stressDelta: 10,
+        unlockedClue: "Bhola confirms Harbans Lal was alive and inspecting reels at 9:10 PM."
       }
     ]
   }
@@ -149,40 +223,21 @@ export class InterrogationEngine {
     const suspectData = SUSPECT_KNOWLEDGE_BASE[suspectId] || SUSPECT_KNOWLEDGE_BASE.raju;
     const cleanQuery = (rawQuery || "").toLowerCase();
 
-    // Check for matching triggers
-    let bestMatch = null;
-    let highestScore = 0;
-
     for (const trigger of suspectData.triggers) {
-      let score = 0;
-      for (const kw of trigger.keywords) {
-        if (cleanQuery.includes(kw)) {
-          score += 1;
-        }
-      }
-      if (score > highestScore) {
-        highestScore = score;
-        bestMatch = trigger;
+      const match = trigger.keywords.some((kw) => cleanQuery.includes(kw.toLowerCase()));
+      if (match) {
+        return {
+          response: trigger.response,
+          stressDelta: trigger.stressDelta,
+          unlockedClue: trigger.unlockedClue
+        };
       }
     }
 
-    if (bestMatch && highestScore > 0) {
-      return {
-        matched: true,
-        response: bestMatch.response,
-        stressDelta: bestMatch.stressDelta,
-        unlockedClue: bestMatch.unlockedClue,
-        topicId: bestMatch.keywords[0]
-      };
-    }
-
-    // Fallback response with slight contextual flavor
     return {
-      matched: false,
       response: suspectData.defaultResponse,
       stressDelta: 4,
-      unlockedClue: null,
-      topicId: "general"
+      unlockedClue: null
     };
   }
 }
