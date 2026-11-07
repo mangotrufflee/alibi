@@ -6,26 +6,26 @@ import HintCards from "./HintCards";
 import TruthGateIndicator from "./TruthGateIndicator";
 
 export default function InterrogationRoom() {
-  const {
-    selectedSuspect,
-    selectSuspect,
-    suspectStress,
-    currentDialogue,
-    dialogueHistory,
-    askTopicQuestion,
-    askTextQuestion,
-    isRecording,
-    isProcessing,
-    isSpeaking,
-    lastTranscript,
-    toggleRecording,
-    stopAudio,
-    currentLanguage,
-    setCurrentLanguage,
-    suspectVoiceMap,
-    isSolved,
-    isFailed
-  } = useGame();
+  const selectedSuspect   = useGame((s) => s.selectedSuspect);
+  const selectSuspect     = useGame((s) => s.selectSuspect);
+  const suspectStress     = useGame((s) => s.suspectStress);
+  const currentDialogue   = useGame((s) => s.currentDialogue);
+  const dialogueHistory   = useGame((s) => s.dialogueHistory);
+  const askTopicQuestion  = useGame((s) => s.askTopicQuestion);
+  const askTextQuestion   = useGame((s) => s.askTextQuestion);
+  const isRecording       = useGame((s) => s.isRecording);
+  const isProcessing      = useGame((s) => s.isProcessing);
+  const isSpeaking        = useGame((s) => s.isSpeaking);
+  const lastTranscript    = useGame((s) => s.lastTranscript);
+  const toggleRecording   = useGame((s) => s.toggleRecording);
+  const stopAudio         = useGame((s) => s.stopAudio);
+  const speakCurrentSuspect = useGame((s) => s.speakCurrentSuspect);
+  const speakDialogue     = useGame((s) => s.speakDialogue);
+  const currentLanguage   = useGame((s) => s.currentLanguage);
+  const setCurrentLanguage = useGame((s) => s.setCurrentLanguage);
+  const suspectVoiceMap   = useGame((s) => s.suspectVoiceMap);
+  const isSolved          = useGame((s) => s.isSolved);
+  const isFailed          = useGame((s) => s.isFailed);
 
   const [textInput, setTextInput] = useState("");
   const dialogueEndRef = useRef(null);
@@ -122,6 +122,19 @@ export default function InterrogationRoom() {
             </div>
           </div>
 
+          {/* SPEAK STATEMENT TRIGGER */}
+          <div className="suspect-speech-control-bar">
+            <button
+              type="button"
+              className="suspect-speak-trigger-btn"
+              onClick={speakCurrentSuspect}
+              disabled={isSpeaking || isRecording || isProcessing}
+              title={`Hear ${currentSuspect.name} speak their statement`}
+            >
+              {isSpeaking ? "🔊 Speaking Statement..." : `🔊 Hear ${currentSuspect.name.split(" ")[0]}'s Statement`}
+            </button>
+          </div>
+
           {/* STRESS / NERVOUSNESS METER */}
           <div className="stress-meter-section">
             <div className="stress-header">
@@ -151,11 +164,22 @@ export default function InterrogationRoom() {
           <div className="transcript-box">
             <div className="transcript-header-bar">
               <div className="transcript-title">REX TALKIES RECORDED TESTIMONY</div>
-              {isSpeaking && (
-                <button className="stop-audio-btn" onClick={stopAudio} title="Interrupt suspect voice">
-                  ⏹ Stop Voice Audio
+              <div className="transcript-actions-group">
+                <button
+                  type="button"
+                  className="play-current-speech-btn"
+                  onClick={speakCurrentSuspect}
+                  disabled={isSpeaking || isRecording || isProcessing}
+                  title={`Speak ${currentSuspect.name}'s current statement`}
+                >
+                  🔊 Play Voice
                 </button>
-              )}
+                {isSpeaking && (
+                  <button className="stop-audio-btn" onClick={stopAudio} title="Interrupt suspect voice">
+                    ⏹ Stop
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="transcript-scroll-area">
@@ -166,6 +190,18 @@ export default function InterrogationRoom() {
                     <span className="bubble-time">{item.time}</span>
                   </div>
                   <div className="bubble-text">{item.text}</div>
+                  {item.type === "suspect" && (
+                    <div className="bubble-audio-action">
+                      <button
+                        type="button"
+                        className="audio-replay-btn"
+                        onClick={() => speakDialogue(item.text, item.suspectId || selectedSuspect)}
+                        title="Replay this response with suspect's custom voice"
+                      >
+                        🔊 Listen
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
               <div ref={dialogueEndRef} />

@@ -7,7 +7,7 @@ import path from "path";
 // Helper to get custom voice override from .env or process.env
 function getEnvVoice(key) {
   if (process.env[key] && process.env[key].trim()) {
-    return process.env[key].trim();
+    return process.env[key].replace(/#.*$/, "").trim();
   }
   try {
     const envPath = path.resolve(process.cwd(), ".env");
@@ -15,7 +15,7 @@ function getEnvVoice(key) {
       const content = fs.readFileSync(envPath, "utf-8");
       const match = content.match(new RegExp(`^${key}=(.*)$`, "m"));
       if (match && match[1]) {
-        return match[1].trim();
+        return match[1].replace(/#.*$/, "").trim();
       }
     }
   } catch (e) {

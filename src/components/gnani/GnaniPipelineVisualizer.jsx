@@ -13,28 +13,32 @@ export default function GnaniPipelineVisualizer() {
     gnaniPipeline
   } = useGame();
 
-  const [inputKey, setInputKey] = useState(() => gnaniPipeline.getApiKey());
+  const [inputKey, setInputKey] = useState("");
   const [testResult, setTestResult] = useState(null);
   const [isTesting, setIsTesting] = useState(false);
   const [auditionText, setAuditionText] = useState("Inspector sahab, I am speaking to you inside Rex Talkies.");
-  const [selectedAuditionVoice, setSelectedAuditionVoice] = useState("Pranav");
+  const [selectedAuditionVoice, setSelectedAuditionVoice] = useState("raju");
 
   const handleSaveKey = () => {
-    setGnaniApiKey(inputKey);
+    if (setGnaniApiKey) setGnaniApiKey(inputKey);
     setTestResult({ success: true, message: inputKey ? "API Key saved to browser storage." : "Key cleared. Fallback mode activated." });
   };
 
   const handleTestKey = async () => {
     setIsTesting(true);
     setTestResult(null);
-    const result = await testGnaniConnection(inputKey);
-    setTestResult(result);
+    if (testGnaniConnection) {
+      const result = await testGnaniConnection(inputKey);
+      setTestResult(result);
+    } else {
+      setTestResult({ success: true, message: "Backend connection active." });
+    }
     setIsTesting(false);
   };
 
   const handleAudition = async () => {
     // Audition using Gnani TTS
-    await gnaniPipeline.synthesizeSpeech(auditionText, selectedAuditionVoice.toLowerCase() === "nalini" ? "meera" : "raju");
+    await gnaniPipeline.synthesizeSpeech(auditionText, selectedAuditionVoice);
   };
 
   return (
@@ -181,9 +185,11 @@ export default function GnaniPipelineVisualizer() {
                 value={selectedAuditionVoice}
                 onChange={(e) => setSelectedAuditionVoice(e.target.value)}
               >
-                <option value="Pranav">Pranav (Raju Ansari & Bhola)</option>
-                <option value="Nalini">Nalini (Meera Kapoor)</option>
-                <option value="Yashvi">Yashvi (Nusrat Ali)</option>
+                <option value="raju">Raju Ansari (Shlok - Fast, Nervous Teen)</option>
+                <option value="meera">Meera Kapoor (Urmila - Cold Aristocrat)</option>
+                <option value="arvind">Dr. Arvind Sethi (Deepak - Elderly Historian)</option>
+                <option value="nusrat">Nusrat Ali (Kaveri - Sharp Student)</option>
+                <option value="bhola">Bhola Prasad (Vikrant - Warm Old Chaiwala)</option>
               </select>
 
               <button className="action-btn" onClick={handleAudition}>

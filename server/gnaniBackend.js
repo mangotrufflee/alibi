@@ -11,7 +11,7 @@ const GNANI_BASE_URL = "https://api.vachana.ai";
 // Read GNANI_API_KEY from environment or .env file
 export function getGnaniApiKey() {
   if (process.env.GNANI_API_KEY && process.env.GNANI_API_KEY.trim()) {
-    return process.env.GNANI_API_KEY.trim();
+    return process.env.GNANI_API_KEY.replace(/#.*$/, "").trim();
   }
 
   try {
@@ -20,7 +20,7 @@ export function getGnaniApiKey() {
       const content = fs.readFileSync(envPath, "utf-8");
       const match = content.match(/^GNANI_API_KEY=(.*)$/m);
       if (match && match[1]) {
-        return match[1].trim();
+        return match[1].replace(/#.*$/, "").trim();
       }
     }
   } catch (e) {

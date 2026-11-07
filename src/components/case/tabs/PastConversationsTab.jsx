@@ -40,12 +40,17 @@ export default function PastConversationsTab() {
     return matchesSuspect && matchesSearch;
   });
 
-  const handleReplayAudio = async (text, speakerName) => {
-    // Find suspect id matching speaker
-    const entry = Object.entries(suspects).find(
-      ([, s]) => s.name.toLowerCase() === (speakerName || "").toLowerCase()
-    );
-    const suspectId = entry ? entry[0] : "raju";
+  const handleReplayAudio = async (text, speakerName, entrySuspectId) => {
+    // Prefer entry.suspectId if recorded directly, else match by suspect name
+    let suspectId = entrySuspectId;
+    if (!suspectId || !suspects[suspectId]) {
+      const entry = Object.entries(suspects).find(
+        ([, s]) =>
+          s.name.toLowerCase() === (speakerName || "").toLowerCase() ||
+          (speakerName || "").toLowerCase().includes(s.name.toLowerCase())
+      );
+      suspectId = entry ? entry[0] : "raju";
+    }
     await gnaniPipeline.synthesizeSpeech(text, suspectId);
   };
 
@@ -133,7 +138,7 @@ export default function PastConversationsTab() {
                         <button
                           type="button"
                           className="audio-replay-btn"
-                          onClick={() => handleReplayAudio(entry.text, entry.speaker)}
+                          onClick={() => handleReplayAudio(entry.text, entry.speaker, entry.suspectId)}
                           title="Replay suspect speech audio via Gnani TTS"
                         >
                           🔊 Replay Voice Audio

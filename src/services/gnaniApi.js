@@ -51,10 +51,11 @@ export const SUSPECT_VOICE_MAP = {
 let _browserVoiceCache = null;
 
 function loadBrowserVoices() {
-  if (_browserVoiceCache) return _browserVoiceCache;
+  if (_browserVoiceCache && _browserVoiceCache.all.length > 0) return _browserVoiceCache;
   if (!window.speechSynthesis) return { male: [], female: [], all: [] };
 
   const voices = window.speechSynthesis.getVoices();
+  if (!voices || voices.length === 0) return { male: [], female: [], all: [] };
   const all = voices;
   const male = voices.filter(
     (v) =>
@@ -341,20 +342,23 @@ export class GnaniClientService {
       // Apply strongly differentiated rate + pitch from voice fingerprint
       // stressBonus adds a little extra nervousness at high stress levels
       const stressBonus = Math.max((stressLevel - 30) / 100, 0) * 0.10;
-      utterance.rate = Math.min(2.0, +(voiceConfig.speed + stressBonus).toFixed(2));
-      utterance.pitch = Math.max(0.1, Math.min(2.0, +(voiceConfig.pitch).toFixed(2)));
+      utterance.rate = Math.min(2.0, Math.max(0.7, +(voiceConfig.speed + stressBonus).toFixed(2)));
+      utterance.pitch = Math.max(0.5, Math.min(2.0, +(voiceConfig.pitch).toFixed(2)));
 
       // Pick a distinct browser voice per suspect (gender-aware, slotted so they differ)
       const slotIndex = SUSPECT_VOICE_SLOTS[suspectId] ?? 0;
       const pickedVoice = pickVoiceForSuspect(voiceConfig.gender, slotIndex, voiceConfig.language);
       if (pickedVoice) {
         utterance.voice = pickedVoice;
-        console.log(`[Fallback TTS] ${suspectId} → browser voice: "${pickedVoice.name}" rate=${utterance.rate} pitch=${utterance.pitch}`);
+        utterance.lang = pickedVoice.lang || voiceConfig.language;
+        console.log(`[Fallback TTS] ${suspectId} → browser voice: "${pickedVoice.name}" (${utterance.lang}) rate=${utterance.rate} pitch=${utterance.pitch}`);
       } else {
         // Last-resort: just pick any available voice and apply rate/pitch fingerprint
         const allVoices = window.speechSynthesis.getVoices();
         if (allVoices.length > 0) {
-          utterance.voice = allVoices[slotIndex % allVoices.length];
+          const fallbackVoice = allVoices[slotIndex % allVoices.length];
+          utterance.voice = fallbackVoice;
+          utterance.lang = fallbackVoice.lang || voiceConfig.language;
         }
         console.log(`[Fallback TTS] ${suspectId} → fallback voice slot ${slotIndex} rate=${utterance.rate} pitch=${utterance.pitch}`);
       }
