@@ -1,9 +1,10 @@
 // src/state/useGameStore.js
-// ALIBI — Centralized Zustand Game State Store (Phases 1, 2 & 4)
+// ALIBI — Centralized Zustand Game State Store Supporting Canonical Storylines A, B, and C
 
 import { create } from "zustand";
+import { STORYLINES } from "../data/storylines.js";
 import { suspects } from "../data/suspects.js";
-import { initialEvidenceItems } from "../data/evidence.js";
+import { CANONICAL_EVIDENCE_ITEMS, getEvidenceForStoryline } from "../data/evidence.js";
 import { caseInfo } from "../data/caseInfo.js";
 import { gnaniPipeline, SUSPECT_VOICE_MAP } from "../services/gnaniApi.js";
 import { interrogationEngine } from "../services/interrogationEngine.js";
@@ -23,16 +24,40 @@ import {
 import {
   SUSPECT_CHARACTER_SHEETS,
   INITIAL_SUSPECT_LIVE_STATE,
-  TRUTH_GATES
+  getTruthGatesForStoryline
 } from "../data/truthGatesData.js";
 import { truthGateEngine } from "../services/truthGateEngine.js";
+import { CUTSCENES } from "../data/cutscenesData.js";
+import { PUZZLES } from "../data/puzzlesData.js";
+
+const DEFAULT_STORYLINE = "A";
 
 export const useGameStore = create((set, get) => ({
+  // ── Canonical Storyline Route ───────────────────────────────────────────
+  activeStoryline: DEFAULT_STORYLINE,
+  storylines: STORYLINES,
+
   // ── Navigation & Tabs ───────────────────────────────────────────────────
-  activeTab: "interrogation", // "interrogation" | "case-files" | "evidence" | "dossier" | "gnani-pipeline"
+  activeTab: "interrogation", // "interrogation" | "case_files"
   caseSubTab: "evidence_list",
   setActiveTab: (tab) => set({ activeTab: tab }),
   setCaseSubTab: (subTab) => set({ caseSubTab: subTab }),
+
+  // ── 3D Scene Camera & Modals ────────────────────────────────────────────
+  cameraState: "MAIN_THEATRE", // "MAIN_THEATRE" | "SUSPECT_FOCUS" | "BOOTH_VIEW" | "SCREEN_VIEW" | "FREE_ORBIT"
+  setCameraState: (cameraState) => set({ cameraState }),
+  cycleCameraState: () => {
+    const states = ["MAIN_THEATRE", "SUSPECT_FOCUS", "BOOTH_VIEW", "SCREEN_VIEW", "FREE_ORBIT"];
+    const current = get().cameraState || "MAIN_THEATRE";
+    const nextIdx = (states.indexOf(current) + 1) % states.length;
+    set({ cameraState: states[nextIdx] });
+  },
+  isVoiceLabOpen: false,
+  setIsVoiceLabOpen: (isOpen) => set({ isVoiceLabOpen: isOpen }),
+  isTranscriptOpen: false,
+  setIsTranscriptOpen: (isOpen) => set({ isTranscriptOpen: isOpen }),
+  isHintsDrawerOpen: false,
+  setIsHintsDrawerOpen: (isOpen) => set({ isHintsDrawerOpen: isOpen }),
 
   // ── Suspects & Demeanor ─────────────────────────────────────────────────
   selectedSuspect: "raju",
@@ -53,29 +78,29 @@ export const useGameStore = create((set, get) => ({
   suspectLiveState: { ...INITIAL_SUSPECT_LIVE_STATE },
   suspectVoiceMap: SUSPECT_VOICE_MAP,
 
-  // ── Phase 4: Truth Gates & Contradictions ───────────────────────────────
-  truthGates: [...TRUTH_GATES],
+  // ── Truth Gates & Contradictions ────────────────────────────────────────
+  truthGates: getTruthGatesForStoryline(DEFAULT_STORYLINE),
   unlockedGateIds: [],
-  contradictions: [...INITIAL_CONTRADICTIONS],
-  truthGatePopup: null, // { title, secretFact, points, suspectName }
+  contradictions: INITIAL_CONTRADICTIONS.map((c) => ({ ...c })),
+  truthGatePopup: null,
 
   // ── Clues & Case Progress ───────────────────────────────────────────────
   caseInfo,
   discoveredClues: [
-    "Victim Harbans Lal struck down during 8:45 PM interval blackout.",
-    "Projection booth door was locked from the outside with a deadbolt key."
+    "Victim Harbans Lal suffered fatal blunt trauma against the booth rail during the 9:17 PM blackout.",
+    "Projector motor halted at 9:19 PM; mechanical booth bell rang at 9:21 PM."
   ],
-  investigationProgress: 25,
-  evidenceItems: initialEvidenceItems,
-  selectedEvidence: initialEvidenceItems[0],
+  investigationProgress: 20,
+  evidenceItems: getEvidenceForStoryline(DEFAULT_STORYLINE),
+  selectedEvidence: getEvidenceForStoryline(DEFAULT_STORYLINE)[0],
 
   // ── Interrogation & Dialogue ────────────────────────────────────────────
   dialogueHistory: [
     {
       id: "d-0",
       speaker: "Inspector (You)",
-      text: "Rex Talkies is sealed until we find Harbans Lal's killer. You were seen near the projection booth right before the power cut. Speak.",
-      time: "09:02 PM",
+      text: "Rex Talkies is sealed until we determine how Harbans Lal died. You were near the projection gallery when the generator started. Speak.",
+      time: "09:35 PM",
       type: "detective"
     },
     {
@@ -83,7 +108,7 @@ export const useGameStore = create((set, get) => ({
       speaker: "Raju Ansari",
       role: "Ticket Boy",
       text: suspects.raju.initialDialogue,
-      time: "09:03 PM",
+      time: "09:36 PM",
       type: "suspect",
       suspectId: "raju"
     }
@@ -107,25 +132,116 @@ export const useGameStore = create((set, get) => ({
   score: INITIAL_SCORE,
   solveThreshold: SOLVE_THRESHOLD,
   remainingTries: INITIAL_TRIES,
+  isProsecutionReady: false,
   isSolved: false,
   isFailed: false,
   failReason: null,
+  verdictResult: null,
   scoredCardIds: {
-    raju: [], meera: [], arvind: [], nusrat: [], bhola: []
+    raju: [],
+    meera: [],
+    arvind: [],
+    nusrat: [],
+    bhola: []
   },
-  activeHints: getActiveHints("raju", []),
+  activeHints: getActiveHints("raju", [], DEFAULT_STORYLINE),
   pointPopup: null,
 
-  // ── Case Tabs Data ──────────────────────────────────────────────────────
-  checklistGoals: INITIAL_CHECKLIST,
-  investigatorNotes: INITIAL_INVESTIGATOR_NOTES,
+  // ── Case Tab Data ───────────────────────────────────────────────────────
+  checklistGoals: INITIAL_CHECKLIST.map((g) => ({ ...g })),
+  investigatorNotes: INITIAL_INVESTIGATOR_NOTES.map((n) => ({ ...n })),
   scoreLedger: [],
   generatorCountdown: 2400, // 40 minutes in seconds
   generatorFlicker: false,
 
+  // ── Puzzles & Cutscenes ─────────────────────────────────────────────────
+  solvedPuzzleIds: [],
+  unlockedCutsceneIds: ["cutscene_opening"],
+  activeCutscene: null,
+  activePuzzle: null,
+
   // ══════════════════════════════════════════════════════════════════════════
   // ACTIONS & METHODS
   // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Switches active canonical storyline and resets all case state deterministically.
+   */
+  selectStoryline: (routeId) => {
+    if (!STORYLINES[routeId]) return;
+    get().resetRun(routeId);
+  },
+
+  /**
+   * Resets all case state, dialogue, clues, and contradictions for a clean run.
+   */
+  resetRun: (targetRouteId = null) => {
+    gnaniPipeline.stopCurrentAudio();
+    const routeId = targetRouteId || get().activeStoryline || "A";
+
+    set({
+      activeStoryline: routeId,
+      activeTab: "interrogation",
+      caseSubTab: "evidence_list",
+      selectedSuspect: "raju",
+      suspectStress: { raju: 35, meera: 20, arvind: 15, nusrat: 40, bhola: 25 },
+      suspectTrust: { raju: 45, meera: 30, arvind: 50, nusrat: 60, bhola: 75 },
+      suspectLiveState: { ...INITIAL_SUSPECT_LIVE_STATE },
+      truthGates: getTruthGatesForStoryline(routeId),
+      unlockedGateIds: [],
+      contradictions: INITIAL_CONTRADICTIONS.map((c) => ({ ...c })),
+      truthGatePopup: null,
+      discoveredClues: [
+        "Victim Harbans Lal suffered fatal blunt trauma against the booth rail during the 9:17 PM blackout.",
+        "Projector motor halted at 9:19 PM; mechanical booth bell rang at 9:21 PM."
+      ],
+      investigationProgress: 20,
+      evidenceItems: getEvidenceForStoryline(routeId),
+      selectedEvidence: getEvidenceForStoryline(routeId)[0],
+      dialogueHistory: [
+        {
+          id: "d-0",
+          speaker: "Inspector (You)",
+          text: `Rex Talkies is sealed until we determine how Harbans Lal died. [Active Storyline: ${STORYLINES[routeId].title}]`,
+          time: "09:35 PM",
+          type: "detective"
+        },
+        {
+          id: "d-1",
+          speaker: "Raju Ansari",
+          role: "Ticket Boy",
+          text: suspects.raju.initialDialogue,
+          time: "09:36 PM",
+          type: "suspect",
+          suspectId: "raju"
+        }
+      ],
+      currentDialogue: {
+        speaker: "Raju Ansari",
+        role: "Ticket Boy",
+        text: suspects.raju.initialDialogue,
+        topics: suspects.raju.topics || []
+      },
+      score: INITIAL_SCORE,
+      remainingTries: INITIAL_TRIES,
+      isProsecutionReady: false,
+      isSolved: false,
+      isFailed: false,
+      failReason: null,
+      verdictResult: null,
+      scoredCardIds: { raju: [], meera: [], arvind: [], nusrat: [], bhola: [] },
+      activeHints: getActiveHints("raju", [], routeId),
+      pointPopup: null,
+      checklistGoals: INITIAL_CHECKLIST.map((g) => ({ ...g })),
+      investigatorNotes: INITIAL_INVESTIGATOR_NOTES.map((n) => ({ ...n })),
+      scoreLedger: [],
+      generatorCountdown: 2400,
+      solvedPuzzleIds: [],
+      unlockedCutsceneIds: ["cutscene_opening"],
+      activeCutscene: null,
+      activePuzzle: null
+    });
+  },
 
   setSelectedEvidence: (evidence) => set({ selectedEvidence: evidence }),
   setCurrentLanguage: (lang) => set({ currentLanguage: lang }),
@@ -139,7 +255,7 @@ export const useGameStore = create((set, get) => ({
 
   setGeneratorFlicker: (val) => set({ generatorFlicker: val }),
 
-  selectSuspect: (suspectId) => {
+  selectSuspect: async (suspectId, autoPlay = true) => {
     const suspect = suspects[suspectId];
     if (!suspect) return;
 
@@ -147,10 +263,11 @@ export const useGameStore = create((set, get) => ({
 
     const state = get();
     const alreadyScored = (state.scoredCardIds && state.scoredCardIds[suspectId]) || [];
-    const hints = getActiveHints(suspectId, alreadyScored);
+    const hints = getActiveHints(suspectId, alreadyScored, state.activeStoryline);
 
     set({
       selectedSuspect: suspectId,
+      cameraState: "SUSPECT_FOCUS",
       activeHints: hints,
       currentDialogue: {
         speaker: suspect.name,
@@ -171,13 +288,17 @@ export const useGameStore = create((set, get) => ({
         }
       ]
     });
+
+    if (autoPlay && suspect.initialDialogue) {
+      const stress = (get().suspectStress[suspectId]) || 30;
+      await gnaniPipeline.synthesizeSpeech(suspect.initialDialogue, suspectId, stress);
+    }
   },
 
   /**
-   * Phase 4: Core Interrogation Dispatch Pipeline.
-   * Intertwines Truth Gates, Keyword Scoring, Contradictions, and Gnani TTS.
+   * Interrogation Dispatch Pipeline with Route Awareness
    */
-  dispatchInterrogation: async (queryText, isVoice = false, isEvidence = false) => {
+  dispatchInterrogation: async (queryText, isVoice = false, isEvidence = false, preferredResponse = null) => {
     if (!queryText || !queryText.trim()) return;
     const state = get();
     if (state.isSolved || state.isFailed) return;
@@ -200,7 +321,7 @@ export const useGameStore = create((set, get) => ({
       ]
     }));
 
-    // 2. Phase 4: Evaluate Truth Gates for Breakthroughs
+    // 2. Evaluate Truth Gates for Breakthroughs
     const seenEvidence = (state.suspectLiveState[suspectId] && state.suspectLiveState[suspectId].seenEvidence) || [];
     const resolvedContradictions = state.contradictions.filter((c) => c.resolved).map((c) => c.id);
 
@@ -210,7 +331,8 @@ export const useGameStore = create((set, get) => ({
       state.suspectLiveState,
       state.unlockedGateIds,
       seenEvidence,
-      resolvedContradictions
+      resolvedContradictions,
+      state.activeStoryline
     );
 
     let finalResponse = "";
@@ -225,11 +347,9 @@ export const useGameStore = create((set, get) => ({
       finalTrustDelta = gateEval.trustDelta;
 
       if (gateEval.unlockedNow && gateEval.gate) {
-        // Breakthrough achieved!
         unlockedClue = gateEval.unlockedClue;
         pointsAwarded = gateEval.points || 20;
 
-        // Fire Truth Gate Breakthrough Alert
         set((prev) => ({
           unlockedGateIds: [...prev.unlockedGateIds, gateEval.gate.id],
           truthGatePopup: {
@@ -240,16 +360,37 @@ export const useGameStore = create((set, get) => ({
           }
         }));
         setTimeout(() => set({ truthGatePopup: null }), 3500);
+
+        // Check if cutscenes should unlock based on gate
+        if (gateEval.gate.id === "gate_meera_cut" && !state.unlockedCutsceneIds.includes("cutscene_last_negotiation")) {
+          get().unlockCutscene("cutscene_last_negotiation");
+        }
+        if (gateEval.gate.id === "gate_arvind_catalogue" && !state.unlockedCutsceneIds.includes("cutscene_three_splices")) {
+          get().unlockCutscene("cutscene_three_splices");
+        }
+        if (gateEval.gate.id === "gate_arvind_label" && !state.unlockedCutsceneIds.includes("cutscene_credit_never_came")) {
+          get().unlockCutscene("cutscene_credit_never_came");
+        }
+        if (gateEval.gate.id === "gate_nusrat_gap" && !state.unlockedCutsceneIds.includes("cutscene_missing_minute")) {
+          get().unlockCutscene("cutscene_missing_minute");
+        }
+        if (gateEval.gate.id === "gate_bhola_trust" && !state.unlockedCutsceneIds.includes("cutscene_bhola_account")) {
+          get().unlockCutscene("cutscene_bhola_account");
+        }
       }
     } else {
-      // Regular interrogation trigger match
-      const regularResult = interrogationEngine.processQuery(suspectId, queryText);
-      finalResponse = regularResult.response;
-      finalStressDelta = regularResult.stressDelta;
-      unlockedClue = regularResult.unlockedClue;
+      if (preferredResponse) {
+        finalResponse = preferredResponse;
+        finalStressDelta = 6;
+      } else {
+        const regularResult = interrogationEngine.processQuery(suspectId, queryText);
+        finalResponse = regularResult.response;
+        finalStressDelta = regularResult.stressDelta;
+        unlockedClue = regularResult.unlockedClue;
+      }
     }
 
-    // 3. Phase 1 Scoring Engine: Match transcript against hint cards
+    // 3. Match transcript against hint cards
     if (!isEvidence) {
       const alreadyScored = (get().scoredCardIds && get().scoredCardIds[suspectId]) || [];
       const matchResult = matchTranscriptToHintCards(queryText, suspectId, alreadyScored);
@@ -259,7 +400,6 @@ export const useGameStore = create((set, get) => ({
         const currentTries = get().remainingTries;
         const update = computeScoreUpdate(matchResult, currentScore, currentTries);
 
-        // Point popup
         set({
           pointPopup: {
             delta: update.delta,
@@ -269,10 +409,10 @@ export const useGameStore = create((set, get) => ({
         });
         setTimeout(() => set({ pointPopup: null }), 2200);
 
-        // Update score & tries
         set((prev) => ({
           score: update.nextScore,
           remainingTries: update.nextTries,
+          isProsecutionReady: update.isProsecutionReady,
           scoreLedger: [
             {
               id: "sc_" + Date.now(),
@@ -289,17 +429,8 @@ export const useGameStore = create((set, get) => ({
             ...prev.scoredCardIds,
             [suspectId]: [...(prev.scoredCardIds[suspectId] || []), matchResult.card.id]
           },
-          activeHints: getActiveHints(suspectId, [...(prev.scoredCardIds[suspectId] || []), matchResult.card.id])
+          activeHints: getActiveHints(suspectId, [...(prev.scoredCardIds[suspectId] || []), matchResult.card.id], prev.activeStoryline)
         }));
-
-        if (update.isSolved) {
-          set((prev) => ({
-            isSolved: true,
-            checklistGoals: prev.checklistGoals.map((g) =>
-              g.id === "confront_killer" ? { ...g, completed: true } : g
-            )
-          }));
-        }
 
         if (update.isFailed) {
           set({
@@ -310,13 +441,13 @@ export const useGameStore = create((set, get) => ({
       }
     }
 
-    // If a truth gate awarded points, apply them to the score
+    // Apply truth gate points
     if (pointsAwarded > 0) {
       set((prev) => {
         const nextScore = prev.score + pointsAwarded;
         return {
           score: nextScore,
-          isSolved: nextScore >= prev.solveThreshold ? true : prev.isSolved,
+          isProsecutionReady: nextScore >= prev.solveThreshold,
           scoreLedger: [
             {
               id: "tg_" + Date.now(),
@@ -333,7 +464,7 @@ export const useGameStore = create((set, get) => ({
       });
     }
 
-    // 4. Update Suspect Live State (Stress, Trust, Clues)
+    // 4. Update Suspect Demeanor (Stress / Trust)
     const currentStress = get().suspectStress[suspectId] || 30;
     const currentTrust = get().suspectTrust[suspectId] || 50;
     const nextStress = Math.max(0, Math.min(100, currentStress + finalStressDelta));
@@ -352,60 +483,32 @@ export const useGameStore = create((set, get) => ({
       }
     }));
 
-    // Auto-complete suspect whereabouts goal
-    set((prev) => ({
-      checklistGoals: prev.checklistGoals.map((goal) => {
-        if (goal.targetSuspect === suspectId && goal.category.includes("Whereabouts")) {
-          return { ...goal, completed: true };
-        }
-        return goal;
-      })
-    }));
-
-    // If clue unlocked, record into discoveredClues & Investigator Notes
+    // If clue unlocked, record
     if (unlockedClue) {
       set((prev) => {
         const nextClues = prev.discoveredClues.includes(unlockedClue)
           ? prev.discoveredClues
           : [unlockedClue, ...prev.discoveredClues];
 
-        const nextProgress = Math.min(100, prev.investigationProgress + 15);
+        const nextProgress = Math.min(100, prev.investigationProgress + 12);
 
         const newNote = {
           id: "auto_" + Date.now(),
           timestamp: timeStr,
-          text: `[BREAKTHROUGH // ${currentSuspectData.name}]: ${unlockedClue}`,
+          text: `[DISCOVERY // ${currentSuspectData.name}]: ${unlockedClue}`,
           tag: "Clue",
           isAuto: true
         };
 
-        const updatedChecklist = prev.checklistGoals.map((g) => {
-          const cLower = unlockedClue.toLowerCase();
-          if ((cLower.includes("booth key") || cLower.includes("office key") || cLower.includes("deadbolt")) && g.id === "clue_key_origin") {
-            return { ...g, completed: true };
-          }
-          if ((cLower.includes("tea was delivered") || cLower.includes("poison") || cLower.includes("sedative") || cLower.includes("tampered")) && g.id === "clue_sedative") {
-            return { ...g, completed: true };
-          }
-          if ((cLower.includes("redevelopment deal") || cLower.includes("sale deed") || cLower.includes("18-crore")) && g.id === "clue_deed") {
-            return { ...g, completed: true, hidden: false };
-          }
-          if ((cLower.includes("erase") || cLower.includes("audio recorder") || cLower.includes("wiped")) && g.id === "clue_erased_audio") {
-            return { ...g, completed: true, hidden: false };
-          }
-          return g;
-        });
-
         return {
           discoveredClues: nextClues,
           investigationProgress: nextProgress,
-          investigatorNotes: [newNote, ...prev.investigatorNotes],
-          checklistGoals: updatedChecklist
+          investigatorNotes: [newNote, ...prev.investigatorNotes]
         };
       });
     }
 
-    // 5. Update Current Dialogue display & Dialogue History
+    // 5. Update dialogue display
     set((prev) => ({
       currentDialogue: {
         speaker: currentSuspectData.name,
@@ -427,32 +530,30 @@ export const useGameStore = create((set, get) => ({
       ]
     }));
 
-    // 6. Gnani TTS Audio Playback with Custom Suspect Voice & Stress Modulation
+    // 6. Gnani TTS Audio Playback
     await gnaniPipeline.synthesizeSpeech(finalResponse, suspectId, nextStress);
   },
 
   /**
-   * Phase 4: Direct Contradiction Challenge Action.
-   * Evaluates contradiction clashes from TimelineTab or spoken prompts.
+   * Confront suspect with a contradiction clash
    */
   confrontSuspectWithContradiction: async (contradictionId) => {
     const state = get();
     const result = truthGateEngine.evaluateContradictionChallenge(
       contradictionId,
       state.suspectLiveState,
-      state.unlockedGateIds
+      state.unlockedGateIds,
+      state.activeStoryline
     );
 
     if (!result.valid) return;
 
-    // 1. Switch to the suspect and open interrogation tab
     get().selectSuspect(result.suspectId);
     set({ activeTab: "interrogation" });
 
     const c = result.contradiction;
-    const query = `You claimed: "${c.claimA}", but physical proof confirms: "${c.claimB}"! You are lying to the police!`;
+    const query = `You claimed: "${c.claimA}", but evidence confirms: "${c.claimB}"! You are lying to the police!`;
 
-    // 2. Mark contradiction resolved
     set((prev) => ({
       contradictions: prev.contradictions.map((item) =>
         item.id === contradictionId ? { ...item, resolved: true } : item
@@ -466,24 +567,21 @@ export const useGameStore = create((set, get) => ({
       }
     }));
 
-    // 3. Dispatch interrogation with the contradiction query
     await get().dispatchInterrogation(query, false, false);
   },
 
   /**
-   * Phase 4: Present Evidence to Suspect.
-   * Tracks seen evidence and tests truth gates.
+   * Present evidence to suspect
    */
   presentEvidenceToSuspect: async (evidenceId) => {
     const state = get();
     const item =
       state.evidenceItems.find((e) => e.id === evidenceId) ||
-      initialEvidenceItems.find((e) => e.id === evidenceId);
+      CANONICAL_EVIDENCE_ITEMS.find((e) => e.id === evidenceId);
     if (!item) return;
 
     const suspectId = state.selectedSuspect;
 
-    // Track evidence as seen by this suspect
     set((prev) => ({
       selectedEvidence: item,
       activeTab: "interrogation",
@@ -498,11 +596,140 @@ export const useGameStore = create((set, get) => ({
       }
     }));
 
-    const query = `Look at this evidence: ${item.name}! ${item.clue}. What do you have to say for yourself?`;
+    const query = `Look closely at this: ${item.name}! ${item.clue} Explain your connection to this!`;
     await get().dispatchInterrogation(query, false, true);
   },
 
-  // ── Voice Recording & Audio Controls ────────────────────────────────────
+  // ── Cutscenes & Puzzles Management ──────────────────────────────────────
+  openCutscene: (cutsceneId) => {
+    const scene = CUTSCENES.find((c) => c.id === cutsceneId);
+    if (scene) set({ activeCutscene: scene });
+  },
+
+  closeCutscene: () => set({ activeCutscene: null }),
+
+  unlockCutscene: (cutsceneId) => {
+    set((prev) => ({
+      unlockedCutsceneIds: prev.unlockedCutsceneIds.includes(cutsceneId)
+        ? prev.unlockedCutsceneIds
+        : [...prev.unlockedCutsceneIds, cutsceneId]
+    }));
+  },
+
+  openPuzzle: (puzzleId) => {
+    const puzzle = PUZZLES.find((p) => p.id === puzzleId);
+    if (puzzle) set({ activePuzzle: puzzle });
+  },
+
+  closePuzzle: () => set({ activePuzzle: null }),
+
+  solvePuzzle: (puzzleId) => {
+    const state = get();
+    if (state.solvedPuzzleIds.includes(puzzleId)) return;
+
+    const puzzle = PUZZLES.find((p) => p.id === puzzleId);
+    const rewardText = puzzle ? puzzle.rewardClue : "Puzzle breakthrough established.";
+
+    set((prev) => ({
+      solvedPuzzleIds: [...prev.solvedPuzzleIds, puzzleId],
+      discoveredClues: prev.discoveredClues.includes(rewardText)
+        ? prev.discoveredClues
+        : [rewardText, ...prev.discoveredClues],
+      score: prev.score + 20,
+      activePuzzle: null
+    }));
+  },
+
+  /**
+   * Deterministic Proof-Chain Validator for Indictment
+   */
+  checkProofChain: (accusedSuspectId) => {
+    const state = get();
+    const route = STORYLINES[state.activeStoryline] || STORYLINES.A;
+    const isCorrectCulprit = accusedSuspectId === route.culpritId;
+
+    // 1. Physical clue verification
+    const seenEvidenceIds = Object.values(state.suspectLiveState).flatMap((s) => s.seenEvidence || []);
+    const physicalSatisfied = route.requiredProof.physicalClues.some((id) =>
+      seenEvidenceIds.includes(id) || state.discoveredClues.some((c) => c.toLowerCase().includes(id.replace("_", " ")))
+    );
+
+    // 2. Contradiction / Timeline verification
+    const resolvedContradictionIds = state.contradictions.filter((c) => c.resolved).map((c) => c.id);
+    const contradictionSatisfied = route.requiredProof.contradictions.some((id) =>
+      resolvedContradictionIds.includes(id)
+    );
+
+    // 3. Corroborating confession / admission verification
+    const confessionSatisfied = state.unlockedGateIds.length > 0 || state.solvedPuzzleIds.length > 0;
+
+    const ready = isCorrectCulprit && physicalSatisfied && (contradictionSatisfied || confessionSatisfied);
+
+    const missing = [];
+    if (!isCorrectCulprit) missing.push("Accused suspect does not match evidence trail");
+    if (!physicalSatisfied) missing.push("Required physical evidence not yet presented or examined");
+    if (!contradictionSatisfied) missing.push("Timeline contradiction not yet formally shattered");
+    if (!confessionSatisfied) missing.push("Corroborating eyewitness or confession not yet secured");
+
+    return { ready, isCorrectCulprit, physicalSatisfied, contradictionSatisfied, confessionSatisfied, missing };
+  },
+
+  /**
+   * Formal Murder Indictment
+   */
+  indictSuspect: (accusedSuspectId, weaponId) => {
+    const state = get();
+    const route = STORYLINES[state.activeStoryline] || STORYLINES.A;
+    const proof = get().checkProofChain(accusedSuspectId);
+
+    if (proof.ready) {
+      // SUCCESSFUL VERDICT
+      const successVerdict = {
+        success: true,
+        culpritId: route.culpritId,
+        culpritName: route.culpritName,
+        title: `CASE SOLVED: ${route.culpritName.toUpperCase()} IS RESPONSIBLE`,
+        summary: route.summary,
+        motive: route.motive,
+        fatalAction: route.fatalAction,
+        stagedElement: route.stagedElement
+      };
+
+      set((prev) => ({
+        isSolved: true,
+        verdictResult: successVerdict,
+        unlockedCutsceneIds: [...new Set([...prev.unlockedCutsceneIds, "cutscene_final_confrontation"])],
+        checklistGoals: prev.checklistGoals.map((g) =>
+          g.id === "confront_killer" ? { ...g, completed: true } : g
+        )
+      }));
+
+      get().openCutscene("cutscene_final_confrontation");
+      return successVerdict;
+    } else {
+      // FAILED ACCUSATION
+      const remainingTries = Math.max(0, state.remainingTries - 1);
+      const isFailed = remainingTries <= 0;
+
+      const failVerdict = {
+        success: false,
+        title: "INDICTMENT FAILED: INSUFFICIENT PROOF",
+        summary: `The magistrate rejected the warrant. Missing proof: ${proof.missing.join("; ")}.`,
+        remainingTries
+      };
+
+      set({
+        remainingTries,
+        isFailed,
+        failReason: isFailed ? "Case collapsed: Groundless indictment rejected by the magistrate." : null,
+        verdictResult: failVerdict
+      });
+
+      return failVerdict;
+    }
+  },
+
+  // ── Voice Controls ──────────────────────────────────────────────────────
   startVoiceRecording: async () => {
     gnaniPipeline.stopCurrentAudio();
     const success = await gnaniPipeline.startRecording();
@@ -541,11 +768,30 @@ export const useGameStore = create((set, get) => ({
   },
 
   askTopicQuestion: (topic) => {
-    get().dispatchInterrogation(topic.title, false);
+    get().dispatchInterrogation(topic.title, false, false, topic.response);
   },
 
   askTextQuestion: (text) => {
     get().dispatchInterrogation(text, false);
+  },
+
+  speakCurrentSuspect: async () => {
+    const state = get();
+    const suspectId = state.selectedSuspect;
+    const text = state.currentDialogue?.text || suspects[suspectId]?.initialDialogue;
+    const stress = state.suspectStress[suspectId] || 30;
+    if (text) {
+      await gnaniPipeline.synthesizeSpeech(text, suspectId, stress);
+    }
+  },
+
+  speakDialogue: async (text, suspectId) => {
+    const state = get();
+    const sid = suspectId || state.selectedSuspect;
+    const stress = state.suspectStress[sid] || 30;
+    if (text) {
+      await gnaniPipeline.synthesizeSpeech(text, sid, stress);
+    }
   },
 
   stopAudio: () => {
@@ -596,7 +842,7 @@ gnaniPipeline.subscribe((pipeState) => {
   useGameStore.setState({
     pipelineState: pipeState,
     isRecording: pipeState.stage === "RECORDING",
-    isProcessing: pipeState.stage === "STT_PROCESSING" || pipeState.stage === "TTS_SYNTHESIZING",
+    isProcessing: pipeState.stage === "STT_PROCESSING" || pipeState.stage === "TTS_SYNTHESIZING" || pipeState.stage === "PROCESSING",
     isSpeaking: pipeState.stage === "PLAYING"
   });
 });

@@ -24,7 +24,15 @@ export const CASE_TABS = [
 ];
 
 export default function CaseFilesHub() {
-  const { caseSubTab, setCaseSubTab, setActiveTab, generatorCountdown, score } = useGame();
+  const caseSubTab = useGame((s) => s.caseSubTab);
+  const setCaseSubTab = useGame((s) => s.setCaseSubTab);
+  const setActiveTab = useGame((s) => s.setActiveTab);
+  const generatorCountdown = useGame((s) => s.generatorCountdown);
+  const score = useGame((s) => s.score);
+
+  const activeStoryline = useGame((s) => s.activeStoryline);
+  const storylines = useGame((s) => s.storylines);
+  const currentRoute = storylines[activeStoryline] || storylines.A;
 
   const minutes = Math.floor(generatorCountdown / 60);
   const seconds = generatorCountdown % 60;
@@ -36,12 +44,12 @@ export default function CaseFilesHub() {
       <div className="dossier-binder-header">
         <div className="binder-brand-group">
           <div className="confidential-seal">
-            <span className="seal-text">TOP SECRET</span>
+            <span className="seal-text">CONFIDENTIAL</span>
           </div>
           <div className="binder-title-block">
             <h1 className="dossier-headline">CASE FILE // REX-0845-DELHI</h1>
             <span className="dossier-subheading">
-              The Homicide of Harbans Lal • 8 Case Tabs System (GDD §7)
+              Route {activeStoryline}: {currentRoute.title} • Culprit: {currentRoute.culpritName}
             </span>
           </div>
         </div>

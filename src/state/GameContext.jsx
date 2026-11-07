@@ -1,22 +1,25 @@
-// src/state/GameContext.jsx
-// Backward-compatible React Context adapter backed 100% by the Zustand store (useGameStore)
-
-import React, { createContext, useContext } from "react";
+import React, { createContext } from "react";
 import { useGameStore } from "./useGameStore.js";
 
-const GameContext = createContext(null);
+const GameContext = createContext(useGameStore);
 
 /**
- * Hook to access game state. Fully reactive via Zustand under the hood.
+ * Hook to access game state.
+ * Supports optional selector: useGame((state) => state.selectedSuspect)
+ * If no selector is passed, returns the full reactive state.
  */
-export const useGame = () => useGameStore();
+const identitySelector = (state) => state;
+
+export const useGame = (selector) => {
+  return useGameStore(typeof selector === "function" ? selector : identitySelector);
+};
 
 /**
  * Provider wrapper maintaining full backwards compatibility for tree root mounting.
+ * Does NOT subscribe to the store state to prevent re-rendering the whole application on state updates.
  */
 export function GameProvider({ children }) {
-  const store = useGameStore();
-  return <GameContext.Provider value={store}>{children}</GameContext.Provider>;
+  return <GameContext.Provider value={useGameStore}>{children}</GameContext.Provider>;
 }
 
 export default GameContext;
