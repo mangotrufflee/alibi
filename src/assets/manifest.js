@@ -93,13 +93,22 @@ export const assetManifest = {
   },
 
   // --- EVIDENCE OBJECTS (3D Models & 2D Illustrations) ---
+  ticket_stub: {
+    id: "ticket_stub",
+    name: "Ticket Stub #409",
+    type: "model",
+    path: "/assets/models/evidence/ticket/ticket.gltf",
+    fallback: "placeholder-prop",
+    status: "ready",
+    transform: { scale: [1, 1, 1] }
+  },
   ticketStub: {
     id: "ticketStub",
     name: "Ticket Stub #409",
     type: "model",
-    path: "/assets/models/evidence/ticket-stub.glb",
+    path: "/assets/models/evidence/ticket/ticket.gltf",
     fallback: "placeholder-prop",
-    status: "placeholder",
+    status: "ready",
     transform: { scale: [1, 1, 1] }
   },
   ticketStubImage: {
@@ -110,14 +119,23 @@ export const assetManifest = {
     fallback: "placeholder-prop-image",
     status: "placeholder"
   },
+  duplicate_key: {
+    id: "duplicate_key",
+    name: "Duplicate Booth Key",
+    type: "model",
+    path: "/assets/models/evidence/key/key.gltf",
+    fallback: "placeholder-prop",
+    status: "ready",
+    transform: { scale: [0.005, 0.005, 0.005] }
+  },
   duplicateKey: {
     id: "duplicateKey",
     name: "Duplicate Booth Key",
     type: "model",
-    path: "/assets/models/evidence/duplicate-key.glb",
+    path: "/assets/models/evidence/key/key.gltf",
     fallback: "placeholder-prop",
-    status: "placeholder",
-    transform: { scale: [1, 1, 1] }
+    status: "ready",
+    transform: { scale: [0.005, 0.005, 0.005] }
   },
   teaGlass: {
     id: "teaGlass",
@@ -148,6 +166,15 @@ export const assetManifest = {
   },
 
   // --- ENVIRONMENT & TEXTURES ---
+  homeTheatre: {
+    id: "homeTheatre",
+    name: "Home Theatre 3D Model",
+    type: "model",
+    path: "/assets/models/furniture/Home+Theatre.gltf",
+    fallback: "procedural-theatre",
+    status: "ready",
+    transform: { scale: [1, 1, 1], position: [0, 0, -5], rotation: [0, 0, 0] }
+  },
   theatreWall: {
     id: "theatreWall",
     name: "Rex Cinema Distressed Wall Texture",

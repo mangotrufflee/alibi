@@ -5,10 +5,11 @@ import React, { useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Center, Float } from "@react-three/drei";
 import { PlaceholderProp } from "../../../assets/placeholders/PlaceholderProp";
+import { ModelWrapper } from "../../../assets/placeholders/ModelWrapper";
 import { useGame } from "../../../state/GameContext";
 import { suspects } from "../../../data/suspects";
 
-function Evidence3DViewer({ propType, autoRotate }) {
+function Evidence3DViewer({ propType, assetId, autoRotate }) {
   return (
     <Canvas
       camera={{ position: [0, 1.2, 3.2], fov: 45 }}
@@ -22,7 +23,9 @@ function Evidence3DViewer({ propType, autoRotate }) {
       <Suspense fallback={null}>
         <Float speed={autoRotate ? 2 : 0} rotationIntensity={0.4} floatIntensity={0.2}>
           <Center top>
-            <PlaceholderProp type={propType} isInteractive={false} />
+            <ModelWrapper assetId={assetId}>
+              <PlaceholderProp type={propType} isInteractive={false} />
+            </ModelWrapper>
           </Center>
         </Float>
       </Suspense>
@@ -110,6 +113,7 @@ export default function PhysicalEvidenceTab() {
         <div className="turntable-canvas-wrapper">
           <Evidence3DViewer
             propType={currentItem.placeholderType || "ticket"}
+            assetId={currentItem.id}
             autoRotate={autoRotate}
           />
 

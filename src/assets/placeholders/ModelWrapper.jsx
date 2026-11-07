@@ -24,7 +24,8 @@ export function ModelWrapper({
   children, // Fallback component to render if asset is not loaded
   ...props
 }) {
-  const { assetMode, debugMode } = useGame();
+  const assetMode = useGame((s) => s.assetMode);
+  const debugMode = useGame((s) => s.debugMode);
   const { status, data, entry } = useAsset(assetId, assetMode);
 
   // If imported model scene is available:
