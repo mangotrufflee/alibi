@@ -267,3 +267,4 @@ test("Test 12: Proof-based accusation validation — full proof chain enforced",
   assert.equal(correctResult.culpritId, "meera");
   assert.equal(useGameStore.getState().isSolved, true, "Game must transition to solved");
 });
+

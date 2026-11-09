@@ -58,7 +58,7 @@ export default function SuspectsSidebar() {
                 className={`suspect-rail-btn ${isSelected ? "selected" : ""} ${
                   isCurrentlySpeaking ? "speaking" : ""
                 }`}
-                onClick={() => selectSuspect(s.id)}
+                onClick={() => (isSelected ? selectSuspect(null) : selectSuspect(s.id))}
                 style={{ "--suspect-accent": s.color }}
                 aria-label={`${s.name} (${s.role})`}
               >
@@ -133,7 +133,10 @@ export default function SuspectsSidebar() {
           whileTap={{ scale: 0.92 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
           className={`overview-cam-btn ${cameraState === "MAIN_THEATRE" ? "active" : ""}`}
-          onClick={() => setCameraState("MAIN_THEATRE")}
+          onClick={() => {
+            setCameraState("MAIN_THEATRE");
+            selectSuspect(null);
+          }}
           title="Zoom out to Full Theatre Overview"
         >
           <Building2 size={18} className="overview-icon" />

@@ -132,7 +132,7 @@ export const useGameStore = create((set, get) => ({
   setIsHintsDrawerOpen: (isOpen) => set({ isHintsDrawerOpen: isOpen }),
 
   // ── Suspects & Demeanor ─────────────────────────────────────────────────
-  selectedSuspect: "raju",
+  selectedSuspect: null,
   suspectStress: {
     raju: 35,
     meera: 20,
@@ -255,7 +255,8 @@ export const useGameStore = create((set, get) => ({
       activeStoryline: routeId,
       activeTab: "interrogation",
       caseSubTab: "evidence_list",
-      selectedSuspect: "raju",
+      selectedSuspect: null,
+      cameraState: "MAIN_THEATRE",
       suspectStress: { raju: 35, meera: 20, arvind: 15, nusrat: 40, bhola: 25 },
       suspectTrust: { raju: 45, meera: 30, arvind: 50, nusrat: 60, bhola: 75 },
       suspectLiveState: { ...INITIAL_SUSPECT_LIVE_STATE },
@@ -767,6 +768,14 @@ export const useGameStore = create((set, get) => ({
   setGeneratorFlicker: (val) => set({ generatorFlicker: val }),
 
   selectSuspect: async (suspectId, autoPlay = true) => {
+    if (!suspectId) {
+      gnaniPipeline.stopCurrentAudio();
+      set({
+        selectedSuspect: null,
+        cameraState: "MAIN_THEATRE"
+      });
+      return;
+    }
     const suspect = suspects[suspectId];
     if (!suspect) return;
 
@@ -1092,13 +1101,15 @@ export const useGameStore = create((set, get) => ({
       CANONICAL_EVIDENCE_ITEMS.find((e) => e.id === evidenceId);
     if (!item) return;
 
-    const suspectId = state.selectedSuspect;
+    const suspectId = state.selectedSuspect || "raju";
     const currentSuspectData = suspects[suspectId] || suspects.raju;
     const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-    // Set selected evidence and switch to interrogation tab
+    // Set selected evidence, ensure suspect is selected, and switch to interrogation tab
     set((prev) => ({
       selectedEvidence: item,
+      selectedSuspect: suspectId,
+      cameraState: "SUSPECT_FOCUS",
       activeTab: "interrogation",
       suspectLiveState: {
         ...prev.suspectLiveState,
