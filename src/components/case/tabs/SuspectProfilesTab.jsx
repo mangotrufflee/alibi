@@ -117,7 +117,7 @@ export default function SuspectProfilesTab() {
           <div className="stress-gauge-block" style={{ marginTop: "0.8rem" }}>
             <div className="gauge-label-row">
               <span className="gauge-title">DETECTIVE TRUST</span>
-              <span className="gauge-status-tag" style={{ color: trust > 60 ? "#10b981" : "#f59e0b" }}>
+              <span className="gauge-status-tag" style={{ color: trust > 60 ? "#10b981" : "#3772f1" }}>
                 {trust}% Trust
               </span>
             </div>
@@ -127,15 +127,15 @@ export default function SuspectProfilesTab() {
                 className="trust-bar-fill"
                 style={{
                   width: `${trust}%`,
-                  backgroundColor: trust > 60 ? "#10b981" : trust > 35 ? "#f59e0b" : "#ef4444",
+                  backgroundColor: trust > 60 ? "#10b981" : trust > 35 ? "#3772f1" : "#ba2c2c",
                   height: "100%",
                   borderRadius: "2px"
                 }}
               />
             </div>
             <div style={{ marginTop: "0.4rem", display: "flex", justifyContent: "space-between", fontSize: "0.78rem" }}>
-              <span style={{ color: "#94a3b8" }}>Alibi Lies Broken:</span>
-              <strong style={{ color: "#e2b170" }}>⚔️ {contradictionsCaught} Contradictions</strong>
+              <span style={{ color: "#929caa" }}>Alibi Lies Broken:</span>
+              <strong style={{ color: "#3772f1" }}>⚔️ {contradictionsCaught} Contradictions</strong>
             </div>
           </div>
 

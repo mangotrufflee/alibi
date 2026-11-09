@@ -148,7 +148,7 @@ export default function InterrogationRoom() {
                 className="stress-bar-fill"
                 style={{
                   width: `${stressLevel}%`,
-                  backgroundColor: stressLevel > 70 ? "#ef4444" : stressLevel > 45 ? "#f59e0b" : "#10b981"
+                  backgroundColor: stressLevel > 70 ? "#ba2c2c" : stressLevel > 45 ? "#3772f1" : "#10b981"
                 }}
               />
             </div>

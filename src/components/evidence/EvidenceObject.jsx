@@ -53,7 +53,7 @@ export function EvidenceObject({ evidence }) {
       {/* SUBTLE DETECTIVE GLOW PULSE */}
       <pointLight
         position={[0, 0.1, 0]}
-        color={isHovered ? "#38bdf8" : "#f59e0b"}
+        color={isHovered ? "#3772f1" : "#1f61ef"}
         intensity={isHovered ? 0.8 : 0.25}
         distance={1.2}
       />
@@ -63,13 +63,13 @@ export function EvidenceObject({ evidence }) {
         <Html position={[0, 0.25, 0]} center distanceFactor={8}>
           <div
             style={{
-              background: "rgba(10, 18, 20, 0.95)",
-              border: "1px solid #f59e0b",
-              color: "#fef3c7",
+              background: "rgba(11, 13, 20, 0.95)",
+              border: "1px solid #1f61ef",
+              color: "#f3f5f7",
               fontFamily: "var(--font-mono, monospace)",
               fontSize: "11px",
-              padding: "4px 8px",
-              borderRadius: "4px",
+              padding: "4px 10px",
+              borderRadius: "1rem",
               whiteSpace: "nowrap",
               boxShadow: "0 4px 12px rgba(0,0,0,0.8)",
               pointerEvents: "none",
@@ -78,7 +78,7 @@ export function EvidenceObject({ evidence }) {
               gap: "6px"
             }}
           >
-            <span style={{ color: "#f59e0b" }}>🔍 [Click to Inspect]</span>
+            <span style={{ color: "#3772f1" }}>🔍 [Click to Inspect]</span>
             <strong>{evidence.name}</strong>
           </div>
         </Html>

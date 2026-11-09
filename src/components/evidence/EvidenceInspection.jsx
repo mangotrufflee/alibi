@@ -41,7 +41,7 @@ export function EvidenceInspection({ evidenceId, onClose }) {
                 >
                   <ambientLight intensity={0.8} />
                   <directionalLight position={[3, 5, 2]} intensity={1.2} />
-                  <pointLight position={[-2, -2, 2]} intensity={0.5} color="#f59e0b" />
+                  <pointLight position={[-2, -2, 2]} intensity={0.5} color="#3772f1" />
                   <Center>
                     <ModelWrapper assetId={evidence.id} isSelected={true}>
                       <PlaceholderProp

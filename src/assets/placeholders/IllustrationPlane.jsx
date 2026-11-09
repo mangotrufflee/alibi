@@ -62,7 +62,7 @@ export function IllustrationPlane({
           {/* Card Border */}
           <lineSegments>
             <edgesGeometry args={[new THREE.PlaneGeometry(width, height)]} />
-            <lineBasicMaterial color="#d97706" />
+            <lineBasicMaterial color="#1f61ef" />
           </lineSegments>
         </group>
       )}

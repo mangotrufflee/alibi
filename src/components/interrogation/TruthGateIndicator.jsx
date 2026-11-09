@@ -17,7 +17,7 @@ export default function TruthGateIndicator() {
   const contradictionsCaught = suspectLiveState.contradictionsCaught || 0;
 
   // Trust qualitative mood read
-  const trustColor = suspectTrust >= 65 ? "#10b981" : suspectTrust >= 35 ? "#f59e0b" : "#ef4444";
+  const trustColor = suspectTrust >= 65 ? "#10b981" : suspectTrust >= 35 ? "#3772f1" : "#ba2c2c";
   const trustMood =
     suspectTrust >= 70 ? "COOPERATIVE / CONFIDING"
     : suspectTrust >= 50 ? "MEASURED / OBSERVANT"

@@ -29,7 +29,7 @@ export default function DialoguePanel() {
         <div className="speaker-column">
           <div
             className="speaker-avatar-frame"
-            style={{ borderColor: currentSuspectData.color || "#f59e0b" }}
+            style={{ borderColor: currentSuspectData.color || "#1f61ef" }}
           >
             <div className="speaker-initials">
               {currentDialogue.speaker.slice(0, 2).toUpperCase()}

@@ -1,28 +1,29 @@
 /* src/styles/global.css */
-/* ALIBI — Stylized Indian Noir Design System */
+/* ALIBI — ProMotor Wow Midnight & Electric Cobalt Design System */
 
 :root {
-  --color-noir-deep: #06090a;
-  --color-charcoal: #0c1214;
-  --color-teal-dark: #0f1d21;
-  --color-teal-mid: #162f36;
-  --color-teal-light: #204b56;
-  --color-amber: #f59e0b;
-  --color-amber-dim: #b45309;
-  --color-amber-glow: rgba(245, 158, 11, 0.25);
-  --color-burgundy: #6b2128;
-  --color-cream: #dfd7c2;
-  --color-cream-dim: #94a3b8;
-  --color-warning-red: #ef4444;
-  --color-cyan-glow: #38bdf8;
+  --color-noir-deep: #05060a;
+  --color-charcoal: #0b0d14;
+  --color-teal-dark: #0e121a;
+  --color-teal-mid: #181b25;
+  --color-teal-light: #23252f;
+  --color-amber: #1f61ef;
+  --color-amber-dim: #181b25;
+  --color-amber-glow: rgba(31, 97, 239, 0.35);
+  --color-burgundy: #ba2c2c;
+  --color-cream: #f3f5f7;
+  --color-cream-dim: #929caa;
+  --color-warning-red: #ba2c2c;
+  --color-cyan-glow: #3772f1;
 
-  --panel-bg: rgba(11, 19, 22, 0.9);
-  --panel-border: rgba(245, 158, 11, 0.2);
-  --panel-border-subtle: rgba(148, 163, 184, 0.12);
+  --panel-bg: rgba(11, 13, 20, 0.92);
+  --panel-border: rgba(31, 97, 239, 0.3);
+  --panel-border-subtle: rgba(35, 37, 47, 0.7);
 
   --font-serif: "Georgia", "Times New Roman", serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Consolas", "Courier New", monospace;
+  --radius: 1rem;
 }
 
 * {
@@ -46,7 +47,7 @@ html, body, #root {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: radial-gradient(circle at center, #0e1a1c 0%, #06090a 100%);
+  background: radial-gradient(circle at center, #0e121a 0%, #05060a 100%);
 }
 
 .canvas-container {
@@ -1888,7 +1889,7 @@ html, body, #root {
   font-weight: bold;
 }
 .dev-badge.green { background: #065f46; color: #34d399; }
-.dev-badge.amber { background: #78350f; color: #f59e0b; }
+.dev-badge.amber { background: #181b25; color: #3772f1; }
 
 .dev-action-btn {
   background: var(--color-teal-mid);
@@ -1952,13 +1953,13 @@ html, body, #root {
 /* ------------------------------------------------------------- */
 
 .btn-primary {
-  background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
+  background: linear-gradient(180deg, #1f61ef 0%, #184bb8 100%);
   border: 1px solid var(--color-amber);
-  color: #000;
+  color: #fff;
   font-weight: 700;
   font-size: 12px;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: var(--radius, 1rem);
   cursor: pointer;
   transition: all 0.2s ease;
 }

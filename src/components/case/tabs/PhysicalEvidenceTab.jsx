@@ -13,12 +13,12 @@ function Evidence3DViewer({ propType, assetId, autoRotate }) {
   return (
     <Canvas
       camera={{ position: [0, 1.2, 3.2], fov: 45 }}
-      style={{ width: "100%", height: "100%", background: "radial-gradient(circle at 50% 50%, #161c24 0%, #080b0e 100%)" }}
+      style={{ width: "100%", height: "100%", background: "radial-gradient(circle at 50% 50%, #181b25 0%, #05060a 100%)" }}
     >
       <ambientLight intensity={0.7} />
-      <directionalLight position={[4, 5, 3]} intensity={1.5} color="#fff1d6" castShadow />
-      <directionalLight position={[-4, 2, -2]} intensity={0.6} color="#38bdf8" />
-      <pointLight position={[0, -2, 2]} intensity={0.4} color="#f59e0b" />
+      <directionalLight position={[4, 5, 3]} intensity={1.5} color="#f3f5f7" castShadow />
+      <directionalLight position={[-4, 2, -2]} intensity={0.6} color="#3772f1" />
+      <pointLight position={[0, -2, 2]} intensity={0.4} color="#1f61ef" />
 
       <Suspense fallback={null}>
         <Float speed={autoRotate ? 2 : 0} rotationIntensity={0.4} floatIntensity={0.2}>

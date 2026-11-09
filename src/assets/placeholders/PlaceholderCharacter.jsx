@@ -38,26 +38,26 @@ export function PlaceholderCharacter({
   });
 
   // Stylized Noir Silhouettes — Deep mysterious black & charcoal tones
-  const noirBlack = "#07090c";
-  const noirCharcoal = "#0e1117";
-  const noirShadow = "#151821";
+  const noirBlack = "#05060a";
+  const noirCharcoal = "#0b0d14";
+  const noirShadow = "#181b25";
 
   // Memoized materials for Noir Silhouettes
   const primaryMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: isSelected ? "#f59e0b" : isHovered ? "#38bdf8" : noirBlack,
+    color: isSelected ? "#1f61ef" : isHovered ? "#3772f1" : noirBlack,
     roughness: 0.85,
     metalness: 0.05,
     wireframe: debug
   }), [isSelected, isHovered, debug]);
 
   const skinToneMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: isSelected ? "#fed7aa" : isHovered ? "#7dd3fc" : noirCharcoal,
+    color: isSelected ? "#93c5fd" : isHovered ? "#60a5fa" : noirCharcoal,
     roughness: 0.9,
     metalness: 0.05
   }), [isSelected, isHovered]);
 
   const accentMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: isSelected ? "#ef4444" : isHovered ? "#0284c7" : noirShadow,
+    color: isSelected ? "#ba2c2c" : isHovered ? "#2255c3" : noirShadow,
     roughness: 0.85,
     metalness: 0.05
   }), [isSelected, isHovered]);
@@ -68,7 +68,7 @@ export function PlaceholderCharacter({
       {isSelected && (
         <mesh position={[0, -0.48, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.45, 0.52, 32]} />
-          <meshBasicMaterial color="#f59e0b" transparent opacity={0.8} />
+          <meshBasicMaterial color="#1f61ef" transparent opacity={0.8} />
         </mesh>
       )}
 
@@ -207,7 +207,7 @@ export function PlaceholderCharacter({
             </mesh>
             <mesh position={[0, 0.35, 0.18]}>
               <boxGeometry args={[0.18, 0.04, 0.04]} />
-              <meshStandardMaterial color="#f59e0b" metalness={0.8} />
+              <meshStandardMaterial color="#3772f1" metalness={0.8} />
             </mesh>
           </group>
         </group>
@@ -295,7 +295,7 @@ export function PlaceholderCharacter({
           {/* Mustache / Beard block & Muted Cap */}
           <mesh position={[0, 0.72, 0.01]}>
             <boxGeometry args={[0.26, 0.08, 0.26]} />
-            <meshStandardMaterial color="#d97706" roughness={0.9} />
+            <meshStandardMaterial color="#181b25" roughness={0.9} />
           </mesh>
         </group>
       )}
@@ -305,16 +305,16 @@ export function PlaceholderCharacter({
         <Html position={[0, 0.95, 0]} center distanceFactor={14}>
           <div
             style={{
-              background: isSelected ? "rgba(245, 158, 11, 0.95)" : "rgba(10, 15, 20, 0.92)",
-              color: isSelected ? "#0a0a0a" : "#38bdf8",
-              border: `1px solid ${isSelected ? "#f59e0b" : "#38bdf8"}`,
-              padding: "4px 10px",
-              borderRadius: "16px",
+              background: isSelected ? "rgba(31, 97, 239, 0.95)" : "rgba(11, 13, 20, 0.92)",
+              color: isSelected ? "#ffffff" : "#f3f5f7",
+              border: `1px solid ${isSelected ? "#1f61ef" : "#3772f1"}`,
+              padding: "4px 12px",
+              borderRadius: "1rem",
               fontSize: "11px",
               fontWeight: "600",
               letterSpacing: "0.5px",
               whiteSpace: "nowrap",
-              boxShadow: isSelected ? "0 0 16px rgba(245, 158, 11, 0.5)" : "0 4px 12px rgba(0,0,0,0.8)",
+              boxShadow: isSelected ? "0 0 16px rgba(31, 97, 239, 0.5)" : "0 4px 12px rgba(0,0,0,0.8)",
               pointerEvents: "none",
               display: "flex",
               alignItems: "center",
@@ -323,7 +323,7 @@ export function PlaceholderCharacter({
           >
             <span>👤</span>
             <span>{name}</span>
-            <span style={{ opacity: 0.8, fontSize: "10px" }}>
+            <span style={{ opacity: 0.85, fontSize: "10px", color: isSelected ? "#ffffff" : "#3772f1" }}>
               {isSelected ? "● INTERROGATING" : "CLICK TO INTERROGATE"}
             </span>
           </div>
@@ -335,13 +335,13 @@ export function PlaceholderCharacter({
         <Html position={[0, 1.05, 0]} center distanceFactor={12}>
           <div
             style={{
-              background: "rgba(12, 25, 28, 0.92)",
-              border: `1px solid ${isSelected ? "#f59e0b" : "#38bdf8"}`,
-              color: isSelected ? "#f59e0b" : "#e2e8f0",
+              background: "rgba(11, 13, 20, 0.92)",
+              border: `1px solid ${isSelected ? "#1f61ef" : "#23252f"}`,
+              color: isSelected ? "#1f61ef" : "#f3f5f7",
               fontFamily: "monospace",
               fontSize: "11px",
               padding: "3px 8px",
-              borderRadius: "4px",
+              borderRadius: "0.5rem",
               whiteSpace: "nowrap",
               boxShadow: "0 2px 8px rgba(0,0,0,0.6)",
               pointerEvents: "none"

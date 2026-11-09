@@ -21,7 +21,7 @@ export function PlaceholderProp({
     }
   });
 
-  const highlightColor = isSelected ? "#f59e0b" : isHovered ? "#38bdf8" : null;
+  const highlightColor = isSelected ? "#1f61ef" : isHovered ? "#3772f1" : null;
 
   switch (type) {
     case "ticket":
