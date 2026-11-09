@@ -7,8 +7,6 @@ import { RainWindow } from "./RainWindow";
 import { LightingRig } from "./LightingRig";
 import { Atmosphere } from "./Atmosphere";
 import { SuspectGroup } from "../characters/SuspectGroup";
-import { EvidenceObject } from "../evidence/EvidenceObject";
-import { initialEvidenceItems } from "../../data/evidence";
 import { TheatreModel } from "./TheatreModel";
 
 /**
@@ -96,13 +94,6 @@ export default function Theatre() {
 
       {/* THE 5 SUSPECT CHARACTERS SEATED */}
       <SuspectGroup />
-
-      {/* IN-SCENE CLICKABLE EVIDENCE OBJECTS */}
-      {initialEvidenceItems
-        .filter((item) => item.inScene)
-        .map((item) => (
-          <EvidenceObject key={item.id} evidence={item} />
-        ))}
 
       {/* FLOOR (Main Auditorium Floor Plane) */}
       <mesh

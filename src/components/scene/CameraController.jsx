@@ -32,9 +32,20 @@ export function CameraController() {
     // Determine target coordinates based on cameraState
     if (cameraState === CAMERA_STATES.SUSPECT_FOCUS && selectedSuspect && suspects[selectedSuspect]) {
       const seat = suspects[selectedSuspect].seat?.position || [0, 0, -5];
-      // Frame the selected suspect while keeping the rest of the theatre visible
-      targetPos.current.set(seat[0] * 0.55, 1.45, seat[2] + 2.4);
-      targetLook.current.set(seat[0], seat[1] + 0.65, seat[2]);
+      const isLeft = (seat[0] || 0) < 0;
+
+      // Cinematic off-center framing:
+      // Suspects on the left (Raju, Arvind, Bhola) are framed on the LEFT of the screen,
+      // allowing the dossier card to appear cleanly on the RIGHT beside them.
+      // Suspects on the right (Meera, Nusrat) are framed on the RIGHT of the screen,
+      // allowing the dossier card to appear cleanly on the LEFT beside them.
+      if (isLeft) {
+        targetPos.current.set(seat[0] + 0.18, 1.45, seat[2] + 2.3);
+        targetLook.current.set(seat[0] + 0.65, seat[1] + 0.65, seat[2]);
+      } else {
+        targetPos.current.set(seat[0] - 0.18, 1.45, seat[2] + 2.3);
+        targetLook.current.set(seat[0] - 0.65, seat[1] + 0.65, seat[2]);
+      }
     } else if (cameraState === CAMERA_STATES.BOOTH_VIEW) {
       // Look back and up at the projection booth aperture & brass plaque
       targetPos.current.set(0, 1.5, -8.0);

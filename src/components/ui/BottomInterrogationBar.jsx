@@ -268,10 +268,10 @@ export default function BottomInterrogationBar() {
           className="floating-bottom-bar"
           style={{
             position: "fixed",
-            bottom: "20px",
+            bottom: "24px",
             left: "50%",
             transform: "translateX(-50%)",
-            width: "min(880px, calc(100vw - 220px))",
+            width: "min(780px, calc(100vw - 420px))",
             background: "rgba(9, 13, 20, 0.94)",
             backdropFilter: "blur(20px)",
             border: "1px solid rgba(31, 97, 239, 0.4)",

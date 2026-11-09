@@ -38,26 +38,32 @@ export default function SuspectProfileCard() {
     .map((id) => CLUE_DATABASE[id])
     .filter((clue) => clue && clue.relatedSuspectIds?.includes(selectedSuspect));
 
+  // Determine whether suspect is on the left or right side of the cinema
+  // If suspect is framed on left (seat[0] < 0), card appears on the RIGHT beside them.
+  // If suspect is framed on right (seat[0] >= 0), card appears on the LEFT beside them.
+  const isLeftSuspect = (currentSuspect.seat?.position?.[0] || 0) < 0;
+
   return (
     <AnimatePresence>
       <motion.div
         key={selectedSuspect}
-        initial={{ opacity: 0, x: -24, scale: 0.96 }}
+        initial={{ opacity: 0, x: isLeftSuspect ? 32 : -32, scale: 0.96 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
-        exit={{ opacity: 0, x: -20, scale: 0.95 }}
+        exit={{ opacity: 0, x: isLeftSuspect ? 24 : -24, scale: 0.95 }}
         transition={{ duration: 0.28, ease: "easeOut" }}
         className="suspect-profile-floating-card"
         style={{
           position: "fixed",
           top: "76px",
-          left: "92px",
-          width: "320px",
-          maxHeight: "calc(100vh - 360px)",
-          background: "rgba(9, 13, 20, 0.92)",
+          left: isLeftSuspect ? "auto" : "92px",
+          right: isLeftSuspect ? "36px" : "auto",
+          width: "350px",
+          maxHeight: "calc(100vh - 100px)",
+          background: "rgba(9, 13, 20, 0.94)",
           backdropFilter: "blur(20px)",
-          border: `1px solid rgba(31, 97, 239, 0.4)`,
+          border: `1px solid rgba(31, 97, 239, 0.45)`,
           borderRadius: "14px",
-          boxShadow: "0 18px 45px rgba(0, 0, 0, 0.8), 0 0 25px rgba(31, 97, 239, 0.15)",
+          boxShadow: "0 18px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(31, 97, 239, 0.18)",
           color: "#f8fafc",
           zIndex: 42,
           display: "flex",
