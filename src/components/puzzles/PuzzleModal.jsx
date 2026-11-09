@@ -340,10 +340,13 @@ export default function PuzzleModal() {
     <div className="evidence-overlay-backdrop puzzle-modal-backdrop">
       <div className="puzzle-dialog-card">
         <div className="puzzle-dialog-header">
-          <div className="puzzle-badge-pill">FORENSIC ANALYSIS PUZZLE</div>
+          <div className="puzzle-badge-pill">FORENSIC LAB (OPTIONAL)</div>
           <button className="puzzle-close-btn" onClick={closePuzzle} title="Close Puzzle">
             ✕
           </button>
+        </div>
+        <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginBottom: "0.5rem" }}>
+          * Optional analysis lab. Key clues can be unlocked directly via cross-examination and evidence challenges.
         </div>
 
         <h2 className="puzzle-title">{activePuzzle.title}</h2>
