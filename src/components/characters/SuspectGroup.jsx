@@ -19,27 +19,27 @@ const SUSPECT_MODEL_CONFIG = {
   raju: {
     modelIndex: 1,
     yOffset: -0.22,
-    rotation: [0, 0.05, 0]
+    rotation: [0, 0.05, 0] // natively faces +Z towards camera
   },
   meera: {
     modelIndex: 2,
     yOffset: -0.22,
-    rotation: [0, -0.08, 0]
+    rotation: [0, -0.08, 0] // natively faces +Z towards camera
   },
   arvind: {
     modelIndex: 3,
     yOffset: 0.0,
-    rotation: [0, 0.12, 0]
+    rotation: [0, Math.PI + 0.12, 0] // rotated 180° so face & chest point to camera (+Z)
   },
   nusrat: {
     modelIndex: 4,
     yOffset: 0.0,
-    rotation: [0, -0.15, 0]
+    rotation: [0, -0.15, 0] // natively faces +Z towards camera
   },
   bhola: {
     modelIndex: 5,
     yOffset: 0.0,
-    rotation: [0, 0.25, 0]
+    rotation: [0, Math.PI - 0.25, 0] // rotated 180° so face & chest point to camera (+Z)
   }
 };
 

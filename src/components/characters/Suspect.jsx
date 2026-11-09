@@ -14,6 +14,14 @@ const SUSPECT_MODEL_INDEX = {
   bhola: 5
 };
 
+const SUSPECT_DEFAULT_ROTATIONS = {
+  raju: [0, 0.05, 0],
+  meera: [0, -0.08, 0],
+  arvind: [0, Math.PI + 0.12, 0],
+  nusrat: [0, -0.15, 0],
+  bhola: [0, Math.PI - 0.25, 0]
+};
+
 export default function Suspect({ suspectId, position, rotation }) {
   const { selectedSuspect, selectSuspect } = useGame();
   const { geometries, isReady } = usePeoplePack();
@@ -25,6 +33,7 @@ export default function Suspect({ suspectId, position, rotation }) {
   const geom = geometries[modelIdx];
   const isSelected = selectedSuspect === suspectId;
   const finalPos = position || data.seat?.position || [0, 0, 0];
+  const finalRot = rotation || SUSPECT_DEFAULT_ROTATIONS[suspectId] || [0, 0, 0];
 
   if (isReady && geom) {
     return (
@@ -32,7 +41,7 @@ export default function Suspect({ suspectId, position, rotation }) {
         geometry={geom}
         modelIndex={modelIdx}
         position={finalPos}
-        rotation={rotation || [0, 0, 0]}
+        rotation={finalRot}
         scale={[0.05, 0.05, 0.05]}
         color={data.color}
         isSuspect={true}
