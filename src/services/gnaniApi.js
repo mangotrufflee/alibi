@@ -1,3 +1,4 @@
+
 // src/services/gnaniApi.js
 // Client-side voice client that communicates with the Gnani AI Backend Server
 
@@ -52,7 +53,7 @@ let _browserVoiceCache = null;
 
 function loadBrowserVoices() {
   if (_browserVoiceCache && _browserVoiceCache.all.length > 0) return _browserVoiceCache;
-  if (!window.speechSynthesis) return { male: [], female: [], all: [] };
+  if (typeof window === "undefined" || !window.speechSynthesis) return { male: [], female: [], all: [] };
 
   const voices = window.speechSynthesis.getVoices();
   if (!voices || voices.length === 0) return { male: [], female: [], all: [] };
@@ -260,7 +261,7 @@ export class GnaniClientService {
 
   fallbackQueryGenerator(languageCode) {
     return new Promise((resolve) => {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechRecognition = typeof window !== "undefined" ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
       if (SpeechRecognition) {
         try {
           const rec = new SpeechRecognition();
@@ -329,7 +330,7 @@ export class GnaniClientService {
 
   fallbackSpeechSynthesis(text, voiceConfig, stressLevel = 30, suspectId = "raju") {
     return new Promise((resolve) => {
-      if (!window.speechSynthesis) {
+      if (typeof window === "undefined" || !window.speechSynthesis) {
         this.setStage("IDLE");
         resolve(false);
         return;
@@ -413,7 +414,7 @@ export class GnaniClientService {
       this.currentAudio.pause();
       this.currentAudio = null;
     }
-    if (window.speechSynthesis) {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
     this.setStage("IDLE");

@@ -15,7 +15,7 @@ class AmbientAudioManager {
   init() {
     if (this.isInitialized) return;
     try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      const AudioContextClass = typeof window !== "undefined" ? (window.AudioContext || window.webkitAudioContext) : null;
       if (!AudioContextClass) return;
       this.audioCtx = new AudioContextClass();
 
@@ -100,3 +100,4 @@ class AmbientAudioManager {
 }
 
 export const ambientAudio = new AmbientAudioManager();
+

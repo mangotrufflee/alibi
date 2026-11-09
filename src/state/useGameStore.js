@@ -31,7 +31,25 @@ import { CUTSCENES } from "../data/cutscenesData.js";
 import { PUZZLES } from "../data/puzzlesData.js";
 import { ambientAudio } from "../services/ambientAudio.js";
 
+// ── Deterministic Interrogation System ──────────────────────────────────────
+import { QUESTION_DATABASE, getCanonicalAnswer } from "../data/questionDatabase.js";
+import { CLUE_DATABASE, getClue } from "../data/clueDatabase.js";
+import { EVIDENCE_CHALLENGES, getChallengeForEvidenceAndSuspect } from "../data/evidenceChallenges.js";
+import { checkAccusationEligibility, ACCUSATION_REQUIREMENTS } from "../data/accusationRequirements.js";
+import { classifyQuestion, getRephrasPrompt, arePrerequisitesMet } from "../services/questionClassifier.js";
+import { computeStressUpdate } from "../services/stressEngine.js";
+
 const DEFAULT_STORYLINE = "A";
+
+// Initial state for per-suspect asked question tracking
+const INITIAL_ASKED_QUESTIONS = {
+  raju: [], meera: [], arvind: [], nusrat: [], bhola: []
+};
+
+// Initial state for per-suspect presented evidence tracking
+const INITIAL_PRESENTED_EVIDENCE = {
+  raju: [], meera: [], arvind: [], nusrat: [], bhola: []
+};
 
 export const useGameStore = create((set, get) => ({
   // ── Game Flow, Pause, Audio & Menu ──────────────────────────────────────
@@ -55,6 +73,41 @@ export const useGameStore = create((set, get) => ({
   // ── Canonical Storyline Route ───────────────────────────────────────────
   activeStoryline: DEFAULT_STORYLINE,
   storylines: STORYLINES,
+
+  // ── DETERMINISTIC INTERROGATION SYSTEM (NEW) ────────────────────────────
+  // Storyline lock — null until pivot question (raju_who_paid) is answered
+  lockedStoryline: null,
+  storylineLocked: false,
+  showStorylinePivotModal: false,  // shows the "who do you think paid?" modal
+
+  // Per-suspect tracking of asked canonical question IDs
+  askedQuestionIds: { raju: [], meera: [], arvind: [], nusrat: [], bhola: [] },
+
+  // Per-suspect tracking of presented evidence IDs
+  presentedEvidenceIds: { raju: [], meera: [], arvind: [], nusrat: [], bhola: [] },
+
+  // All completed evidence challenge IDs (across all suspects)
+  completedChallengeIds: [],
+
+  // All discovered canonical clue IDs (from clueDatabase.js)
+  discoveredClueIds: [],
+
+  // Established facts (from interrogation breakthroughs)
+  establishedFacts: [],
+
+  // Exposed contradictions
+  exposedContradictionIds: [],
+
+  // Accusation state
+  accusationEligible: false,
+  accusationMade: null,         // { suspectId, timestamp, isCorrect }
+  accusationResult: null,       // { success, title, summary, ... }
+
+  // Pivot selection state
+  pendingPivotSuspects: null,   // ['meera', 'arvind', 'nusrat'] — shown in modal
+
+  // Stress band change notification
+  stressBandNotification: null, // { suspectId, reaction, band } — cleared after display
 
   // ── Navigation & Tabs ───────────────────────────────────────────────────
   activeTab: "interrogation", // "interrogation" | "case_files"
@@ -258,12 +311,451 @@ export const useGameStore = create((set, get) => ({
       solvedPuzzleIds: [],
       unlockedCutsceneIds: ["cutscene_opening"],
       activeCutscene: null,
-      activePuzzle: null
+      activePuzzle: null,
+      lockedStoryline: null,
+      storylineLocked: false,
+      showStorylinePivotModal: false,
+      askedQuestionIds: { raju: [], meera: [], arvind: [], nusrat: [], bhola: [] },
+      presentedEvidenceIds: { raju: [], meera: [], arvind: [], nusrat: [], bhola: [] },
+      completedChallengeIds: [],
+      discoveredClueIds: [],
+      establishedFacts: [],
+      exposedContradictionIds: [],
+      accusationEligible: false,
+      accusationMade: null,
+      accusationResult: null,
+      pendingPivotSuspects: null,
+      stressBandNotification: null
     });
   },
 
   setSelectedEvidence: (evidence) => set({ selectedEvidence: evidence }),
   setCurrentLanguage: (lang) => set({ currentLanguage: lang }),
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // DETERMINISTIC INTERROGATION ACTIONS (NEW SYSTEM)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Lock the storyline permanently. Called once when the pivot question is answered
+   * and the player selects a suspect in the pivot modal.
+   */
+  lockStoryline: (storylineId) => {
+    if (get().storylineLocked) return; // already locked, cannot change
+    if (!STORYLINES[storylineId]) return;
+    set({
+      lockedStoryline: storylineId,
+      storylineLocked: true,
+      showStorylinePivotModal: false,
+      activeStoryline: storylineId,
+      evidenceItems: getEvidenceForStoryline(storylineId),
+      selectedEvidence: getEvidenceForStoryline(storylineId)[0]
+    });
+  },
+
+  /**
+   * Dismiss the pivot modal without locking (player can ask more questions first).
+   */
+  dismissPivotModal: () => set({ showStorylinePivotModal: false }),
+
+  /**
+   * Core deterministic question-answering action.
+   * Called by both text and voice pathways.
+   * Returns an object describing the result for the UI to consume.
+   */
+  askQuestion: async (questionId, playerText) => {
+    const state = get();
+    const question = QUESTION_DATABASE[questionId];
+    if (!question) return { success: false, reason: "question_not_found" };
+
+    const suspectId = question.suspectId;
+    const askedForSuspect = state.askedQuestionIds[suspectId] || [];
+
+    // Prerequisite check
+    if (!arePrerequisitesMet(question, askedForSuspect)) {
+      return {
+        success: false,
+        reason: "prerequisites_not_met",
+        message: "You need to establish more facts before asking this."
+      };
+    }
+
+    // Check if already asked (return same answer but mark as repeat)
+    const isRepeat = askedForSuspect.includes(questionId);
+
+    // Record the question as asked (deduplicated)
+    if (!isRepeat) {
+      set((prev) => ({
+        askedQuestionIds: {
+          ...prev.askedQuestionIds,
+          [suspectId]: [...prev.askedQuestionIds[suspectId], questionId]
+        }
+      }));
+    }
+
+    // Get canonical answer
+    const canonicalData = getCanonicalAnswer(questionId);
+    if (!canonicalData) return { success: false, reason: "no_canonical_answer" };
+
+    const stressDelta = isRepeat ? -2 : canonicalData.stressDelta;
+    const trustDelta = isRepeat ? 0 : (canonicalData.trustDelta || 0);
+
+    // Update stress/trust
+    const currentStress = get().suspectStress[suspectId] || 30;
+    const currentTrust = get().suspectTrust[suspectId] || 50;
+    const stressUpdate = computeStressUpdate({ currentStress, delta: stressDelta, suspectId });
+
+    set((prev) => ({
+      suspectStress: { ...prev.suspectStress, [suspectId]: stressUpdate.newStress },
+      suspectTrust: {
+        ...prev.suspectTrust,
+        [suspectId]: Math.max(0, Math.min(100, currentTrust + trustDelta))
+      },
+      suspectLiveState: {
+        ...prev.suspectLiveState,
+        [suspectId]: {
+          ...(prev.suspectLiveState[suspectId] || {}),
+          stress: stressUpdate.newStress,
+          trust: Math.max(0, Math.min(100, currentTrust + trustDelta))
+        }
+      }
+    }));
+
+    // Show stress band notification if band changed
+    if (stressUpdate.bandChanged) {
+      set({ stressBandNotification: { suspectId, reaction: stressUpdate.bandReaction, band: stressUpdate.newBand } });
+      setTimeout(() => set({ stressBandNotification: null }), 4000);
+    }
+
+    // Unlock clue if conditions met
+    let clueUnlocked = null;
+    if (!isRepeat && question.unlocksClueId) {
+      const alreadyDiscovered = get().discoveredClueIds.includes(question.unlocksClueId);
+      if (!alreadyDiscovered) {
+        const clue = getClue(question.unlocksClueId);
+        if (clue) {
+          clueUnlocked = clue;
+          set((prev) => ({
+            discoveredClueIds: [...prev.discoveredClueIds, question.unlocksClueId],
+            discoveredClues: prev.discoveredClues.includes(clue.description)
+              ? prev.discoveredClues
+              : [clue.description, ...prev.discoveredClues],
+            investigationProgress: Math.min(100, prev.investigationProgress + 10)
+          }));
+
+          // Add auto investigator note
+          const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          const suspect = suspects[suspectId] || suspects.raju;
+          set((prev) => ({
+            investigatorNotes: [
+              {
+                id: "auto_" + Date.now(),
+                timestamp: timeStr,
+                text: `[CLUE // ${suspect.name}]: ${clue.description}`,
+                tag: "Clue",
+                isAuto: true
+              },
+              ...prev.investigatorNotes
+            ]
+          }));
+        }
+      }
+    }
+
+    // Check if pivot question unlocked
+    if (!isRepeat && question.isPivotQuestion) {
+      set({
+        showStorylinePivotModal: true,
+        pendingPivotSuspects: ["meera", "arvind", "nusrat"]
+      });
+    }
+
+    // Check accusation eligibility
+    get().checkAccusationEligibility();
+
+    return {
+      success: true,
+      answer: canonicalData.answer,
+      stressDelta,
+      trustDelta,
+      clueUnlocked,
+      isRepeat,
+      isPivotQuestion: question.isPivotQuestion || false
+    };
+  },
+
+  /**
+   * Present a physical evidence item to the currently selected suspect.
+   * Validates all prerequisites before returning a predefined response.
+   */
+  presentEvidence: async (evidenceId, targetSuspectId) => {
+    const state = get();
+    const suspectId = targetSuspectId || state.selectedSuspect;
+    const lockedStoryline = state.lockedStoryline || state.activeStoryline;
+
+    // Find the challenge for this evidence × suspect × storyline
+    const challenge = getChallengeForEvidenceAndSuspect(evidenceId, suspectId, lockedStoryline);
+
+    if (!challenge) {
+      // No predefined challenge — provide a neutral non-answer
+      const evidenceItem = CANONICAL_EVIDENCE_ITEMS.find((e) => e.id === evidenceId);
+      return {
+        success: true,
+        response: `${suspects[suspectId]?.name || "The suspect"} examines the ${evidenceItem?.name || "evidence"} carefully but says nothing that advances the investigation.`,
+        stressDelta: 2,
+        isNeutral: true
+      };
+    }
+
+    // Check if already completed
+    if (state.completedChallengeIds.includes(challenge.id)) {
+      return {
+        success: true,
+        response: `You have already presented this evidence. ${suspects[suspectId]?.name || "The suspect"} has nothing further to add.`,
+        stressDelta: 0,
+        isRepeat: true
+      };
+    }
+
+    // Check prerequisite questions
+    const askedForSuspect = state.askedQuestionIds[suspectId] || [];
+    const missingPrereqs = challenge.prerequisiteQuestionIds.filter(
+      (id) => !askedForSuspect.includes(id)
+    );
+    if (missingPrereqs.length > 0) {
+      return {
+        success: false,
+        reason: "prerequisites_not_met",
+        message: "Ask more questions before presenting this evidence."
+      };
+    }
+
+    // Check prerequisite clues
+    const missingClues = challenge.prerequisiteClueIds.filter(
+      (id) => !state.discoveredClueIds.includes(id)
+    );
+    if (missingClues.length > 0) {
+      return {
+        success: false,
+        reason: "clue_prerequisites_not_met",
+        message: "Discover more facts before presenting this evidence."
+      };
+    }
+
+    // Record challenge as completed
+    set((prev) => ({
+      completedChallengeIds: [...prev.completedChallengeIds, challenge.id],
+      presentedEvidenceIds: {
+        ...prev.presentedEvidenceIds,
+        [suspectId]: [
+          ...new Set([...(prev.presentedEvidenceIds[suspectId] || []), evidenceId])
+        ]
+      }
+    }));
+
+    // Update stress/trust
+    const currentStress = get().suspectStress[suspectId] || 30;
+    const currentTrust = get().suspectTrust[suspectId] || 50;
+    const stressUpdate = computeStressUpdate({
+      currentStress,
+      delta: challenge.stressDelta,
+      suspectId
+    });
+
+    set((prev) => ({
+      suspectStress: { ...prev.suspectStress, [suspectId]: stressUpdate.newStress },
+      suspectTrust: {
+        ...prev.suspectTrust,
+        [suspectId]: Math.max(0, Math.min(100, currentTrust + (challenge.trustDelta || 0)))
+      }
+    }));
+
+    // Unlock clue from challenge
+    let clueUnlocked = null;
+    if (challenge.unlocksClueId) {
+      const alreadyDiscovered = get().discoveredClueIds.includes(challenge.unlocksClueId);
+      if (!alreadyDiscovered) {
+        const clue = getClue(challenge.unlocksClueId);
+        if (clue) {
+          clueUnlocked = clue;
+          set((prev) => ({
+            discoveredClueIds: [...prev.discoveredClueIds, challenge.unlocksClueId],
+            discoveredClues: prev.discoveredClues.includes(clue.description)
+              ? prev.discoveredClues
+              : [clue.description, ...prev.discoveredClues],
+            investigationProgress: Math.min(100, prev.investigationProgress + 10)
+          }));
+        }
+      }
+    }
+
+    // Check accusation eligibility
+    get().checkAccusationEligibility();
+
+    return {
+      success: true,
+      response: challenge.response,
+      stressDelta: challenge.stressDelta,
+      trustDelta: challenge.trustDelta,
+      clueUnlocked
+    };
+  },
+
+  /**
+   * Classify player input and dispatch either a canonical question or a rephrase prompt.
+   * This is the main entry point for text/voice interrogation.
+   */
+  dispatchCanonicalInterrogation: async (playerText, isVoice = false) => {
+    if (!playerText || !playerText.trim()) return;
+    const state = get();
+    if (state.isSolved || state.isFailed) return;
+
+    const suspectId = state.selectedSuspect;
+    const lockedStoryline = state.lockedStoryline || null;
+    const askedForSuspect = state.askedQuestionIds[suspectId] || [];
+    const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const currentSuspectData = suspects[suspectId] || suspects.raju;
+
+    // Record player input in dialogue
+    set((prev) => ({
+      dialogueHistory: [
+        ...prev.dialogueHistory,
+        {
+          id: "d-" + Date.now(),
+          speaker: isVoice ? "Inspector (Voice)" : "Inspector (You)",
+          text: playerText,
+          time: timeStr,
+          type: "detective"
+        }
+      ]
+    }));
+
+    // Classify the question
+    const classification = classifyQuestion(playerText, suspectId, lockedStoryline, askedForSuspect);
+
+    let finalResponse;
+    let finalStressDelta;
+
+    if (classification.confidence === "low" || !classification.questionId) {
+      // No confident match — ask player to rephrase
+      finalResponse = getRephrasPrompt(suspectId);
+      finalStressDelta = 2;
+    } else {
+      // We have a confident classification — ask the canonical question
+      const result = await get().askQuestion(classification.questionId, playerText);
+
+      if (!result.success) {
+        // Prerequisites not met — provide a guarded response
+        finalResponse = result.message || getRephrasPrompt(suspectId);
+        finalStressDelta = 2;
+      } else {
+        finalResponse = result.answer;
+        finalStressDelta = result.stressDelta;
+      }
+    }
+
+    // Update dialogue display with suspect response
+    set((prev) => ({
+      currentDialogue: {
+        speaker: currentSuspectData.name,
+        role: currentSuspectData.role,
+        text: finalResponse,
+        topics: currentSuspectData.topics || []
+      },
+      dialogueHistory: [
+        ...prev.dialogueHistory,
+        {
+          id: "d-" + (Date.now() + 1),
+          speaker: currentSuspectData.name,
+          role: currentSuspectData.role,
+          text: finalResponse,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          type: "suspect",
+          suspectId,
+          questionId: classification.questionId || null
+        }
+      ]
+    }));
+
+    // TTS playback
+    const nextStress = get().suspectStress[suspectId] || 30;
+    await gnaniPipeline.synthesizeSpeech(finalResponse, suspectId, nextStress);
+  },
+
+  /**
+   * Check if the player has met all requirements to make an accusation.
+   * Updates accusationEligible state.
+   */
+  checkAccusationEligibility: () => {
+    const state = get();
+    const lockedStoryline = state.lockedStoryline || state.activeStoryline;
+    const allPresentedEvidence = Object.values(state.presentedEvidenceIds).flat();
+
+    const { eligible } = checkAccusationEligibility(
+      lockedStoryline,
+      state.discoveredClueIds,
+      allPresentedEvidence
+    );
+
+    if (eligible !== state.accusationEligible) {
+      set({ accusationEligible: eligible });
+    }
+  },
+
+  /**
+   * Make a final accusation against a suspect.
+   * Returns whether accusation is correct and what happens next.
+   */
+  makeAccusation: (suspectId) => {
+    const state = get();
+    const lockedStoryline = state.lockedStoryline || state.activeStoryline;
+    const requirements = ACCUSATION_REQUIREMENTS[lockedStoryline];
+
+    if (!requirements) return { success: false, reason: "no_storyline" };
+    if (!state.accusationEligible) return { success: false, reason: "not_eligible", message: "Gather more evidence before making an accusation." };
+
+    const isCorrect = suspectId === requirements.killerSuspectId;
+    const timestamp = new Date().toISOString();
+
+    set({
+      accusationMade: { suspectId, timestamp, isCorrect }
+    });
+
+    if (isCorrect) {
+      const verdict = {
+        success: true,
+        culpritId: requirements.killerSuspectId,
+        culpritName: requirements.killerName,
+        title: `CASE SOLVED: ${requirements.killerName.toUpperCase()} IS RESPONSIBLE`,
+        summary: STORYLINES[lockedStoryline]?.summary || requirements.summary,
+        motive: STORYLINES[lockedStoryline]?.motive,
+        fatalAction: STORYLINES[lockedStoryline]?.fatalAction
+      };
+      set({ isSolved: true, verdictResult: verdict, accusationResult: verdict });
+      return verdict;
+    } else {
+      // Wrong accusation — provide canonical wrong-accusation response
+      const wrongResponse = requirements.wrongAccusationResponses?.[suspectId] ||
+        "The evidence does not conclusively point to this person. Continue investigating.";
+      const failResult = {
+        success: false,
+        accusedSuspectId: suspectId,
+        message: wrongResponse,
+        title: "ACCUSATION REJECTED"
+      };
+      set((prev) => ({
+        accusationResult: failResult,
+        remainingTries: Math.max(0, prev.remainingTries - 1),
+        accusationMade: null // allow trying again
+      }));
+      return failResult;
+    }
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // END DETERMINISTIC INTERROGATION ACTIONS
+  // ══════════════════════════════════════════════════════════════════════════
+
 
   setGeneratorCountdown: (updateFn) => {
     set((state) => {
@@ -574,6 +1066,7 @@ export const useGameStore = create((set, get) => ({
     const query = `You claimed: "${c.claimA}", but evidence confirms: "${c.claimB}"! You are lying to the police!`;
 
     set((prev) => ({
+      exposedContradictionIds: [...new Set([...prev.exposedContradictionIds, contradictionId])],
       contradictions: prev.contradictions.map((item) =>
         item.id === contradictionId ? { ...item, resolved: true } : item
       ),
@@ -590,7 +1083,7 @@ export const useGameStore = create((set, get) => ({
   },
 
   /**
-   * Present evidence to suspect
+   * Present evidence to suspect — integrated with deterministic evidence challenge engine
    */
   presentEvidenceToSuspect: async (evidenceId) => {
     const state = get();
@@ -600,7 +1093,10 @@ export const useGameStore = create((set, get) => ({
     if (!item) return;
 
     const suspectId = state.selectedSuspect;
+    const currentSuspectData = suspects[suspectId] || suspects.raju;
+    const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+    // Set selected evidence and switch to interrogation tab
     set((prev) => ({
       selectedEvidence: item,
       activeTab: "interrogation",
@@ -612,11 +1108,50 @@ export const useGameStore = create((set, get) => ({
             ...new Set([...((prev.suspectLiveState[suspectId]?.seenEvidence) || []), evidenceId])
           ]
         }
-      }
+      },
+      dialogueHistory: [
+        ...prev.dialogueHistory,
+        {
+          id: "d-" + Date.now(),
+          speaker: "Inspector (Evidence Challenge)",
+          text: `[Presents ${item.name}]: Examine this carefully. Explain your connection to this item!`,
+          time: timeStr,
+          type: "detective"
+        }
+      ]
     }));
 
-    const query = `Look closely at this: ${item.name}! ${item.clue} Explain your connection to this!`;
-    await get().dispatchInterrogation(query, false, true);
+    // Run through deterministic evidence challenge engine
+    const challengeResult = await get().presentEvidence(evidenceId, suspectId);
+    const responseText = challengeResult.response || challengeResult.message ||
+      `${currentSuspectData.name} inspects the evidence closely but maintains silence.`;
+
+    // Record response in dialogue
+    set((prev) => ({
+      currentDialogue: {
+        speaker: currentSuspectData.name,
+        role: currentSuspectData.role,
+        text: responseText,
+        topics: currentSuspectData.topics || []
+      },
+      dialogueHistory: [
+        ...prev.dialogueHistory,
+        {
+          id: "d-" + (Date.now() + 1),
+          speaker: currentSuspectData.name,
+          role: currentSuspectData.role,
+          text: responseText,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          type: "suspect",
+          suspectId,
+          evidenceId
+        }
+      ]
+    }));
+
+    // Synthesize response audio
+    const currentStress = get().suspectStress[suspectId] || 30;
+    await gnaniPipeline.synthesizeSpeech(responseText, suspectId, currentStress);
   },
 
   // ── Cutscenes & Puzzles Management ──────────────────────────────────────
@@ -679,8 +1214,12 @@ export const useGameStore = create((set, get) => ({
       resolvedContradictionIds.includes(id)
     );
 
-    // 3. Corroborating confession / admission verification
-    const confessionSatisfied = state.unlockedGateIds.length > 0 || state.solvedPuzzleIds.length > 0;
+    // 3. Corroborating confession / admission verification (via gate, clue, or evidence challenge)
+    const confessionSatisfied =
+      state.unlockedGateIds.length > 0 ||
+      state.completedChallengeIds.length > 0 ||
+      state.discoveredClueIds.length >= 3 ||
+      state.solvedPuzzleIds.length > 0;
 
     const ready = isCorrectCulprit && physicalSatisfied && (contradictionSatisfied || confessionSatisfied);
 
@@ -771,7 +1310,7 @@ export const useGameStore = create((set, get) => ({
       set({ lastTranscript: transcript, isProcessing: false });
 
       if (transcript && transcript.trim()) {
-        await get().dispatchInterrogation(transcript, true);
+        await get().dispatchCanonicalInterrogation(transcript, true);
       }
     } else {
       set({ isProcessing: false });
@@ -786,12 +1325,65 @@ export const useGameStore = create((set, get) => ({
     }
   },
 
-  askTopicQuestion: (topic) => {
-    get().dispatchInterrogation(topic.title, false, false, topic.response);
+  askTopicQuestion: async (topic) => {
+    const state = get();
+    const suspectId = state.selectedSuspect;
+    const candidateQid = QUESTION_DATABASE[topic.id]
+      ? topic.id
+      : QUESTION_DATABASE[`${suspectId}_${topic.id}`]
+      ? `${suspectId}_${topic.id}`
+      : null;
+
+    if (candidateQid) {
+      const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const currentSuspectData = suspects[suspectId] || suspects.raju;
+      set((prev) => ({
+        dialogueHistory: [
+          ...prev.dialogueHistory,
+          {
+            id: "d-" + Date.now(),
+            speaker: "Inspector (You)",
+            text: topic.title,
+            time: timeStr,
+            type: "detective"
+          }
+        ]
+      }));
+
+      const res = await get().askQuestion(candidateQid, topic.title);
+      const answer = res.success ? res.answer : (res.message || topic.response);
+
+      set((prev) => ({
+        currentDialogue: {
+          speaker: currentSuspectData.name,
+          role: currentSuspectData.role,
+          text: answer,
+          topics: currentSuspectData.topics || []
+        },
+        dialogueHistory: [
+          ...prev.dialogueHistory,
+          {
+            id: "d-" + (Date.now() + 1),
+            speaker: currentSuspectData.name,
+            role: currentSuspectData.role,
+            text: answer,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            type: "suspect",
+            suspectId,
+            questionId: candidateQid
+          }
+        ]
+      }));
+
+      const stress = get().suspectStress[suspectId] || 30;
+      await gnaniPipeline.synthesizeSpeech(answer, suspectId, stress);
+    } else {
+      await get().dispatchCanonicalInterrogation(topic.title, false);
+    }
   },
 
-  askTextQuestion: (text) => {
-    get().dispatchInterrogation(text, false);
+  askTextQuestion: async (text) => {
+    await get().dispatchCanonicalInterrogation(text, false);
   },
 
   speakCurrentSuspect: async () => {
@@ -866,25 +1458,26 @@ gnaniPipeline.subscribe((pipeState) => {
   });
 });
 
-// Periodic Generator Atmospheric Flicker
-setInterval(() => {
-  if (Math.random() > 0.65) {
-    useGameStore.setState({ generatorFlicker: true });
-    setTimeout(() => useGameStore.setState({ generatorFlicker: false }), 280);
-  }
-}, 18000);
+// Periodic Generator Atmospheric Flicker & Real-Time Countdown Timer (Browser Only)
+if (typeof window !== "undefined") {
+  setInterval(() => {
+    if (Math.random() > 0.65) {
+      useGameStore.setState({ generatorFlicker: true });
+      setTimeout(() => useGameStore.setState({ generatorFlicker: false }), 280);
+    }
+  }, 18000);
 
-// Auxiliary Generator Real-Time Countdown Timer (40 Minutes)
-setInterval(() => {
-  const state = useGameStore.getState();
-  if (state.isSolved || state.isFailed || state.isPaused) return;
-  if (state.generatorCountdown <= 1) {
-    useGameStore.setState({
-      generatorCountdown: 0,
-      isFailed: true,
-      failReason: "Auxiliary generator depleted: Rex Talkies plunged into permanent blackout and the killer fled."
-    });
-  } else {
-    useGameStore.setState({ generatorCountdown: state.generatorCountdown - 1 });
-  }
-}, 1000);
+  setInterval(() => {
+    const state = useGameStore.getState();
+    if (state.isSolved || state.isFailed || state.isPaused) return;
+    if (state.generatorCountdown <= 1) {
+      useGameStore.setState({
+        generatorCountdown: 0,
+        isFailed: true,
+        failReason: "Auxiliary generator depleted: Rex Talkies plunged into permanent blackout and the killer fled."
+      });
+    } else {
+      useGameStore.setState({ generatorCountdown: state.generatorCountdown - 1 });
+    }
+  }, 1000);
+}
