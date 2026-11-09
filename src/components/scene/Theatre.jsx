@@ -7,7 +7,6 @@ import { RainWindow } from "./RainWindow";
 import { LightingRig } from "./LightingRig";
 import { Atmosphere } from "./Atmosphere";
 import { SuspectGroup } from "../characters/SuspectGroup";
-import { AudienceGroup } from "../characters/AudienceGroup";
 import { EvidenceObject } from "../evidence/EvidenceObject";
 import { initialEvidenceItems } from "../../data/evidence";
 import { TheatreModel } from "./TheatreModel";
@@ -94,9 +93,6 @@ export default function Theatre() {
 
       {/* CINEMA SEATING ROWS (4 ROWS x 6 SEATS) */}
       <CinemaSeats />
-
-      {/* RANDOM AUDIENCE MEMBERS & SPECTATORS */}
-      <AudienceGroup />
 
       {/* THE 5 SUSPECT CHARACTERS SEATED */}
       <SuspectGroup />

@@ -56,3 +56,4 @@ export function usePeoplePack() {
 
   return { geometries, isReady: Object.keys(geometries).length > 0 };
 }
+
