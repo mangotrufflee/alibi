@@ -1,38 +1,33 @@
 // src/components/ui/HeaderNav.jsx
 import React from "react";
+import { motion } from "framer-motion";
+import {
+  Mic,
+  FolderOpen,
+  Puzzle,
+  Clapperboard,
+  Lightbulb,
+  Volume2,
+  VolumeX,
+  Menu,
+  Trophy
+} from "lucide-react";
 import { useGame } from "../../state/GameContext";
-
-function HeaderTimer() {
-  const generatorCountdown = useGame((s) => s.generatorCountdown);
-  const minutes = Math.floor(generatorCountdown / 60);
-  const seconds = generatorCountdown % 60;
-  const timeFormatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  const isTimeCritical = generatorCountdown < 300;
-
-  return (
-    <div
-      className={`progress-badge timer-badge ${isTimeCritical ? "timer-alert" : ""}`}
-      title="Auxiliary Diesel Generator Countdown"
-    >
-      <span className="progress-label">Generator:</span>
-      <strong className="timer-digits">⏱️ {timeFormatted}</strong>
-    </div>
-  );
-}
 
 export default function HeaderNav() {
   const activeTab = useGame((s) => s.activeTab);
   const setActiveTab = useGame((s) => s.setActiveTab);
   const setCaseSubTab = useGame((s) => s.setCaseSubTab);
-  const activeStoryline = useGame((s) => s.activeStoryline);
-  const selectStoryline = useGame((s) => s.selectStoryline);
-  const resetRun = useGame((s) => s.resetRun);
   const score = useGame((s) => s.score);
-  const cluesCount = useGame((s) => s.discoveredClues.length);
   const openPuzzle = useGame((s) => s.openPuzzle);
   const openCutscene = useGame((s) => s.openCutscene);
   const unlockedCutsceneIds = useGame((s) => s.unlockedCutsceneIds);
   const solvedPuzzleIds = useGame((s) => s.solvedPuzzleIds);
+  const isHintsDrawerOpen = useGame((s) => s.isHintsDrawerOpen);
+  const setIsHintsDrawerOpen = useGame((s) => s.setIsHintsDrawerOpen);
+  const isMuted = useGame((s) => s.isMuted);
+  const toggleMute = useGame((s) => s.toggleMute);
+  const toggleMenu = useGame((s) => s.toggleMenu);
 
   const handleOpenCaseFiles = (subTab = "evidence_list") => {
     setCaseSubTab(subTab);
@@ -42,99 +37,119 @@ export default function HeaderNav() {
   const isCaseFilesActive =
     activeTab === "case_files" || activeTab === "evidence" || activeTab === "dossier";
 
-  return (
-    <header className="alibi-header">
-      <div className="header-brand">
-        <div className="brand-logo-frame">
-          <span className="brand-film-sprocket">🎞️</span>
-          <div className="brand-text-block">
-            <h1 className="brand-title">ALIBI</h1>
-            <span className="brand-tagline">Rex Talkies • 17 Oct 2026 Noir</span>
-          </div>
-        </div>
+  const tabs = [
+    {
+      id: "interrogation",
+      label: "Interrogation",
+      icon: <Mic size={15} />,
+      isActive: activeTab === "interrogation",
+      onClick: () => setActiveTab("interrogation")
+    },
+    {
+      id: "case_files",
+      label: "Case Files",
+      icon: <FolderOpen size={15} />,
+      isActive: isCaseFilesActive,
+      onClick: () => handleOpenCaseFiles("evidence_list")
+    },
+    {
+      id: "puzzles",
+      label: `Puzzles (${solvedPuzzleIds?.length || 0}/5)`,
+      icon: <Puzzle size={15} />,
+      isActive: false,
+      onClick: () => openPuzzle("puzzle_ticket_clock")
+    },
+    {
+      id: "scenes",
+      label: `Scenes (${unlockedCutsceneIds?.length || 1}/8)`,
+      icon: <Clapperboard size={15} />,
+      isActive: false,
+      onClick: () =>
+        openCutscene(
+          unlockedCutsceneIds[unlockedCutsceneIds.length - 1] || "cutscene_opening"
+        )
+    }
+  ];
 
-        {/* CANONICAL STORYLINE SELECTOR */}
-        <div className="storyline-selector-cluster">
-          <span className="storyline-label">ROUTE:</span>
-          <select
-            className="storyline-dropdown"
-            value={activeStoryline}
-            onChange={(e) => selectStoryline(e.target.value)}
-            title="Switch between the 3 distinct canonical storylines"
-          >
-            <option value="A">Storyline A: The Sale Must Survive (Meera Kapoor)</option>
-            <option value="B">Storyline B: The Film That Would Not Die (Dr. Arvind Sethi)</option>
-            <option value="C">Storyline C: The Missing Minute (Nusrat Ali)</option>
-          </select>
-          <button
-            type="button"
-            className="reset-run-btn"
-            onClick={() => resetRun()}
-            title="Reset current run to initial state"
-          >
-            🔄 Reset
-          </button>
-        </div>
+  return (
+    <header className="alibi-header alibi-dock-header">
+      {/* LEFT: ONLY "ALIBI" TEXT + THE 4 TABS ALIGNED LEFT */}
+      <div className="header-left-cluster">
+        {/* ALIBI BRAND TEXT */}
+        <h1 className="header-brand-alibi">ALIBI</h1>
+
+        {/* 4 TABS - DOCK THEME ALIGNED LEFT */}
+        <nav className="header-dock-tabs-container" aria-label="Game Navigation Tabs">
+          {tabs.map((tab) => (
+            <motion.button
+              key={tab.id}
+              type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className={`header-dock-tab-btn ${tab.isActive ? "active" : ""}`}
+              onClick={tab.onClick}
+            >
+              <span className="tab-dock-icon">{tab.icon}</span>
+              <span className="tab-dock-label">{tab.label}</span>
+            </motion.button>
+          ))}
+        </nav>
       </div>
 
-      {/* GAME NAVIGATION TABS */}
-      <nav className="header-nav-tabs">
-        <button
-          type="button"
-          className={`nav-tab-btn ${activeTab === "interrogation" ? "active" : ""}`}
-          onClick={() => setActiveTab("interrogation")}
-        >
-          <span className="tab-icon">🎙️</span>
-          <span>Interrogation</span>
-        </button>
-
-        <button
-          type="button"
-          className={`nav-tab-btn ${isCaseFilesActive ? "active" : ""}`}
-          onClick={() => handleOpenCaseFiles("evidence_list")}
-        >
-          <span className="tab-icon">📁</span>
-          <span>Case Files (8 Tabs)</span>
-        </button>
-
-        {/* QUICK PUZZLE LAUNCHER */}
-        <button
-          type="button"
-          className="nav-tab-btn nav-tab-action"
-          onClick={() => openPuzzle("puzzle_ticket_clock")}
-          title="Open Forensic Analysis Puzzles"
-        >
-          <span className="tab-icon">🧩</span>
-          <span>Puzzles ({solvedPuzzleIds.length}/5)</span>
-        </button>
-
-        {/* QUICK CUTSCENE ARCHIVE */}
-        <button
-          type="button"
-          className="nav-tab-btn nav-tab-action"
-          onClick={() => openCutscene(unlockedCutsceneIds[unlockedCutsceneIds.length - 1] || "cutscene_opening")}
-          title="Replay Unlocked Cutscenes"
-        >
-          <span className="tab-icon">🎬</span>
-          <span>Scenes ({unlockedCutsceneIds.length}/8)</span>
-        </button>
-      </nav>
-
-      {/* RIGHT STATUS INDICATORS */}
-      <div className="header-status-area">
-        {/* SCORE BADGE */}
-        <div className="progress-badge score-badge" title="Investigation Thoroughness Score">
-          <span className="progress-label">Score:</span>
-          <strong>{score} pts</strong>
+      {/* RIGHT: SCORE -> HINT ICON -> MUTE ICON -> MENU ICON */}
+      <div className="header-right-cluster">
+        {/* SCORE PART */}
+        <div className="header-dock-score-pill" title="Investigation Thoroughness Score">
+          <Trophy size={15} className="score-trophy-icon" />
+          <span className="score-val">{score}</span>
+          <span className="score-pts">PTS</span>
         </div>
 
-        {/* GENERATOR COUNTDOWN BADGE */}
-        <HeaderTimer />
+        {/* DOCK ACTION ICONS GROUP */}
+        <div className="header-dock-actions-group">
+          {/* HINT ICON */}
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.15, y: -2 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className={`header-dock-icon-btn ${isHintsDrawerOpen ? "active" : ""}`}
+            onClick={() => setIsHintsDrawerOpen(!isHintsDrawerOpen)}
+            title="Forensic Hints & Truth Gates"
+            aria-label="Hints"
+          >
+            <Lightbulb size={17} />
+            {isHintsDrawerOpen && <span className="header-icon-active-dot" />}
+          </motion.button>
 
-        {/* CLUES DISCOVERED BADGE */}
-        <div className="progress-badge" title="Forensic Clues & Revelations Discovered">
-          <span className="progress-label">Clues:</span>
-          <strong>{cluesCount}</strong>
+          {/* MUTE MUSIC ICON */}
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.15, y: -2 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className={`header-dock-icon-btn ${isMuted ? "muted" : ""}`}
+            onClick={toggleMute}
+            title={isMuted ? "Unmute Background Music & Audio" : "Mute Background Music & Audio"}
+            aria-label={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? <VolumeX size={17} /> : <Volume2 size={17} />}
+          </motion.button>
+
+          {/* GAME MENU ICON */}
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.15, y: -2 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="header-dock-icon-btn header-dock-menu-btn"
+            onClick={toggleMenu}
+            title="Game Menu (Resume, Pause, Quit, Options)"
+            aria-label="Menu"
+          >
+            <Menu size={17} />
+          </motion.button>
         </div>
       </div>
     </header>

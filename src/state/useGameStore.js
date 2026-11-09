@@ -29,10 +29,29 @@ import {
 import { truthGateEngine } from "../services/truthGateEngine.js";
 import { CUTSCENES } from "../data/cutscenesData.js";
 import { PUZZLES } from "../data/puzzlesData.js";
+import { ambientAudio } from "../services/ambientAudio.js";
 
 const DEFAULT_STORYLINE = "A";
 
 export const useGameStore = create((set, get) => ({
+  // ── Game Flow, Pause, Audio & Menu ──────────────────────────────────────
+  isPaused: false,
+  isMuted: false,
+  isMenuOpen: false,
+  setIsMenuOpen: (isOpen) => set({ isMenuOpen: isOpen }),
+  toggleMenu: () => set((s) => ({ isMenuOpen: !s.isMenuOpen })),
+  setPaused: (isPaused) => set({ isPaused }),
+  togglePause: () => set((s) => ({ isPaused: !s.isPaused })),
+  setMuted: (isMuted) => {
+    ambientAudio.setMuted(isMuted);
+    set({ isMuted });
+  },
+  toggleMute: () => {
+    const next = !get().isMuted;
+    ambientAudio.setMuted(next);
+    set({ isMuted: next });
+    return next;
+  },
   // ── Canonical Storyline Route ───────────────────────────────────────────
   activeStoryline: DEFAULT_STORYLINE,
   storylines: STORYLINES,
@@ -858,7 +877,7 @@ setInterval(() => {
 // Auxiliary Generator Real-Time Countdown Timer (40 Minutes)
 setInterval(() => {
   const state = useGameStore.getState();
-  if (state.isSolved || state.isFailed) return;
+  if (state.isSolved || state.isFailed || state.isPaused) return;
   if (state.generatorCountdown <= 1) {
     useGameStore.setState({
       generatorCountdown: 0,

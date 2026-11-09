@@ -12,6 +12,7 @@ import HintsDrawer from "./components/ui/HintsDrawer";
 import CaseFilesHub from "./components/case/CaseFilesHub";
 import PuzzleModal from "./components/puzzles/PuzzleModal";
 import CutsceneModal from "./components/cutscenes/CutsceneModal";
+import PauseMenu from "./components/ui/PauseMenu";
 import "./styles/noir-theme.css";
 
 function GameMain() {
@@ -70,6 +71,7 @@ function GameMain() {
       <VoiceLabModal />
       <PuzzleModal />
       <CutsceneModal />
+      <PauseMenu />
     </div>
   );
 }
