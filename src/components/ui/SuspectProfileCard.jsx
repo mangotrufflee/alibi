@@ -54,11 +54,11 @@ export default function SuspectProfileCard() {
         className="suspect-profile-floating-card"
         style={{
           position: "fixed",
-          top: "76px",
-          left: isLeftSuspect ? "auto" : "92px",
-          right: isLeftSuspect ? "36px" : "auto",
-          width: "350px",
-          maxHeight: "calc(100vh - 100px)",
+          top: "74px",
+          left: isLeftSuspect ? "auto" : "86px",
+          right: isLeftSuspect ? "86px" : "auto",
+          width: "340px",
+          maxHeight: "calc(100vh - 240px)",
           background: "rgba(9, 13, 20, 0.94)",
           backdropFilter: "blur(20px)",
           border: `1px solid rgba(31, 97, 239, 0.45)`,

@@ -108,8 +108,8 @@ export function PersonModel({
         </mesh>
       )}
 
-      {/* SUSPECT HOVER OR SELECTED FLOATING NAME BADGE */}
-      {isSuspect && (isSelected || isHovered) && (
+      {/* SUSPECT HOVER FLOATING NAME BADGE (ONLY SHOWN ON HOVER, NOT WHEN TALKING) */}
+      {isSuspect && isHovered && !isSelected && (
         <Html position={[0, 1.55, 0]} center distanceFactor={7}>
           <div
             style={{

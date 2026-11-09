@@ -4797,23 +4797,26 @@ body {
 
 /* SIDEBAR RAILS BASE (MACOS DOCK STYLING) */
 .alibi-sidebar {
-  position: absolute;
-  top: 76px;
-  bottom: 210px;
-  z-index: 25;
+  position: fixed;
+  top: 74px;
+  bottom: auto;
+  height: fit-content;
+  max-height: calc(100vh - 100px);
+  z-index: 35;
   pointer-events: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
-  background: rgba(11, 13, 20, 0.78);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(11, 13, 20, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
-  padding: 12px 7px;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 10px 5px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 16px rgba(31, 97, 239, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.15);
   transition: all 0.2s ease;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
 
 .macos-dock-separator {
@@ -4896,13 +4899,13 @@ body {
 /* LEFT SIDEBAR: SUSPECTS */
 .alibi-left-sidebar {
   left: 14px;
-  width: 66px;
+  width: 60px;
 }
 
 .suspect-icons-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
   align-items: center;
 }
@@ -4916,9 +4919,9 @@ body {
 
 .suspect-rail-btn {
   position: relative;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
   background: #0b0d14;
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
@@ -5139,13 +5142,13 @@ body {
 /* RIGHT SIDEBAR: INVESTIGATION TOOLS */
 .alibi-right-sidebar {
   right: 14px;
-  width: 66px;
+  width: 60px;
 }
 
 .tool-icons-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
   align-items: center;
 }
@@ -5159,9 +5162,9 @@ body {
 
 .tool-rail-btn {
   position: relative;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
   background: #0b0d14;
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;

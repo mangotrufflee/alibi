@@ -29,12 +29,12 @@ export default function CrossExamineTopics({ suspectId }) {
 
   return (
     <div className="cross-examine-container" style={{
-      marginTop: "0.6rem",
-      paddingTop: "0.6rem",
+      marginTop: "0.25rem",
+      paddingTop: "0.25rem",
       borderTop: "1px solid rgba(255, 255, 255, 0.08)",
       display: "flex",
       flexDirection: "column",
-      gap: "0.45rem"
+      gap: "0.25rem"
     }}>
       {/* SECTION HEADER & CONTROLS */}
       <div style={{
@@ -171,8 +171,8 @@ export default function CrossExamineTopics({ suspectId }) {
                 border: `1px solid ${isAsked ? "rgba(55, 114, 241, 0.25)" : "rgba(55, 114, 241, 0.5)"}`,
                 borderRadius: "6px",
                 color: isAsked ? "#94a3b8" : "#f1f5f9",
-                padding: "0.4rem 0.75rem",
-                fontSize: "0.75rem",
+                padding: "0.22rem 0.55rem",
+                fontSize: "0.7rem",
                 cursor: isBusy ? "not-allowed" : "pointer",
                 display: "flex",
                 alignItems: "center",
