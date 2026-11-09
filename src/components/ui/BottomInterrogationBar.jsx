@@ -271,7 +271,7 @@ export default function BottomInterrogationBar() {
             bottom: "24px",
             left: "50%",
             transform: "translateX(-50%)",
-            width: "min(780px, calc(100vw - 420px))",
+            width: "min(720px, 90vw)",
             background: "rgba(9, 13, 20, 0.94)",
             backdropFilter: "blur(20px)",
             border: "1px solid rgba(31, 97, 239, 0.4)",
