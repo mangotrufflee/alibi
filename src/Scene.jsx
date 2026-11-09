@@ -22,7 +22,9 @@ export default function Scene() {
         <CameraController />
 
         {/* 3D THEATRE ENVIRONMENT */}
-        <Theatre />
+        <React.Suspense fallback={null}>
+          <Theatre />
+        </React.Suspense>
 
         {/* FREE-CAMERA ORBIT CONTROLS */}
         {enableOrbit && (

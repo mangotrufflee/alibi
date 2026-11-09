@@ -50,14 +50,6 @@ export function EvidenceObject({ evidence }) {
         />
       </ModelWrapper>
 
-      {/* SUBTLE DETECTIVE GLOW PULSE */}
-      <pointLight
-        position={[0, 0.1, 0]}
-        color={isHovered ? "#3772f1" : "#1f61ef"}
-        intensity={isHovered ? 0.8 : 0.25}
-        distance={1.2}
-      />
-
       {/* HOVER TOOLTIP IN SCENE */}
       {isHovered && (
         <Html position={[0, 0.25, 0]} center distanceFactor={8}>

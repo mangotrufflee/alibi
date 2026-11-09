@@ -61,14 +61,6 @@ export function ProjectorBeam() {
           depthWrite={false}
         />
       </mesh>
-
-      {/* LIGHT CONE APERTURE AT PROJECTION BOOTH SLIT */}
-      <pointLight
-        position={[0, 0.4, 0.5]}
-        color="#fef08a"
-        intensity={1.2}
-        distance={6}
-      />
     </group>
   );
 }

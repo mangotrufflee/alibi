@@ -75,17 +75,6 @@ export function RainWindow() {
         <lineBasicMaterial color="#93c5fd" transparent opacity={0.65} />
       </lineSegments>
 
-      {/* COLD STREET BLEED LIGHT ENTERING AUDITORIUM */}
-      <spotLight
-        position={[2.5, 3.5, 0]}
-        target-position={[4.0, 0, 0]}
-        color="#38bdf8"
-        intensity={0.6}
-        distance={9}
-        angle={0.6}
-        penumbra={0.8}
-      />
-
       {/* EXIT SIGN (RESTRICTED DIM RED NOIR ACCENT) */}
       <mesh position={[0.2, 4.6, 0]}>
         <boxGeometry args={[0.1, 0.25, 0.7]} />
@@ -95,7 +84,6 @@ export function RainWindow() {
         <planeGeometry args={[0.65, 0.2]} />
         <meshBasicMaterial color="#ef4444" />
       </mesh>
-      <pointLight position={[0.4, 4.6, 0]} color="#ef4444" intensity={0.4} distance={2.5} />
     </group>
   );
 }
