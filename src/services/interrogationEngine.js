@@ -243,3 +243,5 @@ export class InterrogationEngine {
 }
 
 export const interrogationEngine = new InterrogationEngine();
+
+export { getCanonicalAnswer, getQuestion, QUESTION_DATABASE } from "../data/questionDatabase.js";
