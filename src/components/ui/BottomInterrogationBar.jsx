@@ -1,14 +1,19 @@
 // src/components/ui/BottomInterrogationBar.jsx
+// Floating Interrogation Console — appears only when a suspect is chosen
+// Contains complete testimony text, voice input, type input, voice listen button,
+// and CrossExamineTopics component rendered below the input box.
+
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "../../state/GameContext";
 import { suspects } from "../../data/suspects";
+import CrossExamineTopics from "./CrossExamineTopics";
 
 export default function BottomInterrogationBar() {
   const selectedSuspect = useGame((s) => s.selectedSuspect);
-  const suspectStress = useGame((s) => s.suspectStress);
+  const selectSuspect = useGame((s) => s.selectSuspect);
   const currentDialogue = useGame((s) => s.currentDialogue);
   const dialogueHistory = useGame((s) => s.dialogueHistory);
-  const askTopicQuestion = useGame((s) => s.askTopicQuestion);
   const askTextQuestion = useGame((s) => s.askTextQuestion);
   const isRecording = useGame((s) => s.isRecording);
   const isProcessing = useGame((s) => s.isProcessing);
@@ -20,15 +25,8 @@ export default function BottomInterrogationBar() {
   const setCurrentLanguage = useGame((s) => s.setCurrentLanguage);
   const isSolved = useGame((s) => s.isSolved);
   const isFailed = useGame((s) => s.isFailed);
-  const isTranscriptOpen = useGame((s) => s.isTranscriptOpen);
-  const setIsTranscriptOpen = useGame((s) => s.setIsTranscriptOpen);
-  const isHintsDrawerOpen = useGame((s) => s.isHintsDrawerOpen);
-  const setIsHintsDrawerOpen = useGame((s) => s.setIsHintsDrawerOpen);
-  const unlockedGateIds = useGame((s) => s.unlockedGateIds);
 
-  // Deterministic Interrogation & Evidence Challenge State
-  const evidenceItems = useGame((s) => s.evidenceItems) || [];
-  const presentEvidenceToSuspect = useGame((s) => s.presentEvidenceToSuspect);
+  // Storyline Pivot & Accusation State
   const showStorylinePivotModal = useGame((s) => s.showStorylinePivotModal);
   const lockStoryline = useGame((s) => s.lockStoryline);
   const dismissPivotModal = useGame((s) => s.dismissPivotModal);
@@ -37,12 +35,14 @@ export default function BottomInterrogationBar() {
   const stressBandNotification = useGame((s) => s.stressBandNotification);
 
   const [textInput, setTextInput] = useState("");
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isEvidencePickerOpen, setIsEvidencePickerOpen] = useState(false);
   const [showAccusationConfirm, setShowAccusationConfirm] = useState(false);
 
+  // FLOATING BAR APPEARS ONLY WHEN A SUSPECT IS CHOSEN
+  if (!selectedSuspect) {
+    return null;
+  }
+
   const currentSuspect = suspects[selectedSuspect] || suspects.raju;
-  const stressLevel = suspectStress[selectedSuspect] || 30;
   const isGameOver = isSolved || isFailed;
 
   // Find the latest suspect statement from dialogue history
@@ -61,11 +61,6 @@ export default function BottomInterrogationBar() {
     if (!textInput.trim() || isRecording || isProcessing || isGameOver) return;
     askTextQuestion(textInput);
     setTextInput("");
-  };
-
-  const handlePresentEvidence = (evidenceId) => {
-    setIsEvidencePickerOpen(false);
-    presentEvidenceToSuspect(evidenceId);
   };
 
   const handleConfirmAccusation = () => {
@@ -262,364 +257,348 @@ export default function BottomInterrogationBar() {
         </div>
       )}
 
-      {/* ── MAIN INTERROGATION BAR ────────────────────────────────────────── */}
-      <footer
-        className={`bottom-interrogation-bar ${isMinimized ? "minimized" : ""}`}
-        aria-label="Detective Interrogation Console"
-      >
-        {/* MINIMIZE / RESTORE BAR TAB */}
-        <div className="bottom-bar-header-strip">
-          <div className="strip-left">
-            <span className="strip-title">REX TALKIES CROSS-EXAMINATION</span>
-            <span className="strip-suspect-pill" style={{ color: currentSuspect.color }}>
-              ● {currentSuspect.name} ({currentSuspect.role})
-            </span>
-            {accusationEligible && (
+      {/* ── FLOATING INTERROGATION CONSOLE (APPEARS ONLY WHEN SUSPECT IS CHOSEN) ── */}
+      <AnimatePresence>
+        <motion.div
+          key={selectedSuspect}
+          initial={{ opacity: 0, y: 36, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 28, scale: 0.97 }}
+          transition={{ duration: 0.28, ease: "easeOut" }}
+          className="floating-bottom-bar"
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "min(880px, calc(100vw - 220px))",
+            background: "rgba(9, 13, 20, 0.94)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(31, 97, 239, 0.4)",
+            borderRadius: "16px",
+            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.88), 0 0 35px rgba(31, 97, 239, 0.2)",
+            padding: "0.85rem 1.25rem 1rem 1.25rem",
+            zIndex: 40,
+            color: "#f8fafc",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.65rem",
+            pointerEvents: "auto"
+          }}
+          aria-label="Floating Interrogation Console"
+        >
+          {/* BAR HEADER STRIP: TARGET SUSPECT + VOICE LISTEN BUTTON + CLOSE BTN */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingBottom: "0.45rem",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+            fontSize: "0.75rem"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
               <span style={{
-                background: "#1f61ef",
-                color: "#ffffff",
-                padding: "0.15rem 0.5rem",
-                borderRadius: "4px",
-                fontSize: "0.65rem",
+                color: currentSuspect.color,
                 fontWeight: 700,
-                letterSpacing: "0.05em",
-                marginLeft: "0.5rem",
-                animation: "pulse 2s infinite"
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem"
               }}>
-                ⚖️ ACCUSATION READY
+                <span>●</span>
+                <span>INTERROGATING: {currentSuspect.name.toUpperCase()}</span>
               </span>
-            )}
-          </div>
 
-          <div className="strip-right">
-            {accusationEligible && !isGameOver && (
+              {accusationEligible && !isGameOver && (
+                <button
+                  type="button"
+                  onClick={() => setShowAccusationConfirm(true)}
+                  style={{
+                    background: "#dc2626",
+                    color: "#ffffff",
+                    border: "none",
+                    padding: "0.2rem 0.6rem",
+                    borderRadius: "4px",
+                    fontSize: "0.68rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    letterSpacing: "0.05em",
+                    animation: "pulse 2s infinite"
+                  }}
+                  title={`Formally accuse ${currentSuspect.name}`}
+                >
+                  ⚖️ ACCUSE SUSPECT
+                </button>
+              )}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {/* VOICE LISTEN / STOP BUTTON */}
               <button
                 type="button"
-                onClick={() => setShowAccusationConfirm(true)}
+                onClick={isSpeaking ? stopAudio : speakCurrentSuspect}
+                disabled={isRecording || isProcessing}
                 style={{
-                  background: "#dc2626",
-                  color: "#ffffff",
-                  border: "none",
-                  padding: "0.35rem 0.8rem",
-                  borderRadius: "4px",
-                  fontSize: "0.75rem",
-                  fontWeight: 700,
+                  background: isSpeaking ? "rgba(220, 38, 38, 0.2)" : "rgba(31, 97, 239, 0.15)",
+                  border: `1px solid ${isSpeaking ? "#dc2626" : "rgba(55, 114, 241, 0.4)"}`,
+                  color: isSpeaking ? "#fca5a5" : "#93c5fd",
+                  padding: "0.25rem 0.65rem",
+                  borderRadius: "6px",
+                  fontSize: "0.72rem",
+                  fontWeight: 600,
                   cursor: "pointer",
-                  marginRight: "0.5rem"
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.3rem"
                 }}
-                title={`Formally accuse ${currentSuspect.name}`}
+                title={isSpeaking ? "Stop Voice Playback" : `Listen to ${currentSuspect.name} speak`}
               >
-                ⚖️ Accuse {currentSuspect.name}
-              </button>
-            )}
-
-            <button
-              type="button"
-              className="transcript-toggle-btn"
-              onClick={() => setIsHintsDrawerOpen(!isHintsDrawerOpen)}
-              title="Toggle forensic hint cards and suspect demeanor truth gates"
-            >
-              💡 Hints & Gates ({unlockedGateIds?.length || 0})
-            </button>
-            <button
-              type="button"
-              className="transcript-toggle-btn"
-              onClick={() => setIsTranscriptOpen(!isTranscriptOpen)}
-              title="Toggle full recorded testimony log"
-            >
-              📜 Testimony Log ({dialogueHistory.length})
-            </button>
-            <button
-              type="button"
-              className="toggle-minimize-btn"
-              onClick={() => setIsMinimized(!isMinimized)}
-              title={isMinimized ? "Expand interrogation console" : "Minimize console for 3D view"}
-            >
-              {isMinimized ? "▲ Expand Interrogation" : "▼ Minimize for 3D Scene"}
-            </button>
-          </div>
-        </div>
-
-        {!isMinimized && (
-          <div className="bottom-bar-main-body">
-            {/* LEFT: SUSPECT DOSSIER MINI-CARD */}
-            <div className="bottom-suspect-profile">
-              <div className="bottom-avatar-frame" style={{ borderColor: currentSuspect.color }}>
-                <div className="bottom-silhouette-bust">👤</div>
-                <span className="bottom-monogram">
-                  {currentSuspect.name.split(" ").map((n) => n[0]).join("")}
-                </span>
+                <span>{isSpeaking ? "⏹" : "🔊"}</span>
+                <span>{isSpeaking ? "Stop Voice" : "Listen (Voice)"}</span>
                 {isSpeaking && (
-                  <div className="speaking-wave-mini">
+                  <span className="speaking-wave-mini" style={{ position: "relative", top: 0 }}>
                     <span className="sw-bar b1" />
                     <span className="sw-bar b2" />
                     <span className="sw-bar b3" />
-                  </div>
+                  </span>
                 )}
-              </div>
+              </button>
 
-              <div className="bottom-suspect-meta">
-                <h3 className="bottom-suspect-name">{currentSuspect.name}</h3>
-                <span className="bottom-suspect-role">
-                  {currentSuspect.role} • {currentSuspect.age} yrs
-                </span>
-
-                {/* STRESS METER */}
-                <div className="bottom-stress-container">
-                  <div className="bottom-stress-label">
-                    <span>Demeanor:</span>
-                    <strong className={stressLevel > 65 ? "text-danger" : "text-amber"}>
-                      {stressLevel}% {stressLevel > 75 ? "Panicked" : stressLevel > 55 ? "Evasive" : stressLevel > 30 ? "Guarded" : "Calm"}
-                    </strong>
-                  </div>
-                  <div className="bottom-stress-track">
-                    <div
-                      className="bottom-stress-fill"
-                      style={{
-                        width: `${stressLevel}%`,
-                        backgroundColor:
-                          stressLevel > 75 ? "#ba2c2c" : stressLevel > 55 ? "#f59e0b" : stressLevel > 30 ? "#3772f1" : "#10b981"
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* VOICE PLAY / STOP BUTTON */}
-                <div className="bottom-voice-btn-row">
-                  <button
-                    type="button"
-                    className="bottom-speak-btn"
-                    onClick={speakCurrentSuspect}
-                    disabled={isSpeaking || isRecording || isProcessing}
-                    title={`Speak ${currentSuspect.name}'s statement with Gnani TTS`}
-                  >
-                    {isSpeaking ? "🔊 Speaking..." : "🔊 Listen"}
-                  </button>
-                  {isSpeaking && (
-                    <button
-                      type="button"
-                      className="bottom-stop-btn"
-                      onClick={stopAudio}
-                      title="Stop audio playback"
-                    >
-                      ⏹ Stop
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* CENTER: CURRENT STATEMENT & INTERROGATION DOCK */}
-            <div className="bottom-dialogue-center">
-              {/* STRESS BAND REACTION BANNER */}
-              {stressBandNotification && (
-                <div style={{
-                  background: "rgba(31, 97, 239, 0.15)",
-                  border: "1px solid rgba(55, 114, 241, 0.4)",
-                  color: "#93c5fd",
-                  padding: "0.3rem 0.75rem",
-                  borderRadius: "4px",
-                  fontSize: "0.75rem",
-                  marginBottom: "0.4rem",
+              {/* UNSELECT / CLOSE BAR BUTTON */}
+              <button
+                type="button"
+                onClick={() => selectSuspect(null)}
+                style={{
+                  background: "rgba(255, 255, 255, 0.06)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#94a3b8",
+                  padding: "0.25rem 0.55rem",
+                  borderRadius: "6px",
+                  fontSize: "0.72rem",
+                  cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.4rem"
-                }}>
-                  <span>⚠️</span>
-                  <span><strong>[Demeanor Shift]:</strong> {stressBandNotification.reaction}</span>
-                </div>
-              )}
-
-              {/* CURRENT SUSPECT TESTIMONY BUBBLE */}
-              <div className="statement-bubble-card">
-                <div className="statement-speaker-line">
-                  <span className="statement-badge">CURRENT TESTIMONY</span>
-                  <span className="statement-speaker-name">{currentSuspect.name}:</span>
-                </div>
-                <p className="statement-text">"{statementText}"</p>
-              </div>
-
-              {/* QUICK CROSS-EXAMINATION CHIPS */}
-              {currentSuspect.topics && currentSuspect.topics.length > 0 && (
-                <div className="quick-topics-strip">
-                  <span className="quick-topics-label">Cross-Examine:</span>
-                  {currentSuspect.topics.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      className="quick-topic-button"
-                      onClick={() => askTopicQuestion(t)}
-                      disabled={isRecording || isProcessing || isGameOver}
-                      title={`Ask: ${t.title}`}
-                    >
-                      ❓ {t.title}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* EVIDENCE PICKER DROPDOWN */}
-              {isEvidencePickerOpen && (
-                <div style={{
-                  background: "#0c101a",
-                  border: "1px solid #1f61ef",
-                  borderRadius: "8px",
-                  padding: "0.75rem",
-                  marginBottom: "0.5rem",
-                  maxHeight: "160px",
-                  overflowY: "auto"
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                    <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#3772f1", textTransform: "uppercase" }}>
-                      Select Evidence to Challenge {currentSuspect.name}:
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsEvidencePickerOpen(false)}
-                      style={{ background: "transparent", border: "none", color: "#64748b", cursor: "pointer", fontSize: "0.8rem" }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                    {evidenceItems.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => handlePresentEvidence(item.id)}
-                        style={{
-                          background: "#161c2e",
-                          border: "1px solid #23252f",
-                          borderRadius: "4px",
-                          padding: "0.35rem 0.65rem",
-                          color: "#e2e8f0",
-                          fontSize: "0.75rem",
-                          cursor: "pointer",
-                          transition: "all 0.15s"
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = "#1f61ef";
-                          e.currentTarget.style.background = "#1e293b";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = "#23252f";
-                          e.currentTarget.style.background = "#161c2e";
-                        }}
-                      >
-                        📁 {item.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* INTERROGATION ACTION DOCK: MIC + TEXT INPUT + EVIDENCE BTN + LANGUAGE */}
-              <div className="bottom-input-dock">
-                {/* PUSH-TO-TALK MIC BUTTON */}
-                <button
-                  type="button"
-                  className={`bottom-mic-btn ${isRecording ? "recording" : ""}`}
-                  onClick={toggleRecording}
-                  disabled={isProcessing || isGameOver}
-                  title="Voice Interrogation via Gnani STT (Push to talk / click to finish)"
-                >
-                  <div className="bottom-mic-halo" />
-                  <span className="bottom-mic-icon">{isRecording ? "⏹" : "🎙"}</span>
-                  <span className="bottom-mic-label">
-                    {isRecording ? "CLICK TO FINISH" : "PUSH TO TALK"}
-                  </span>
-                </button>
-
-                {/* PRESENT EVIDENCE BUTTON */}
-                <button
-                  type="button"
-                  onClick={() => setIsEvidencePickerOpen(!isEvidencePickerOpen)}
-                  disabled={isRecording || isProcessing || isGameOver}
-                  style={{
-                    background: isEvidencePickerOpen ? "#1f61ef" : "#121622",
-                    border: "1px solid #23252f",
-                    borderRadius: "6px",
-                    color: "#ffffff",
-                    padding: "0.5rem 0.85rem",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.4rem",
-                    whiteSpace: "nowrap"
-                  }}
-                  title={`Present physical evidence to ${currentSuspect.name}`}
-                >
-                  📁 Present Evidence
-                </button>
-
-                {/* TEXT QUERY FORM */}
-                <form className="bottom-text-form" onSubmit={handleTextSubmit}>
-                  <input
-                    type="text"
-                    className="bottom-text-input"
-                    placeholder={
-                      isGameOver
-                        ? "Case concluded."
-                        : `Question ${currentSuspect.name} about 9:17 PM blackout, duplicate key, or Harbans...`
-                    }
-                    value={textInput}
-                    onChange={(e) => setTextInput(e.target.value)}
-                    disabled={isRecording || isProcessing || isGameOver}
-                  />
-                  <button
-                    type="submit"
-                    className="bottom-submit-btn"
-                    disabled={!textInput.trim() || isRecording || isProcessing || isGameOver}
-                  >
-                    Interrogate ➔
-                  </button>
-                </form>
-
-                {/* LANGUAGE SELECTOR */}
-                <div className="bottom-lang-box">
-                  <button
-                    type="button"
-                    className={`bottom-lang-btn ${currentLanguage === "en-IN" ? "active" : ""}`}
-                    onClick={() => setCurrentLanguage("en-IN")}
-                  >
-                    EN
-                  </button>
-                  <button
-                    type="button"
-                    className={`bottom-lang-btn ${currentLanguage === "hi-IN" ? "active" : ""}`}
-                    onClick={() => setCurrentLanguage("hi-IN")}
-                  >
-                    HI
-                  </button>
-                </div>
-              </div>
-
-              {/* LIVE STATUS BAR */}
-              <div className="bottom-pipeline-status">
-                {isRecording ? (
-                  <span className="status-item rec">
-                    <span className="pulse-rec-dot" /> <strong>RECORDING:</strong> Speak your question into the microphone...
-                  </span>
-                ) : isProcessing ? (
-                  <span className="status-item proc">
-                    ⏳ <strong>TRANSCRIBING:</strong> Processing detective speech query via Gnani STT...
-                  </span>
-                ) : isSpeaking ? (
-                  <span className="status-item spk">
-                    🔊 <strong>SPEAKING:</strong> {currentSuspect.name} is giving their statement...
-                  </span>
-                ) : (
-                  <span className="status-item idle">
-                    🎙️ Push-to-Talk, select a topic, or Present Evidence to cross-examine
-                  </span>
-                )}
-              </div>
+                  gap: "0.25rem"
+                }}
+                title="Unfocus suspect and return to 3D theatre view"
+              >
+                <span>✕</span>
+                <span>Unfocus</span>
+              </button>
             </div>
           </div>
-        )}
-      </footer>
+
+          {/* DEMEANOR SHIFT ALERT IF ACTIVE */}
+          {stressBandNotification && (
+            <div style={{
+              background: "rgba(31, 97, 239, 0.15)",
+              border: "1px solid rgba(55, 114, 241, 0.4)",
+              color: "#93c5fd",
+              padding: "0.3rem 0.75rem",
+              borderRadius: "6px",
+              fontSize: "0.74rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem"
+            }}>
+              <span>⚠️</span>
+              <span><strong>[Demeanor Reaction]:</strong> {stressBandNotification.reaction}</span>
+            </div>
+          )}
+
+          {/* CURRENT TESTIMONY (FULLY VISIBLE — ALL WORDS DISPLAYED WITHOUT CUTOFF) */}
+          <div style={{
+            background: "rgba(18, 24, 38, 0.8)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "10px",
+            padding: "0.75rem 1rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.35rem"
+          }}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontSize: "0.7rem",
+              fontFamily: "monospace",
+              color: "#94a3b8",
+              letterSpacing: "0.06em"
+            }}>
+              <span style={{ color: "#3772f1", fontWeight: 700 }}>
+                RECORDED TESTIMONY // {currentSuspect.name.toUpperCase()}
+              </span>
+              <span>{new Date().toLocaleDateString()}</span>
+            </div>
+
+            {/* FULL TESTIMONY TEXT — NO MAX-HEIGHT TRUNCATION, ALL WORDS VISIBLE */}
+            <p style={{
+              margin: 0,
+              fontSize: "0.92rem",
+              lineHeight: 1.6,
+              color: "#f8fafc",
+              fontStyle: "italic",
+              whiteSpace: "normal",
+              wordBreak: "break-word",
+              overflow: "visible"
+            }}>
+              "{statementText}"
+            </p>
+          </div>
+
+          {/* INTERROGATION INPUT ROW: VOICE PUSH-TO-TALK + TEXT INPUT + LANGUAGE */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.55rem"
+          }}>
+            {/* PUSH-TO-TALK MIC BUTTON */}
+            <button
+              type="button"
+              className={`bottom-mic-btn ${isRecording ? "recording" : ""}`}
+              onClick={toggleRecording}
+              disabled={isProcessing || isGameOver}
+              style={{
+                flexShrink: 0,
+                minWidth: "140px",
+                height: "42px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.45rem",
+                borderRadius: "8px",
+                padding: "0 0.85rem",
+                background: isRecording ? "#dc2626" : "rgba(31, 97, 239, 0.2)",
+                border: `1px solid ${isRecording ? "#ef4444" : "#1f61ef"}`,
+                color: "#ffffff",
+                cursor: isGameOver ? "not-allowed" : "pointer",
+                fontWeight: 600,
+                fontSize: "0.76rem"
+              }}
+              title="Voice Interrogation via Gnani STT (Push to talk / click to finish)"
+            >
+              <span style={{ fontSize: "1rem" }}>{isRecording ? "⏹" : "🎙️"}</span>
+              <span>{isRecording ? "CLICK TO FINISH" : "PUSH TO TALK"}</span>
+            </button>
+
+            {/* TEXT QUERY FORM */}
+            <form onSubmit={handleTextSubmit} style={{ flex: 1, display: "flex", gap: "0.45rem" }}>
+              <input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder={
+                  isGameOver
+                    ? "Case concluded."
+                    : `Ask ${currentSuspect.name} about 9:17 PM blackout, key, bell, alibi...`
+                }
+                disabled={isRecording || isProcessing || isGameOver}
+                style={{
+                  flex: 1,
+                  height: "42px",
+                  background: "rgba(14, 18, 28, 0.95)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: "8px",
+                  padding: "0 0.85rem",
+                  color: "#ffffff",
+                  fontSize: "0.85rem",
+                  outline: "none"
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#1f61ef")}
+                onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.12)")}
+              />
+              <button
+                type="submit"
+                disabled={!textInput.trim() || isRecording || isProcessing || isGameOver}
+                style={{
+                  height: "42px",
+                  padding: "0 1.15rem",
+                  background: textInput.trim() ? "#1f61ef" : "rgba(31, 97, 239, 0.3)",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#ffffff",
+                  fontWeight: 600,
+                  fontSize: "0.82rem",
+                  cursor: textInput.trim() && !isRecording && !isProcessing ? "pointer" : "not-allowed",
+                  whiteSpace: "nowrap"
+                }}
+              >
+                Interrogate ➔
+              </button>
+            </form>
+
+            {/* LANGUAGE TOGGLE */}
+            <div style={{
+              display: "flex",
+              borderRadius: "6px",
+              overflow: "hidden",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              flexShrink: 0
+            }}>
+              <button
+                type="button"
+                onClick={() => setCurrentLanguage("en-IN")}
+                style={{
+                  background: currentLanguage === "en-IN" ? "#1f61ef" : "transparent",
+                  color: currentLanguage === "en-IN" ? "#ffffff" : "#64748b",
+                  border: "none",
+                  padding: "0.45rem 0.55rem",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  cursor: "pointer"
+                }}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentLanguage("hi-IN")}
+                style={{
+                  background: currentLanguage === "hi-IN" ? "#1f61ef" : "transparent",
+                  color: currentLanguage === "hi-IN" ? "#ffffff" : "#64748b",
+                  border: "none",
+                  padding: "0.45rem 0.55rem",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  cursor: "pointer"
+                }}
+              >
+                HI
+              </button>
+            </div>
+          </div>
+
+          {/* ── CROSS-EXAMINATION SECTION (SEPARATE COMPONENT BELOW INPUT BOX) ── */}
+          <CrossExamineTopics suspectId={selectedSuspect} />
+
+          {/* LIVE STATUS BAR */}
+          <div style={{
+            fontSize: "0.7rem",
+            color: "#64748b",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            marginTop: "0.15rem"
+          }}>
+            {isRecording ? (
+              <span style={{ color: "#ef4444", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                <span className="pulse-rec-dot" /> <strong>RECORDING:</strong> Speak clearly into microphone...
+              </span>
+            ) : isProcessing ? (
+              <span style={{ color: "#38bdf8" }}>
+                ⏳ <strong>TRANSCRIBING:</strong> Processing speech query via Gnani STT...
+              </span>
+            ) : isSpeaking ? (
+              <span style={{ color: "#3772f1" }}>
+                🔊 <strong>SPEAKING:</strong> {currentSuspect.name} is giving their statement...
+              </span>
+            ) : (
+              <span>
+                🎙️ Push-to-Talk, type question, or click cross-examine topics above
+              </span>
+            )}
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </>
   );
 }

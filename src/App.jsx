@@ -4,6 +4,7 @@ import { GameProvider, useGame } from "./state/GameContext";
 import Scene from "./Scene";
 import HeaderNav from "./components/ui/HeaderNav";
 import SuspectsSidebar from "./components/ui/SuspectsSidebar";
+import SuspectProfileCard from "./components/ui/SuspectProfileCard";
 import ToolsSidebar from "./components/ui/ToolsSidebar";
 import BottomInterrogationBar from "./components/ui/BottomInterrogationBar";
 import TranscriptDrawer from "./components/ui/TranscriptDrawer";
@@ -40,6 +41,9 @@ function GameMain() {
 
         {/* LEFT ICONS BAR: 5 SUSPECTS SEATED IN AUDITORIUM */}
         <SuspectsSidebar />
+
+        {/* FLOATING SUSPECT CARD BESIDE CHARACTER (INFO, BARS, UNLOCKED CLUES) */}
+        <SuspectProfileCard />
 
         {/* RIGHT ICONS BAR: FORENSIC TOOLS, EVIDENCE, PUZZLES, CAMERA */}
         <ToolsSidebar />
