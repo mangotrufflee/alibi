@@ -1,5 +1,6 @@
 // src/App.jsx
 import React, { useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { GameProvider, useGame } from "./state/GameContext";
 import Scene from "./Scene";
 import HeaderNav from "./components/ui/HeaderNav";
@@ -137,6 +138,7 @@ export default function App() {
   return (
     <GameProvider>
       <GameMain />
+      <Analytics />
     </GameProvider>
   );
 }
