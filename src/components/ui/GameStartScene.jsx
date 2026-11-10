@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import { useGame } from "../../state/GameContext";
-import { ambientAudio } from "../../services/ambientAudio";
 
 const OLD_THEATRE_IMAGE_URL =
   "https://www.bengalfilmarchive.com/images/our-film/DSC_7557.jpg";
@@ -10,10 +9,6 @@ const OLD_THEATRE_IMAGE_URL =
 export default function GameStartScene() {
   const startGame = useGame((s) => s.startGame);
   const [isLaunching, setIsLaunching] = useState(false);
-
-  useEffect(() => {
-    ambientAudio.playIntro();
-  }, []);
 
   const launchGame = () => {
     if (isLaunching) return;

@@ -14,6 +14,7 @@ import CaseFilesHub from "./components/case/CaseFilesHub";
 import PuzzleModal from "./components/puzzles/PuzzleModal";
 import CutsceneModal from "./components/cutscenes/CutsceneModal";
 import PauseMenu from "./components/ui/PauseMenu";
+import AudioLoadScene from "./components/ui/AudioLoadScene";
 import GameStartScene from "./components/ui/GameStartScene";
 import OpeningInstructionOverlay from "./components/ui/OpeningInstructionOverlay";
 import "./styles/noir-theme.css";
@@ -21,6 +22,7 @@ import { ambientAudio } from "./services/ambientAudio";
 
 function GameMain() {
   const hasStartedGame = useGame((s) => s.hasStartedGame);
+  const isAudioUnlocked = useGame((s) => s.isAudioUnlocked);
   const activeTab = useGame((s) => s.activeTab);
   const generatorFlicker = useGame((s) => s.generatorFlicker);
   const isSolved = useGame((s) => s.isSolved);
@@ -31,7 +33,7 @@ function GameMain() {
 
     const handleButtonClick = (event) => {
       ambientAudio.init();
-      if (event.target.closest("button:not(:disabled), .interactive-chip, [role='button']")) {
+      if (event.target.closest("button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), .interactive-chip, [role='button'], canvas")) {
         ambientAudio.playClick();
       }
     };
@@ -39,7 +41,7 @@ function GameMain() {
     const handleButtonHover = (event) => {
       ambientAudio.init();
       const target = event.target.closest(
-        "button:not(:disabled), .interactive-chip, [role='button'], .macos-dock-item-wrapper, .suspect-rail-item, .tool-rail-item, .chip-btn"
+        "button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), .interactive-chip, [role='button'], canvas, .macos-dock-item-wrapper, .suspect-rail-item, .tool-rail-item, .chip-btn"
       );
       if (target && target !== lastHoveredElement) {
         lastHoveredElement = target;
@@ -51,7 +53,7 @@ function GameMain() {
       if (
         lastHoveredElement &&
         !event.relatedTarget?.closest?.(
-          "button, .interactive-chip, [role='button'], .macos-dock-item-wrapper, .suspect-rail-item, .tool-rail-item, .chip-btn"
+          "button, input, select, textarea, .interactive-chip, [role='button'], canvas, .macos-dock-item-wrapper, .suspect-rail-item, .tool-rail-item, .chip-btn"
         )
       ) {
         lastHoveredElement = null;
@@ -76,6 +78,7 @@ function GameMain() {
     activeTab === "case_files" || activeTab === "evidence" || activeTab === "dossier";
 
   if (!hasStartedGame) {
+    if (!isAudioUnlocked) return <AudioLoadScene />;
     return <GameStartScene />;
   }
 

@@ -110,10 +110,14 @@ export const useGameStore = create((set, get) => ({
   stressBandNotification: null, // { suspectId, reaction, band } — cleared after display
 
   // ── Navigation & Tabs ───────────────────────────────────────────────────
+  isAudioUnlocked: false,
+  unlockAudio: () => {
+    ambientAudio.unlock();
+    set({ isAudioUnlocked: true });
+  },
   hasStartedGame: false,
   isOpeningCameraPanComplete: false,
   startGame: () => {
-    ambientAudio.playIntro();
     ambientAudio.startGameAudio();
     set({ hasStartedGame: true, isPaused: false, isOpeningCameraPanComplete: false });
   },

@@ -19,17 +19,21 @@ export default function OpeningInstructionOverlay() {
 
     setVisible(true);
     let characterIndex = 0;
+    ambientAudio.playTyping();
     const typingTimer = window.setInterval(() => {
       characterIndex += 1;
       setTypedText(BRIEFING.slice(0, characterIndex));
-      if (characterIndex % 3 === 0) ambientAudio.playTyping();
-      if (characterIndex >= BRIEFING.length) window.clearInterval(typingTimer);
+      if (characterIndex >= BRIEFING.length) {
+        window.clearInterval(typingTimer);
+        ambientAudio.stopTyping();
+      }
     }, 18);
     const dismissTimer = window.setTimeout(() => setVisible(false), 11200);
 
     return () => {
       window.clearInterval(typingTimer);
       window.clearTimeout(dismissTimer);
+      ambientAudio.stopTyping();
     };
   }, [isOpeningCameraPanComplete]);
 

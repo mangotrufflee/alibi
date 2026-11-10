@@ -83,6 +83,64 @@ body {
   line-height: 1.5;
 }
 
+/* AUDIO LOAD SCREEN */
+.audio-load-scene {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 44%, #142a55 0%, #070d1b 32%, #03050a 78%);
+}
+
+.audio-load-scene::before {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(147, 197, 253, 0.18) 0.7px, transparent 0.8px);
+  background-size: 5px 5px;
+  content: "";
+  opacity: 0.42;
+}
+
+.audio-load-scene__beam {
+  position: absolute;
+  top: -18vh;
+  left: 50%;
+  width: min(105vw, 1350px);
+  height: 130vh;
+  background: conic-gradient(from 90deg at 50% 0%, transparent 0 30deg, rgba(96, 165, 250, 0.23) 50deg, transparent 80deg, transparent 280deg, rgba(96, 165, 250, 0.18) 310deg, transparent 340deg);
+  filter: blur(12px);
+  transform: translateX(-50%);
+}
+
+.audio-load-scene__button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  min-width: min(88vw, 360px);
+  padding: 34px 38px;
+  border: 1px solid rgba(191, 219, 254, 0.48);
+  border-radius: 16px;
+  background: rgba(5, 12, 27, 0.68);
+  box-shadow: 0 0 44px rgba(37, 99, 235, 0.24), inset 0 1px rgba(255, 255, 255, 0.1);
+  color: #eff6ff;
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: clamp(1.2rem, 3vw, 1.7rem);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.audio-load-scene__button small {
+  color: #93c5fd;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
 /* START SCENE */
 .game-start-scene {
   position: relative;

@@ -43,8 +43,9 @@ const SUSPECT_MODEL_CONFIG = {
   }
 };
 
-// The two imported models are visually reversed in the theatre. Keep their game
-// data and interactions unchanged, but exchange the identity shown on hover.
+// The two imported models are visually reversed in the theatre. Exchange both
+// their displayed identity and interaction target so the hover card and click
+// always refer to the same suspect.
 const MODEL_HOVER_IDENTITY = {
   meera: "arvind",
   arvind: "meera"
@@ -59,6 +60,7 @@ export function SuspectGroup() {
       {Object.keys(suspects).map((suspectId) => {
         const data = suspects[suspectId];
         const hoverIdentity = suspects[MODEL_HOVER_IDENTITY[suspectId]] || data;
+        const displayedSuspectId = hoverIdentity.id || suspectId;
         const config = SUSPECT_MODEL_CONFIG[suspectId];
         const rawPos = data.seat?.position || [0, 0, 0];
         const position = [
@@ -66,7 +68,7 @@ export function SuspectGroup() {
           rawPos[1] + (config?.yOffset || 0),
           rawPos[2]
         ];
-        const isSelected = selectedSuspect === suspectId;
+        const isSelected = selectedSuspect === displayedSuspectId;
         const geom = config ? geometries[config.modelIndex] : null;
 
         // If the 3D model geometry is ready, render the assigned imported people model
@@ -79,13 +81,13 @@ export function SuspectGroup() {
               position={position}
               rotation={config.rotation || [0, 0, 0]}
               scale={[0.05, 0.05, 0.05]}
-              color={data.color}
+              color={hoverIdentity.color}
               isSuspect={true}
-              suspectId={suspectId}
+              suspectId={displayedSuspectId}
               name={hoverIdentity.name}
               role={hoverIdentity.role}
               isSelected={isSelected}
-              onClick={() => selectSuspect(suspectId)}
+              onClick={() => selectSuspect(displayedSuspectId)}
             />
           );
         }
@@ -94,14 +96,14 @@ export function SuspectGroup() {
         return (
           <CharacterBase
             key={suspectId}
-            characterId={suspectId}
+            characterId={displayedSuspectId}
             modelAssetId={`${suspectId}Character`}
-            name={data.name}
-            silhouette={data.silhouette}
-            color={data.color}
+            name={hoverIdentity.name}
+            silhouette={hoverIdentity.silhouette}
+            color={hoverIdentity.color}
             position={rawPos}
             rotation={[0, 0, 0]}
-            onSelect={() => selectSuspect(suspectId)}
+            onSelect={() => selectSuspect(displayedSuspectId)}
           />
         );
       })}

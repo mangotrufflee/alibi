@@ -19,6 +19,7 @@ class AmbientAudioManager {
     this.droneGain = null;
     this.rainGain = null;
     this.suspenseTrack = null;
+    this.typingTrack = null;
     this.lastHoverAt = 0;
     this.lastTypingAt = 0;
     this.pools = {};
@@ -150,6 +151,7 @@ class AmbientAudioManager {
       if (muted) this.suspenseTrack.pause();
       else this.suspenseTrack.play().catch(() => {});
     }
+    if (muted && this.typingTrack) this.typingTrack.pause();
   }
 
   toggleMute() {
@@ -205,15 +207,30 @@ class AmbientAudioManager {
   }
 
   playTyping() {
-    const now = Date.now();
-    if (now - this.lastTypingAt < 70) return;
-    this.lastTypingAt = now;
-    this.playOneShot("typing", 0.12);
+    if (this.isMuted || typeof Audio === "undefined") return;
+    if (!this.typingTrack) {
+      this.typingTrack = new Audio(GAME_AUDIO.typing);
+      this.typingTrack.loop = true;
+      this.typingTrack.volume = 0.1;
+      this.typingTrack.preload = "auto";
+    }
+    this.typingTrack.play().catch(() => {});
+  }
+
+  stopTyping() {
+    if (!this.typingTrack) return;
+    this.typingTrack.pause();
+    this.typingTrack.currentTime = 0;
   }
 
   playFlicker() {
-    // Atmospheric, subtle electrical buzz/flicker (lowered from 0.16)
-    this.playOneShot("flicker", 0.035);
+    this.playOneShot("flicker", 0.28);
+  }
+
+  unlock() {
+    this.init();
+    if (this.audioCtx?.state === "suspended") this.audioCtx.resume().catch(() => {});
+    this.playIntro();
   }
 
   startGameAudio() {
@@ -231,6 +248,7 @@ class AmbientAudioManager {
   }
 
   stopGameAudio() {
+    this.stopTyping();
     if (!this.suspenseTrack) return;
     this.suspenseTrack.pause();
     this.suspenseTrack.currentTime = 0;

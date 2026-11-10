@@ -15,6 +15,13 @@ export const CAMERA_STATES = {
   CUTSCENE: "CUTSCENE"
 };
 
+// Meera and Arvind's imported theatre models are physically reversed. Camera
+// focus must use the displayed identity's physical seat, just like model clicks.
+const DISPLAYED_SUSPECT_SEAT = {
+  meera: "arvind",
+  arvind: "meera"
+};
+
 export function CameraController() {
   const { cameraState, selectedSuspect, reducedMotion, completeOpeningCameraPan } = useGame();
   const hasPlayedOpeningPan = useRef(false);
@@ -33,7 +40,8 @@ export function CameraController() {
 
     // Determine target coordinates based on cameraState
     if (cameraState === CAMERA_STATES.SUSPECT_FOCUS && selectedSuspect && suspects[selectedSuspect]) {
-      const seat = suspects[selectedSuspect].seat?.position || [0, 0, -5];
+      const physicalSuspectId = DISPLAYED_SUSPECT_SEAT[selectedSuspect] || selectedSuspect;
+      const seat = suspects[physicalSuspectId].seat?.position || [0, 0, -5];
       const isLeft = (seat[0] || 0) < 0;
 
       // Cinematic off-center framing:
