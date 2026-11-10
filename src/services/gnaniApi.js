@@ -108,6 +108,8 @@ export class GnaniClientService {
     this.mediaRecorder = null;
     this.audioChunks = [];
     this.currentAudio = null;
+    this.speechCache = new Map();
+    this.pendingSpeechRequests = new Map();
     this.stage = "IDLE"; // IDLE | RECORDING | PROCESSING | PLAYING
     this.listeners = new Set();
     // Pre-warm voice cache after browser voices load
@@ -303,25 +305,50 @@ export class GnaniClientService {
   }
 
   // Synthesize suspect speech via Backend Custom Voice
+  getSpeechCacheKey(text, suspectId, stressLevel) {
+    return `${suspectId}:${stressLevel}:${text}`;
+  }
+
+  async requestSpeechAudio(text, suspectId, stressLevel) {
+    const cacheKey = this.getSpeechCacheKey(text, suspectId, stressLevel);
+    if (this.speechCache.has(cacheKey)) return this.speechCache.get(cacheKey);
+    if (this.pendingSpeechRequests.has(cacheKey)) return this.pendingSpeechRequests.get(cacheKey);
+
+    const request = fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, suspectId, stressLevel })
+    })
+      .then(async (res) => {
+        const contentType = res.headers.get("content-type") || "";
+        if (!res.ok || !contentType.includes("audio")) return null;
+        const audioBlob = await res.blob();
+        this.speechCache.set(cacheKey, audioBlob);
+        return audioBlob;
+      })
+      .catch(() => null)
+      .finally(() => this.pendingSpeechRequests.delete(cacheKey));
+
+    this.pendingSpeechRequests.set(cacheKey, request);
+    return request;
+  }
+
+  preloadSpeech(lines) {
+    return Promise.all(
+      lines.map(({ text, suspectId, stressLevel = 30 }) =>
+        this.requestSpeechAudio(text, suspectId, stressLevel)
+      )
+    );
+  }
+
   async synthesizeSpeech(text, suspectId = "raju", stressLevel = 30) {
     this.setStage("PROCESSING");
     const voiceConfig = SUSPECT_VOICE_MAP[suspectId] || SUSPECT_VOICE_MAP.raju;
 
-    try {
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, suspectId, stressLevel })
-      });
-
-      const contentType = res.headers.get("content-type") || "";
-      if (res.ok && contentType.includes("audio")) {
-        const audioBlob = await res.blob();
-        await this.playAudioBlob(audioBlob);
-        return true;
-      }
-    } catch (e) {
-      console.warn("Backend TTS fetch error:", e);
+    const audioBlob = await this.requestSpeechAudio(text, suspectId, stressLevel);
+    if (audioBlob) {
+      await this.playAudioBlob(audioBlob);
+      return true;
     }
 
     // Local SpeechSynthesis fallback — pass suspectId so we can pick distinct voices

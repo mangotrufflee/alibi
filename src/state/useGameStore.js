@@ -119,6 +119,13 @@ export const useGameStore = create((set, get) => ({
   isOpeningCameraPanComplete: false,
   startGame: () => {
     ambientAudio.startGameAudio();
+    void gnaniPipeline.preloadSpeech(
+      Object.entries(suspects).map(([suspectId, suspect]) => ({
+        text: suspect.initialDialogue,
+        suspectId,
+        stressLevel: get().suspectStress[suspectId] || 30
+      }))
+    );
     set({ hasStartedGame: true, isPaused: false, isOpeningCameraPanComplete: false });
   },
   completeOpeningCameraPan: () => set({ isOpeningCameraPanComplete: true }),
