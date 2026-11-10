@@ -16,7 +16,7 @@ function Evidence3DViewer({ propType, assetId, autoRotate }) {
   return (
     <Canvas
       camera={{ position: [0, 1.2, 3.2], fov: 45 }}
-      style={{ width: "100%", height: "100%", background: "radial-gradient(circle at 50% 50%, #181b25 0%, #05060a 100%)" }}
+      style={{ width: "100%", height: "100%", background: "#05060a" }}
     >
       <ambientLight intensity={0.7} />
       <spotLight

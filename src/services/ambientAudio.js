@@ -227,10 +227,10 @@ class AmbientAudioManager {
     this.playOneShot("flicker", 0.28);
   }
 
-  unlock() {
+  unlock(playIntro = true) {
     this.init();
     if (this.audioCtx?.state === "suspended") this.audioCtx.resume().catch(() => {});
-    this.playIntro();
+    if (playIntro) this.playIntro();
   }
 
   startGameAudio() {
