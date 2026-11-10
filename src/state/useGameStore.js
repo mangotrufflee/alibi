@@ -110,6 +110,19 @@ export const useGameStore = create((set, get) => ({
   stressBandNotification: null, // { suspectId, reaction, band } — cleared after display
 
   // ── Navigation & Tabs ───────────────────────────────────────────────────
+  hasStartedGame: false,
+  isOpeningCameraPanComplete: false,
+  startGame: () => {
+    ambientAudio.playIntro();
+    ambientAudio.startGameAudio();
+    set({ hasStartedGame: true, isPaused: false, isOpeningCameraPanComplete: false });
+  },
+  completeOpeningCameraPan: () => set({ isOpeningCameraPanComplete: true }),
+  returnToStartScreen: () => {
+    ambientAudio.stopGameAudio();
+    get().resetRun();
+    set({ hasStartedGame: false, isPaused: false, isMenuOpen: false });
+  },
   activeTab: "interrogation", // "interrogation" | "case_files"
   caseSubTab: "evidence_list",
   setActiveTab: (tab) => set({ activeTab: tab }),
@@ -223,6 +236,7 @@ export const useGameStore = create((set, get) => ({
   checklistGoals: INITIAL_CHECKLIST.map((g) => ({ ...g })),
   investigatorNotes: INITIAL_INVESTIGATOR_NOTES.map((n) => ({ ...n })),
   scoreLedger: [],
+  unlockedForensicClueIds: [],
   generatorCountdown: 2400, // 40 minutes in seconds
   generatorFlicker: false,
 
@@ -257,6 +271,7 @@ export const useGameStore = create((set, get) => ({
       caseSubTab: "evidence_list",
       selectedSuspect: null,
       cameraState: "MAIN_THEATRE",
+      isOpeningCameraPanComplete: false,
       suspectStress: { raju: 35, meera: 20, arvind: 15, nusrat: 40, bhola: 25 },
       suspectTrust: { raju: 45, meera: 30, arvind: 50, nusrat: 60, bhola: 75 },
       suspectLiveState: { ...INITIAL_SUSPECT_LIVE_STATE },
@@ -308,6 +323,7 @@ export const useGameStore = create((set, get) => ({
       checklistGoals: INITIAL_CHECKLIST.map((g) => ({ ...g })),
       investigatorNotes: INITIAL_INVESTIGATOR_NOTES.map((n) => ({ ...n })),
       scoreLedger: [],
+      unlockedForensicClueIds: [],
       generatorCountdown: 2400,
       solvedPuzzleIds: [],
       unlockedCutsceneIds: ["cutscene_opening"],
@@ -331,6 +347,31 @@ export const useGameStore = create((set, get) => ({
   },
 
   setSelectedEvidence: (evidence) => set({ selectedEvidence: evidence }),
+  unlockForensicClue: (evidenceId, cost = 10) => {
+    const state = get();
+    if (!evidenceId || state.unlockedForensicClueIds.includes(evidenceId)) return true;
+    if (state.score < cost) return false;
+
+    const nextScore = state.score - cost;
+    set((prev) => ({
+      score: nextScore,
+      isProsecutionReady: nextScore >= prev.solveThreshold,
+      unlockedForensicClueIds: [...prev.unlockedForensicClueIds, evidenceId],
+      scoreLedger: [
+        {
+          id: `clue_unlock_${evidenceId}_${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          suspect: "Forensic Lab",
+          keyword: "FORENSIC CLUE UNLOCK",
+          type: "spend",
+          delta: -cost,
+          scoreAfter: nextScore
+        },
+        ...prev.scoreLedger
+      ]
+    }));
+    return true;
+  },
   setCurrentLanguage: (lang) => set({ currentLanguage: lang }),
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -1472,11 +1513,12 @@ gnaniPipeline.subscribe((pipeState) => {
 // Periodic Generator Atmospheric Flicker & Real-Time Countdown Timer (Browser Only)
 if (typeof window !== "undefined") {
   setInterval(() => {
-    if (Math.random() > 0.65) {
-      useGameStore.setState({ generatorFlicker: true });
-      setTimeout(() => useGameStore.setState({ generatorFlicker: false }), 280);
-    }
-  }, 18000);
+    const state = useGameStore.getState();
+    if (!state.hasStartedGame || state.isSolved || state.isFailed || state.isPaused) return;
+    useGameStore.setState({ generatorFlicker: true });
+    ambientAudio.playFlicker();
+    setTimeout(() => useGameStore.setState({ generatorFlicker: false }), 280);
+  }, 5000);
 
   setInterval(() => {
     const state = useGameStore.getState();

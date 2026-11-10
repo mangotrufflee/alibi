@@ -1,5 +1,5 @@
 // src/App.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { GameProvider, useGame } from "./state/GameContext";
 import Scene from "./Scene";
 import HeaderNav from "./components/ui/HeaderNav";
@@ -14,15 +14,70 @@ import CaseFilesHub from "./components/case/CaseFilesHub";
 import PuzzleModal from "./components/puzzles/PuzzleModal";
 import CutsceneModal from "./components/cutscenes/CutsceneModal";
 import PauseMenu from "./components/ui/PauseMenu";
+import GameStartScene from "./components/ui/GameStartScene";
+import OpeningInstructionOverlay from "./components/ui/OpeningInstructionOverlay";
 import "./styles/noir-theme.css";
+import { ambientAudio } from "./services/ambientAudio";
 
 function GameMain() {
+  const hasStartedGame = useGame((s) => s.hasStartedGame);
   const activeTab = useGame((s) => s.activeTab);
-  const setActiveTab = useGame((s) => s.setActiveTab);
   const generatorFlicker = useGame((s) => s.generatorFlicker);
+  const isSolved = useGame((s) => s.isSolved);
+  const isFailed = useGame((s) => s.isFailed);
+
+  useEffect(() => {
+    let lastHoveredElement = null;
+
+    const handleButtonClick = (event) => {
+      ambientAudio.init();
+      if (event.target.closest("button:not(:disabled), .interactive-chip, [role='button']")) {
+        ambientAudio.playClick();
+      }
+    };
+
+    const handleButtonHover = (event) => {
+      ambientAudio.init();
+      const target = event.target.closest(
+        "button:not(:disabled), .interactive-chip, [role='button'], .macos-dock-item-wrapper, .suspect-rail-item, .tool-rail-item, .chip-btn"
+      );
+      if (target && target !== lastHoveredElement) {
+        lastHoveredElement = target;
+        ambientAudio.playHover();
+      }
+    };
+
+    const handleButtonPointerOut = (event) => {
+      if (
+        lastHoveredElement &&
+        !event.relatedTarget?.closest?.(
+          "button, .interactive-chip, [role='button'], .macos-dock-item-wrapper, .suspect-rail-item, .tool-rail-item, .chip-btn"
+        )
+      ) {
+        lastHoveredElement = null;
+      }
+    };
+
+    document.addEventListener("click", handleButtonClick);
+    document.addEventListener("pointerover", handleButtonHover);
+    document.addEventListener("pointerout", handleButtonPointerOut);
+    return () => {
+      document.removeEventListener("click", handleButtonClick);
+      document.removeEventListener("pointerover", handleButtonHover);
+      document.removeEventListener("pointerout", handleButtonPointerOut);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isSolved || isFailed) ambientAudio.stopGameAudio();
+  }, [isSolved, isFailed]);
 
   const isCaseFiles =
     activeTab === "case_files" || activeTab === "evidence" || activeTab === "dossier";
+
+  if (!hasStartedGame) {
+    return <GameStartScene />;
+  }
 
   return (
     <div className={`alibi-noir-app ${generatorFlicker ? "generator-dip" : ""}`}>
@@ -50,20 +105,15 @@ function GameMain() {
 
         {/* BOTTOM BAR: LIVE INTERROGATION, SPEECH, MIC, TOPICS */}
         <BottomInterrogationBar />
+
+        {/* POST-INTRO: TYPEWRITTEN INVESTIGATION BRIEF */}
+        <OpeningInstructionOverlay />
       </div>
 
       {/* OVERLAY: FULL CASE FILES DOSSIER */}
       {isCaseFiles && (
         <div className="case-files-overlay-backdrop">
           <div className="case-files-overlay-container">
-            <button
-              type="button"
-              className="case-files-modal-close-btn"
-              onClick={() => setActiveTab("interrogation")}
-              title="Return to 3D Cinema Auditorium"
-            >
-              ✕ Return to 3D Theatre
-            </button>
             <CaseFilesHub />
           </div>
         </div>
