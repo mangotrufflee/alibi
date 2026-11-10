@@ -100,13 +100,13 @@ export function classifyQuestion(input, suspectId, lockedStoryline = null, asked
  */
 export function getRephrasPrompt(suspectId) {
   const prompts = {
-    raju: "Could you rephrase that, Sahab? I am nervous and I may not have understood. Ask me about the door, the bell, or where I was during the blackout.",
-    meera: "Inspector, please be more precise with your question. I will not respond to vague insinuations without a specific topic.",
-    arvind: "Perhaps you could ask more specifically about the film, the reel catalogue, or the events at 9:21 PM?",
-    nusrat: "I don't understand what you're asking. Can you ask me about the recording, the booth, or the reel more specifically?",
-    bhola: "Babu ji, speak clearly. Ask me about the bell, the footsteps, the tea delivery, or my token."
+    raju: "Kya? Zara tez boliye.",
+    meera: "Yeh aap kya kehna chahte hain?",
+    arvind: "Could you say that again?",
+    nusrat: "Kya? Zara tez boliye.",
+    bhola: "Yeh aap kya kehna chahte hain?"
   };
-  return prompts[suspectId] || "Please rephrase your question. Focus on the evidence, the timeline, or specific details of the case.";
+  return prompts[suspectId] || "What are you trying to say?";
 }
 
 /**

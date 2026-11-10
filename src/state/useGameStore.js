@@ -241,6 +241,7 @@ export const useGameStore = create((set, get) => ({
   investigatorNotes: INITIAL_INVESTIGATOR_NOTES.map((n) => ({ ...n })),
   scoreLedger: [],
   unlockedForensicClueIds: [],
+  unlockedHintIds: [],
   generatorCountdown: 2400, // 40 minutes in seconds
   generatorFlicker: false,
 
@@ -328,6 +329,7 @@ export const useGameStore = create((set, get) => ({
       investigatorNotes: INITIAL_INVESTIGATOR_NOTES.map((n) => ({ ...n })),
       scoreLedger: [],
       unlockedForensicClueIds: [],
+      unlockedHintIds: [],
       generatorCountdown: 2400,
       solvedPuzzleIds: [],
       unlockedCutsceneIds: ["cutscene_opening"],
@@ -367,6 +369,31 @@ export const useGameStore = create((set, get) => ({
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           suspect: "Forensic Lab",
           keyword: "FORENSIC CLUE UNLOCK",
+          type: "spend",
+          delta: -cost,
+          scoreAfter: nextScore
+        },
+        ...prev.scoreLedger
+      ]
+    }));
+    return true;
+  },
+  unlockHint: (hintId, cost = 10) => {
+    const state = get();
+    if (!hintId || state.unlockedHintIds.includes(hintId)) return true;
+    if (state.score < cost) return false;
+
+    const nextScore = state.score - cost;
+    set((prev) => ({
+      score: nextScore,
+      isProsecutionReady: nextScore >= prev.solveThreshold,
+      unlockedHintIds: [...prev.unlockedHintIds, hintId],
+      scoreLedger: [
+        {
+          id: `hint_unlock_${hintId}_${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          suspect: "Investigation Desk",
+          keyword: "HINT UNLOCK",
           type: "spend",
           delta: -cost,
           scoreAfter: nextScore
