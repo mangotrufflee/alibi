@@ -15,11 +15,43 @@ export function CinemaSeats() {
   const armrestGeo = useMemo(() => new THREE.BoxGeometry(0.08, 0.45, 0.55), []);
   const legGeo = useMemo(() => new THREE.CylinderGeometry(0.02, 0.02, 0.4, 8), []);
 
-  const burgundyMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: "#6b2128", // faded burgundy velvet
-    roughness: 0.9,
-    metalness: 0.05
-  }), []);
+  // Vintage red leather / velvet material using Poly Haven PBR textures
+  const burgundyMaterial = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    const mat = new THREE.MeshStandardMaterial({
+      color: "#881337", // rich vintage cinema red
+      roughness: 0.82,
+      metalness: 0.08
+    });
+
+    loader.load("/assets/textures/environment/leather_red_diff_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(1.5, 1.5);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      mat.map = tex;
+      mat.needsUpdate = true;
+    });
+
+    loader.load("/assets/textures/environment/leather_red_rough_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(1.5, 1.5);
+      mat.roughnessMap = tex;
+      mat.needsUpdate = true;
+    });
+
+    loader.load("/assets/textures/environment/leather_red_nor_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(1.5, 1.5);
+      mat.normalMap = tex;
+      mat.normalScale.set(0.6, 0.6);
+      mat.needsUpdate = true;
+    });
+
+    return mat;
+  }, []);
 
   const ironMaterial = useMemo(() => new THREE.MeshStandardMaterial({
     color: "#18181b", // cast-iron frame

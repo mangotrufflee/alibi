@@ -14,7 +14,7 @@ export default function Scene() {
     <div className="canvas-container">
       <Canvas
         shadows
-        camera={{ position: [0, 1.8, 1.0], fov: 48 }}
+        camera={{ position: [0, 10.5, 3.4], fov: 48 }}
         style={{ width: "100%", height: "100%", background: "#06090a" }}
         gl={{ antialias: true, alpha: false }}
       >

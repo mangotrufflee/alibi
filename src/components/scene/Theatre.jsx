@@ -23,24 +23,124 @@ import { TheatreModel } from "./TheatreModel";
  * - Single ambient light for clean, uniform visibility
  */
 export default function Theatre() {
-  // Shared materials for architectural auditorium surfaces
-  const floorMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: "#27272a", // aged concrete / worn cinema carpeting
-    roughness: 0.85,
-    metalness: 0.1
-  }), []);
+  // Poly Haven PBR Texture loader helper
+  const textureLoader = useMemo(() => new THREE.TextureLoader(), []);
 
-  const wallMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: "#18181b", // dark slate plaster
-    roughness: 0.85,
-    metalness: 0.05
-  }), []);
+  // Floor Material: Poly Haven dirty_carpet PBR
+  const floorMaterial = useMemo(() => {
+    const mat = new THREE.MeshStandardMaterial({
+      color: "#3f3f46", // noir tone
+      roughness: 0.85,
+      metalness: 0.08
+    });
+    textureLoader.load("/assets/textures/environment/carpet_diff_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 8);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      mat.map = tex;
+      mat.needsUpdate = true;
+    });
+    textureLoader.load("/assets/textures/environment/carpet_rough_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 8);
+      mat.roughnessMap = tex;
+      mat.needsUpdate = true;
+    });
+    textureLoader.load("/assets/textures/environment/carpet_nor_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 8);
+      mat.normalMap = tex;
+      mat.normalScale.set(0.6, 0.6);
+      mat.needsUpdate = true;
+    });
+    return mat;
+  }, [textureLoader]);
 
-  const pilasterMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: "#27272a",
-    roughness: 0.8,
-    metalness: 0.15
-  }), []);
+  // Wall Material: Poly Haven plaster_grey_04 PBR
+  const wallMaterial = useMemo(() => {
+    const mat = new THREE.MeshStandardMaterial({
+      color: "#27272a", // dark aged slate
+      roughness: 0.88,
+      metalness: 0.04
+    });
+    textureLoader.load("/assets/textures/environment/plaster_diff_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 3);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      mat.map = tex;
+      mat.needsUpdate = true;
+    });
+    textureLoader.load("/assets/textures/environment/plaster_rough_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 3);
+      mat.roughnessMap = tex;
+      mat.needsUpdate = true;
+    });
+    textureLoader.load("/assets/textures/environment/plaster_nor_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 3);
+      mat.normalMap = tex;
+      mat.normalScale.set(0.5, 0.5);
+      mat.needsUpdate = true;
+    });
+    return mat;
+  }, [textureLoader]);
+
+  // Stage Floor & Steps: Poly Haven dark_wooden_planks PBR
+  const stageMaterial = useMemo(() => {
+    const mat = new THREE.MeshStandardMaterial({
+      color: "#3e2723", // aged dark teak proscenium planks
+      roughness: 0.75,
+      metalness: 0.12
+    });
+    textureLoader.load("/assets/textures/environment/wood_planks_diff_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 2);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      mat.map = tex;
+      mat.needsUpdate = true;
+    });
+    textureLoader.load("/assets/textures/environment/wood_planks_rough_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 2);
+      mat.roughnessMap = tex;
+      mat.needsUpdate = true;
+    });
+    textureLoader.load("/assets/textures/environment/wood_planks_nor_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 2);
+      mat.normalMap = tex;
+      mat.normalScale.set(0.7, 0.7);
+      mat.needsUpdate = true;
+    });
+    return mat;
+  }, [textureLoader]);
+
+  // Architectural Pilasters: Poly Haven plaster with fluting repeat
+  const pilasterMaterial = useMemo(() => {
+    const mat = new THREE.MeshStandardMaterial({
+      color: "#18181b",
+      roughness: 0.8,
+      metalness: 0.15
+    });
+    textureLoader.load("/assets/textures/environment/plaster_nor_1k.jpg", (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(1, 4);
+      mat.normalMap = tex;
+      mat.needsUpdate = true;
+    });
+    return mat;
+  }, [textureLoader]);
 
   const screenFrameMaterial = useMemo(() => new THREE.MeshStandardMaterial({
     color: "#09090b",
@@ -117,11 +217,11 @@ export default function Theatre() {
       {/* FRONT WALL & PROSCENIUM STAGE (Screen at front) */}
       <group position={[0, 0, -15.2]}>
         {/* Stage Platform */}
-        <mesh position={[0, 0.45, 1.2]} material={wallMaterial} receiveShadow>
+        <mesh position={[0, 0.45, 1.2]} material={stageMaterial} receiveShadow>
           <boxGeometry args={[16, 0.9, 3]} />
         </mesh>
         {/* Stage Steps */}
-        <mesh position={[0, 0.22, 2.9]} material={wallMaterial}>
+        <mesh position={[0, 0.22, 2.9]} material={stageMaterial}>
           <boxGeometry args={[4, 0.44, 0.6]} />
         </mesh>
 

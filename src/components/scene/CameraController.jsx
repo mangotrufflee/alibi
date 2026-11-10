@@ -16,7 +16,9 @@ export const CAMERA_STATES = {
 };
 
 export function CameraController() {
-  const { cameraState, selectedSuspect, reducedMotion } = useGame();
+  const { cameraState, selectedSuspect, reducedMotion, completeOpeningCameraPan } = useGame();
+  const hasPlayedOpeningPan = useRef(false);
+  const openingPanElapsed = useRef(0);
 
   // Target camera position and lookAt vectors
   const targetPos = useRef(new THREE.Vector3(0, 1.8, 1.0));
@@ -64,6 +66,32 @@ export function CameraController() {
       // Default: MAIN_THEATRE
       targetPos.current.set(0, 1.8, 1.0);
       targetLook.current.set(0, 1.0, -5.2);
+    }
+
+    // On entry, sweep down from the auditorium ceiling before settling into the
+    // established theatre composition. It runs only once and does not affect
+    // later camera-state changes.
+    if (!hasPlayedOpeningPan.current && cameraState === CAMERA_STATES.MAIN_THEATRE) {
+      if (reducedMotion) {
+        hasPlayedOpeningPan.current = true;
+        completeOpeningCameraPan();
+      } else {
+        openingPanElapsed.current += delta;
+        const progress = Math.min(openingPanElapsed.current / 2.35, 1);
+        const easedProgress = progress * progress * (3 - 2 * progress);
+        const overheadPosition = new THREE.Vector3(0, 10.5, 3.4);
+        const overheadLook = new THREE.Vector3(0, 0.55, -5.2);
+
+        state.camera.position.lerpVectors(overheadPosition, targetPos.current, easedProgress);
+        currentLook.current.lerpVectors(overheadLook, targetLook.current, easedProgress);
+        state.camera.lookAt(currentLook.current);
+
+        if (progress >= 1) {
+          hasPlayedOpeningPan.current = true;
+          completeOpeningCameraPan();
+        }
+        return;
+      }
     }
 
     // Smooth lerp camera position and lookAt (fast if reduced motion is on)
