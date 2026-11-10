@@ -3,6 +3,7 @@ import React, { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
+import { UiIcon } from "../../components/ui/UiIcon";
 
 /**
  * Procedural stylized silhouettes for the 5 suspects.
@@ -321,7 +322,7 @@ export function PlaceholderCharacter({
               gap: "6px"
             }}
           >
-            <span>👤</span>
+            <span><UiIcon name="user" /></span>
             <span>{name}</span>
             <span style={{ opacity: 0.85, fontSize: "10px", color: isSelected ? "#ffffff" : "#3772f1" }}>
               {isSelected ? "● INTERROGATING" : "CLICK TO INTERROGATE"}

@@ -43,6 +43,13 @@ const SUSPECT_MODEL_CONFIG = {
   }
 };
 
+// The two imported models are visually reversed in the theatre. Keep their game
+// data and interactions unchanged, but exchange the identity shown on hover.
+const MODEL_HOVER_IDENTITY = {
+  meera: "arvind",
+  arvind: "meera"
+};
+
 export function SuspectGroup() {
   const { selectedSuspect, selectSuspect } = useGame();
   const { geometries, isReady } = usePeoplePack();
@@ -51,6 +58,7 @@ export function SuspectGroup() {
     <group name="SuspectGroup">
       {Object.keys(suspects).map((suspectId) => {
         const data = suspects[suspectId];
+        const hoverIdentity = suspects[MODEL_HOVER_IDENTITY[suspectId]] || data;
         const config = SUSPECT_MODEL_CONFIG[suspectId];
         const rawPos = data.seat?.position || [0, 0, 0];
         const position = [
@@ -74,8 +82,8 @@ export function SuspectGroup() {
               color={data.color}
               isSuspect={true}
               suspectId={suspectId}
-              name={data.name}
-              role={data.role}
+              name={hoverIdentity.name}
+              role={hoverIdentity.role}
               isSelected={isSelected}
               onClick={() => selectSuspect(suspectId)}
             />

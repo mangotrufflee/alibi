@@ -3,6 +3,7 @@ import React, { useRef, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
+import { ambientAudio } from "../../services/ambientAudio";
 
 /**
  * Renders an individual low-poly person from the people model pack.
@@ -66,6 +67,7 @@ export function PersonModel({
     e.stopPropagation();
     setIsHovered(true);
     document.body.style.cursor = "pointer";
+    ambientAudio.playHover();
   };
 
   const handlePointerOut = () => {
@@ -77,6 +79,7 @@ export function PersonModel({
   const handleClick = (e) => {
     if (!isSuspect) return;
     e.stopPropagation();
+    ambientAudio.playClick();
     if (onClick) onClick();
   };
 
