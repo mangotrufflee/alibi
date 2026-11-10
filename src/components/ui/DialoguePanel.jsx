@@ -1,6 +1,7 @@
 // src/components/ui/DialoguePanel.jsx
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 import { suspects } from "../../data/suspects";
 
 export default function DialoguePanel() {
@@ -82,7 +83,7 @@ export default function DialoguePanel() {
                   </>
                 ) : (
                   <>
-                    <span className="mic-icon">🎙️</span>
+                    <span className="mic-icon"><UiIcon name="mic" /></span>
                     <span className="transcript-label">DETECTIVE SPOKE:</span>
                   </>
                 )}
@@ -104,7 +105,7 @@ export default function DialoguePanel() {
                   onClick={() => askTopicQuestion(topic)}
                   title="Press to confront suspect with this question"
                 >
-                  ❓ {topic.title}
+                  <UiIcon name="question" /> {topic.title}
                 </button>
               ))}
             </div>
@@ -124,7 +125,7 @@ export default function DialoguePanel() {
               }
             >
               <div className="mic-circle-outer">
-                <span className="mic-symbol">{isRecording ? "⏹" : "🎙"}</span>
+                <span className="mic-symbol"><UiIcon name={isRecording ? "stop" : "mic"} /></span>
               </div>
             </button>
             <span className="mic-status-label">

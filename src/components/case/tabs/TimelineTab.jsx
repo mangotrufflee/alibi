@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useGame } from "../../../state/GameContext";
 import { MASTER_TIMELINE, SUSPECT_CLAIMS, CONTRADICTIONS } from "../../../data/caseTabsData";
 import { suspects } from "../../../data/suspects";
+import { UiIcon } from "../../ui/UiIcon";
 
 export default function TimelineTab() {
   const {
@@ -32,19 +33,19 @@ export default function TimelineTab() {
             className={`filter-pill-btn ${viewMode === "master" ? "active" : ""}`}
             onClick={() => setViewMode("master")}
           >
-            ⏱️ Master Clock ({MASTER_TIMELINE.length} Events)
+            <UiIcon name="time" /> Master Clock ({MASTER_TIMELINE.length} Events)
           </button>
           <button
             className={`filter-pill-btn ${viewMode === "claims" ? "active" : ""}`}
             onClick={() => setViewMode("claims")}
           >
-            🗣️ Suspect Alibi Claims
+            <UiIcon name="sound" /> Suspect Alibi Claims
           </button>
           <button
             className={`filter-pill-btn ${viewMode === "clashes" ? "active" : ""}`}
             onClick={() => setViewMode("clashes")}
           >
-            ⚠️ Flagged Contradictions ({CONTRADICTIONS.length})
+            <UiIcon name="warning" /> Flagged Contradictions ({CONTRADICTIONS.length})
           </button>
         </div>
 
@@ -90,7 +91,7 @@ export default function TimelineTab() {
                     <div className="node-top">
                       <span className="node-category-tag">{item.category.toUpperCase()}</span>
                       {item.verified && (
-                        <span className="node-verified-tag">✔ FORENSICALLY VERIFIED</span>
+                        <span className="node-verified-tag"><UiIcon name="success" /> FORENSICALLY VERIFIED</span>
                       )}
                     </div>
                     <h4 className="node-title">{item.title}</h4>
@@ -121,11 +122,7 @@ export default function TimelineTab() {
                 <div className="claim-card-header">
                   <div className="suspect-heading">
                     <span className="claim-avatar">
-                      {suspectId === "raju" && "🧢"}
-                      {suspectId === "meera" && "💍"}
-                      {suspectId === "arvind" && "👓"}
-                      {suspectId === "nusrat" && "🎙️"}
-                      {suspectId === "bhola" && "☕"}
+                      <UiIcon name={{ raju: "hat", meera: "gem", arvind: "glasses", nusrat: "mic", bhola: "coffee" }[suspectId] || "user"} />
                     </span>
                     <div>
                       <h3 className="claim-suspect-name">{suspect.name}</h3>
@@ -138,7 +135,7 @@ export default function TimelineTab() {
                     className="challenge-alibi-btn"
                     onClick={() => handleJumpToSuspect(suspectId)}
                   >
-                    Challenge Alibi ➔
+                    Challenge Alibi <UiIcon name="arrow" />
                   </button>
                 </div>
 
@@ -178,7 +175,7 @@ export default function TimelineTab() {
                 <div key={c.id} className={`contradiction-clash-card ${c.resolved ? "clash-resolved" : ""}`}>
                   <div className="clash-card-top">
                     <span className={`clash-badge ${c.resolved ? "badge-resolved" : ""}`}>
-                      {c.resolved ? "✔ CONTRADICTION BROKEN" : "⚠️ CONTRADICTION DETECTED"}
+                      {c.resolved ? <><UiIcon name="success" /> CONTRADICTION BROKEN</> : <><UiIcon name="warning" /> CONTRADICTION DETECTED</>}
                     </span>
                     <h3 className="clash-title">{c.title}</h3>
                   </div>
@@ -200,7 +197,7 @@ export default function TimelineTab() {
                   <div className="clash-footer">
                     {c.resolved ? (
                       <span className="clash-resolved-chip">
-                        ✔ ALIBI DISMANTLED // Confession Extracted (+20 pts)
+                        <UiIcon name="success" /> ALIBI DISMANTLED // Confession Extracted (+20 pts)
                       </span>
                     ) : (
                       <button
@@ -208,7 +205,7 @@ export default function TimelineTab() {
                         className="confront-contradiction-btn"
                         onClick={() => confrontSuspectWithContradiction(c.id)}
                       >
-                        Confront {suspA.name} with Contradiction ➔
+                        Confront {suspA.name} with Contradiction <UiIcon name="arrow" />
                       </button>
                     )}
                   </div>

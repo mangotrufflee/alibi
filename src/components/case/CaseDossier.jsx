@@ -1,6 +1,7 @@
 // src/components/case/CaseDossier.jsx
 import React, { useState } from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "../ui/UiIcon";
 import { suspects } from "../../data/suspects";
 
 export default function CaseDossier() {
@@ -93,7 +94,7 @@ export default function CaseDossier() {
 
           {/* ACCUSATION DEDUCTION SECTION */}
           <div className="accusation-box">
-            <h4 className="accusation-title">⚖️ Issue Formal Murder Indictment</h4>
+            <h4 className="accusation-title"><UiIcon name="gavel" /> Issue Formal Murder Indictment</h4>
             <p className="accusation-intro">
               When you have uncovered sufficient evidence through voice interrogation, name the killer and murder weapon:
             </p>

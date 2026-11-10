@@ -1,6 +1,7 @@
 // src/components/ui/TranscriptDrawer.jsx
 import React, { useRef, useEffect } from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 
 export default function TranscriptDrawer() {
   const isTranscriptOpen = useGame((s) => s.isTranscriptOpen);
@@ -27,7 +28,7 @@ export default function TranscriptDrawer() {
         {/* DRAWER HEADER */}
         <div className="drawer-header">
           <div className="drawer-title-group">
-            <span className="drawer-icon">📜</span>
+            <span className="drawer-icon"><UiIcon name="scroll" /></span>
             <div className="drawer-title-text">
               <h2>REX TALKIES RECORDED TESTIMONY</h2>
               <span className="drawer-subtitle">
@@ -53,7 +54,7 @@ export default function TranscriptDrawer() {
               onClick={() => setIsTranscriptOpen(false)}
               title="Close Transcript Drawer"
             >
-              ✕ Close
+              <UiIcon name="close" /> Close
             </button>
           </div>
         </div>
@@ -78,7 +79,7 @@ export default function TranscriptDrawer() {
                       onClick={() => speakDialogue(item.text, item.suspectId || selectedSuspect)}
                       title="Replay this response with custom voice"
                     >
-                      🔊 Listen
+                      <UiIcon name="sound" /> Listen
                     </button>
                   </div>
                 )}

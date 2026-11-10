@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import { useGame } from "../../../state/GameContext";
 import { suspects } from "../../../data/suspects";
+import { UiIcon } from "../../ui/UiIcon";
 
 export default function EvidenceListTab() {
   const {
@@ -89,7 +90,7 @@ export default function EvidenceListTab() {
 
               <h3 className="card-title">{item.name}</h3>
               <p className="card-location">
-                📍 <strong>Location:</strong> {item.location}
+                <UiIcon name="location" /> <strong>Location:</strong> {item.location}
               </p>
 
               <p className="card-description">{item.description}</p>
@@ -117,7 +118,7 @@ export default function EvidenceListTab() {
                   onClick={() => handleInspect3D(item)}
                   title="View 3D turntable model"
                 >
-                  🔍 3D Turntable
+                  <UiIcon name="evidence" /> 3D Turntable
                 </button>
 
                 <button
@@ -126,7 +127,7 @@ export default function EvidenceListTab() {
                   onClick={() => presentEvidenceToSuspect(item.id)}
                   title={`Present this evidence to ${currentSuspect.name}`}
                 >
-                  ⚖️ Present to {currentSuspect.name} ➔
+                  <UiIcon name="gavel" /> Present to {currentSuspect.name} <UiIcon name="arrow" />
                 </button>
               </div>
             </div>

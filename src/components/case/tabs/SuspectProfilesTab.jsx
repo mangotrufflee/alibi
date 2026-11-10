@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import { useGame } from "../../../state/GameContext";
 import { suspects } from "../../../data/suspects";
+import { UiIcon } from "../../ui/UiIcon";
 import { SUSPECT_RELATIONSHIPS } from "../../../data/caseTabsData";
 import { TRUTH_GATES, SUSPECT_CHARACTER_SHEETS } from "../../../data/truthGatesData";
 
@@ -69,11 +70,7 @@ export default function SuspectProfilesTab() {
             >
               <div className="roster-avatar-frame">
                 <span className="roster-avatar-icon">
-                  {id === "raju" && "🧢"}
-                  {id === "meera" && "💍"}
-                  {id === "arvind" && "👓"}
-                  {id === "nusrat" && "🎙️"}
-                  {id === "bhola" && "☕"}
+                  <UiIcon name={{ raju: "hat", meera: "gem", arvind: "glasses", nusrat: "mic", bhola: "coffee" }[id] || "user"} />
                 </span>
                 <span className="roster-stress-pip" style={{ height: `${sStress}%` }} />
               </div>
@@ -135,7 +132,7 @@ export default function SuspectProfilesTab() {
             </div>
             <div style={{ marginTop: "0.4rem", display: "flex", justifyContent: "space-between", fontSize: "0.78rem" }}>
               <span style={{ color: "#929caa" }}>Alibi Lies Broken:</span>
-              <strong style={{ color: "#3772f1" }}>⚔️ {contradictionsCaught} Contradictions</strong>
+              <strong style={{ color: "#3772f1" }}><UiIcon name="gavel" /> {contradictionsCaught} Contradictions</strong>
             </div>
           </div>
 
@@ -165,7 +162,7 @@ export default function SuspectProfilesTab() {
             className="interrogate-now-btn"
             onClick={() => handleStartInterrogation(activeProfileId)}
           >
-            🎙️ Interrogate {suspectData.name} ➔
+            <UiIcon name="mic" /> Interrogate {suspectData.name} <UiIcon name="arrow" />
           </button>
         </div>
 
@@ -198,7 +195,7 @@ export default function SuspectProfilesTab() {
                     <div key={idx} className="relation-item-card">
                       <div className="relation-header">
                         <span className="relation-type-tag">{rel.relation}</span>
-                        <span className="other-party-name">➔ {otherPartyName}</span>
+                        <span className="other-party-name"><UiIcon name="arrow" /> {otherPartyName}</span>
                       </div>
                       <p className="relation-desc-text">{rel.desc}</p>
                     </div>
@@ -239,7 +236,7 @@ export default function SuspectProfilesTab() {
                   >
                     <div className="relation-header">
                       <span className="relation-type-tag" style={{ background: isUnlocked ? "#10b981" : "#475569" }}>
-                        {isUnlocked ? "🔓 CRACKED (+" + gate.points + " PTS)" : "🔒 LOCKED"}
+                        {isUnlocked ? <><UiIcon name="success" /> CRACKED (+{gate.points} PTS)</> : <><UiIcon name="lock" /> LOCKED</>}
                       </span>
                       <strong style={{ color: isUnlocked ? "#34d399" : "#e2e8f0" }}>
                         {gate.title}

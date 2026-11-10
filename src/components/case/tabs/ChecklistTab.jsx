@@ -3,6 +3,7 @@
 
 import React from "react";
 import { useGame } from "../../../state/GameContext";
+import { UiIcon } from "../../ui/UiIcon";
 
 export default function ChecklistTab() {
   const {
@@ -64,7 +65,7 @@ export default function ChecklistTab() {
                   if (goal.hidden && !goal.completed) {
                     return (
                       <div key={goal.id} className="goal-item-card goal-hidden">
-                        <div className="goal-check-box locked">🔒</div>
+                        <div className="goal-check-box locked"><UiIcon name="lock" /></div>
                         <div className="goal-content">
                           <span className="goal-title-redacted">
                             [CLASSIFIED LEAD // Awaiting forensic breakthrough]
@@ -88,7 +89,7 @@ export default function ChecklistTab() {
                         onClick={() => toggleChecklistGoal(goal.id)}
                         title="Click to toggle objective state"
                       >
-                        {goal.completed ? "✓" : ""}
+                        {goal.completed ? <UiIcon name="check" /> : ""}
                       </button>
 
                       <div className="goal-content">
@@ -103,7 +104,7 @@ export default function ChecklistTab() {
                             className="jump-suspect-btn"
                             onClick={() => handleJumpToSuspect(goal.targetSuspect)}
                           >
-                            Interrogate {goal.targetSuspect.toUpperCase()} ➔
+                            Interrogate {goal.targetSuspect.toUpperCase()} <UiIcon name="arrow" />
                           </button>
                         </div>
                       )}

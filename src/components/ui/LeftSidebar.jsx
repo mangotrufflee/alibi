@@ -1,6 +1,7 @@
 // src/components/ui/LeftSidebar.jsx
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 import { suspects } from "../../data/suspects";
 import { initialEvidenceItems } from "../../data/evidence";
 import { caseInfo } from "../../data/caseInfo";
@@ -34,7 +35,7 @@ export default function LeftSidebar() {
           onClick={() => toggleSidebar("left")}
           title="Collapse Dossier"
         >
-          ✕
+          <UiIcon name="close" />
         </button>
       </div>
 
@@ -44,19 +45,19 @@ export default function LeftSidebar() {
           className={`tab-btn ${activeLeftTab === "evidence" ? "active" : ""}`}
           onClick={() => setActiveLeftTab("evidence")}
         >
-          🔍 Evidence ({discoveredEvidence.length}/12)
+          <UiIcon name="evidence" /> Evidence ({discoveredEvidence.length}/12)
         </button>
         <button
           className={`tab-btn ${activeLeftTab === "suspects" ? "active" : ""}`}
           onClick={() => setActiveLeftTab("suspects")}
         >
-          👥 Suspects (5)
+          <UiIcon name="users" /> Suspects (5)
         </button>
         <button
           className={`tab-btn ${activeLeftTab === "checklist" ? "active" : ""}`}
           onClick={() => setActiveLeftTab("checklist")}
         >
-          ☑ Checklist
+          <UiIcon name="report" /> Checklist
         </button>
         <button
           className={`tab-btn ${activeLeftTab === "timeline" ? "active" : ""}`}
@@ -68,13 +69,13 @@ export default function LeftSidebar() {
           className={`tab-btn ${activeLeftTab === "notes" ? "active" : ""}`}
           onClick={() => setActiveLeftTab("notes")}
         >
-          📝 Notes
+          <UiIcon name="notebook" /> Notes
         </button>
         <button
           className={`tab-btn ${activeLeftTab === "transcripts" ? "active" : ""}`}
           onClick={() => setActiveLeftTab("transcripts")}
         >
-          🎙 Transcripts
+          <UiIcon name="mic" /> Transcripts
         </button>
       </div>
 
@@ -190,7 +191,7 @@ export default function LeftSidebar() {
             <ul className="checklist-items">
               {caseInfo.checklist.map((c) => (
                 <li key={c.id} className={`checklist-item ${c.completed ? "done" : ""}`}>
-                  <span className="checkbox-icon">{c.completed ? "☑" : "☐"}</span>
+                  <span className="checkbox-icon">{c.completed && <UiIcon name="check" />}</span>
                   <span className="checklist-text">{c.label}</span>
                 </li>
               ))}

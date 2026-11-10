@@ -13,6 +13,7 @@ import {
   Film
 } from "lucide-react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 
 export default function PauseMenu() {
   const isMenuOpen = useGame((s) => s.isMenuOpen);
@@ -22,7 +23,7 @@ export default function PauseMenu() {
   const setPaused = useGame((s) => s.setPaused);
   const isMuted = useGame((s) => s.isMuted);
   const toggleMute = useGame((s) => s.toggleMute);
-  const resetRun = useGame((s) => s.resetRun);
+  const returnToStartScreen = useGame((s) => s.returnToStartScreen);
   const activeStoryline = useGame((s) => s.activeStoryline);
   const selectStoryline = useGame((s) => s.selectStoryline);
   const setCameraState = useGame((s) => s.setCameraState);
@@ -62,8 +63,7 @@ export default function PauseMenu() {
 
   const handleResetRun = () => {
     if (window.confirm("Are you sure you want to reset the investigation back to the start?")) {
-      resetRun();
-      setIsMenuOpen(false);
+      returnToStartScreen();
     }
   };
 
@@ -139,7 +139,7 @@ export default function PauseMenu() {
                 color: "#cbd5e1"
               }}
             >
-              🏆 Score: {score} pts
+              <UiIcon name="success" /> Score: {score} pts
             </span>
           </div>
 

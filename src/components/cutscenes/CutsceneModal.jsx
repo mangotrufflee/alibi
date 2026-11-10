@@ -1,6 +1,7 @@
 // src/components/cutscenes/CutsceneModal.jsx
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "../ui/UiIcon";
 
 export default function CutsceneModal() {
   const activeCutscene = useGame((s) => s.activeCutscene);
@@ -38,7 +39,7 @@ export default function CutsceneModal() {
         {/* FOOTER ACTION */}
         <div className="cutscene-dialog-footer">
           <button type="button" className="cutscene-dismiss-btn" onClick={closeCutscene}>
-            Resume Investigation ➔
+            Resume Investigation <UiIcon name="arrow" />
           </button>
         </div>
       </div>

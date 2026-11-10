@@ -1,6 +1,7 @@
 // src/components/ui/RightSidebar.jsx
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 
 export default function RightSidebar() {
   const {
@@ -27,7 +28,7 @@ export default function RightSidebar() {
           onClick={() => toggleSidebar("right")}
           title="Close Settings"
         >
-          ✕
+          <UiIcon name="close" />
         </button>
       </div>
 
@@ -37,19 +38,19 @@ export default function RightSidebar() {
           className={`tab-btn ${activeRightTab === "settings" ? "active" : ""}`}
           onClick={() => setActiveRightTab("settings")}
         >
-          🔊 Audio & Display
+          <UiIcon name="sound" /> Audio & Display
         </button>
         <button
           className={`tab-btn ${activeRightTab === "controls" ? "active" : ""}`}
           onClick={() => setActiveRightTab("controls")}
         >
-          🎮 Controls
+          <UiIcon name="wrench" /> Controls
         </button>
         <button
           className={`tab-btn ${activeRightTab === "save" ? "active" : ""}`}
           onClick={() => setActiveRightTab("save")}
         >
-          💾 Save / Load
+          <UiIcon name="archive" /> Save / Load
         </button>
       </div>
 

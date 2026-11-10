@@ -8,6 +8,9 @@ import { PlaceholderProp } from "../../../assets/placeholders/PlaceholderProp";
 import { ModelWrapper } from "../../../assets/placeholders/ModelWrapper";
 import { useGame } from "../../../state/GameContext";
 import { suspects } from "../../../data/suspects";
+import { UiIcon } from "../../ui/UiIcon";
+
+const FORENSIC_CLUE_UNLOCK_COST = 10;
 
 function Evidence3DViewer({ propType, assetId, autoRotate }) {
   return (
@@ -16,9 +19,13 @@ function Evidence3DViewer({ propType, assetId, autoRotate }) {
       style={{ width: "100%", height: "100%", background: "radial-gradient(circle at 50% 50%, #181b25 0%, #05060a 100%)" }}
     >
       <ambientLight intensity={0.7} />
-      <directionalLight position={[4, 5, 3]} intensity={1.5} color="#f3f5f7" castShadow />
-      <directionalLight position={[-4, 2, -2]} intensity={0.6} color="#3772f1" />
-      <pointLight position={[0, -2, 2]} intensity={0.4} color="#1f61ef" />
+      <spotLight
+        color="#3b82f6"
+        intensity={12}
+        position={[2.5, 4, 2.5]}
+        angle={0.45}
+        penumbra={0.7}
+      />
 
       <Suspense fallback={null}>
         <Float speed={autoRotate ? 2 : 0} rotationIntensity={0.4} floatIntensity={0.2}>
@@ -48,7 +55,10 @@ export default function PhysicalEvidenceTab() {
     selectedEvidence,
     setSelectedEvidence,
     selectedSuspect,
-    presentEvidenceToSuspect
+    presentEvidenceToSuspect,
+    score,
+    unlockedForensicClueIds,
+    unlockForensicClue
   } = useGame();
 
   const [autoRotate, setAutoRotate] = useState(true);
@@ -63,6 +73,8 @@ export default function PhysicalEvidenceTab() {
     evidenceItems[0];
 
   const currentSuspect = suspects[selectedSuspect] || suspects.raju;
+  const isClueUnlocked = (unlockedForensicClueIds || []).includes(currentItem.id);
+  const hasUnlockPoints = score >= FORENSIC_CLUE_UNLOCK_COST;
 
   return (
     <div className="tab-pane physical-evidence-pane">
@@ -84,19 +96,7 @@ export default function PhysicalEvidenceTab() {
                 onClick={() => setSelectedEvidence(item)}
               >
                 <div className="exhibit-icon-box">
-                  {item.placeholderType === "key" && "🔑"}
-                  {item.placeholderType === "ticket" && "🎟️"}
-                  {item.placeholderType === "glass" && "🍵"}
-                  {item.placeholderType === "filmstrip" && "🎞️"}
-                  {item.placeholderType === "ledger" && "📓"}
-                  {item.placeholderType === "phone" && "📱"}
-                  {item.placeholderType === "clamp" && "🔩"}
-                  {item.placeholderType === "token" && "🪙"}
-                  {item.placeholderType === "gauge" && "⚡"}
-                  {item.placeholderType === "canister" && "🛢️"}
-                  {item.placeholderType === "cord" && "🪢"}
-                  {item.placeholderType === "certificate" && "📜"}
-                  {item.placeholderType === "bell" && "🔔"}
+                  <UiIcon name={{ key: "key", ticket: "ticket", glass: "coffee", filmstrip: "film", ledger: "notebook", phone: "phone", clamp: "wrench", token: "briefcase", gauge: "zap", canister: "archive", cord: "waves", certificate: "scroll", bell: "bell" }[item.placeholderType] || "file"} />
                 </div>
                 <div className="exhibit-info">
                   <span className="exhibit-name">{item.name}</span>
@@ -124,7 +124,7 @@ export default function PhysicalEvidenceTab() {
               className={`control-btn ${autoRotate ? "active" : ""}`}
               onClick={() => setAutoRotate(!autoRotate)}
             >
-              {autoRotate ? "⏸ Pause Rotation" : "▶ Auto Rotate"}
+              {autoRotate ? <><UiIcon name="pause" /> Pause Rotation</> : <><UiIcon name="arrow" /> Auto Rotate</>}
             </button>
             <span className="control-hint">Drag mouse to orbit • Scroll to zoom</span>
           </div>
@@ -152,9 +152,31 @@ export default function PhysicalEvidenceTab() {
 
           <div className="dossier-section clue-section">
             <h4 className="section-heading">FORENSIC CLUE</h4>
-            <div className="clue-highlight-box">
-              <p>{currentItem.clue}</p>
-            </div>
+            {isClueUnlocked ? (
+              <div className="clue-highlight-box">
+                <p>{currentItem.clue}</p>
+              </div>
+            ) : (
+              <div className="clue-unlock-overlay">
+                <span className="clue-lock-icon"><UiIcon name="lock" /></span>
+                <span className="clue-unlock-copy">FORENSIC CLUE SEALED</span>
+                <button
+                  type="button"
+                  className="clue-unlock-btn"
+                  onClick={() => unlockForensicClue(currentItem.id)}
+                  disabled={!hasUnlockPoints}
+                >
+                  USE {FORENSIC_CLUE_UNLOCK_COST} POINTS TO UNLOCK THE CLUE
+                  <span
+                    className="clue-cost-icon"
+                    title="Play the puzzle to gain points"
+                    aria-label="Play the puzzle to gain points"
+                  >
+                    <UiIcon name="gem" />
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
 
           {currentItem.inspectionDetails && currentItem.inspectionDetails.length > 0 && (
@@ -175,7 +197,7 @@ export default function PhysicalEvidenceTab() {
             className="present-evidence-large-btn"
             onClick={() => presentEvidenceToSuspect(currentItem.id)}
           >
-            ⚖️ Present "{currentItem.name}" to {currentSuspect.name} ➔
+            <UiIcon name="gavel" /> Present "{currentItem.name}" to {currentSuspect.name} <UiIcon name="arrow" />
           </button>
         </div>
       </aside>

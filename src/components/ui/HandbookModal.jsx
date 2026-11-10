@@ -1,6 +1,7 @@
 // src/components/ui/HandbookModal.jsx
 import React, { useState } from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 import { suspects } from "../../data/suspects";
 import { initialEvidenceItems } from "../../data/evidence";
 import { caseInfo } from "../../data/caseInfo";
@@ -25,7 +26,7 @@ export default function HandbookModal() {
             <h2 className="handbook-title">CASE DEDUCTION BOARD</h2>
           </div>
           <button className="handbook-close-btn" onClick={toggleHandbook}>
-            ✕ RETURN TO AUDITORIUM
+            <UiIcon name="close" /> RETURN TO AUDITORIUM
           </button>
         </div>
 
@@ -46,7 +47,7 @@ export default function HandbookModal() {
             {/* COLUMN 1: SUSPECT DOSSIER PINS */}
             <div className="board-column">
               <h4 className="column-heading">
-                <span className="pin-symbol">📌</span> PERSONS OF INTEREST
+                <span className="pin-symbol"><UiIcon name="pin" /></span> PERSONS OF INTEREST
               </h4>
               <div className="pinned-suspects-list">
                 {Object.values(suspects).map((s) => (
@@ -68,7 +69,7 @@ export default function HandbookModal() {
             {/* COLUMN 2: COLLECTED CLUES & CONNECTING YARN */}
             <div className="board-column">
               <h4 className="column-heading">
-                <span className="pin-symbol">🧵</span> FORENSIC CONNECTIONS
+                <span className="pin-symbol"><UiIcon name="waves" /></span> FORENSIC CONNECTIONS
               </h4>
               <div className="evidence-pins-list">
                 {initialEvidenceItems
@@ -90,7 +91,7 @@ export default function HandbookModal() {
             {/* COLUMN 3: HYPOTHESIS & DEDUCTION SLOTS */}
             <div className="board-column deduction-column">
               <h4 className="column-heading">
-                <span className="pin-symbol">⚖️</span> CASE HYPOTHESIS
+                <span className="pin-symbol"><UiIcon name="gavel" /></span> CASE HYPOTHESIS
               </h4>
 
               <div className="deduction-box">
@@ -151,7 +152,7 @@ export default function HandbookModal() {
                   }
                 }}
               >
-                ⚖️ Formalize Accusation
+                <UiIcon name="gavel" /> Formalize Accusation
               </button>
             </div>
           </div>

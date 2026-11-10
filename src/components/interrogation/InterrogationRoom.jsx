@@ -4,6 +4,7 @@ import { useGame } from "../../state/GameContext";
 import { suspects } from "../../data/suspects";
 import HintCards from "./HintCards";
 import TruthGateIndicator from "./TruthGateIndicator";
+import { UiIcon } from "../ui/UiIcon";
 
 export default function InterrogationRoom() {
   const selectedSuspect   = useGame((s) => s.selectedSuspect);
@@ -90,7 +91,7 @@ export default function InterrogationRoom() {
             style={{ borderColor: currentSuspect.color }}
           >
             <div className="portrait-inner-avatar">
-              <span className="portrait-silhouette-icon">👤</span>
+              <span className="portrait-silhouette-icon"><UiIcon name="user" /></span>
               <span className="portrait-monogram">{currentSuspect.name.slice(0, 2).toUpperCase()}</span>
             </div>
 
@@ -131,7 +132,7 @@ export default function InterrogationRoom() {
               disabled={isSpeaking || isRecording || isProcessing}
               title={`Hear ${currentSuspect.name} speak their statement`}
             >
-              {isSpeaking ? "🔊 Speaking Statement..." : `🔊 Hear ${currentSuspect.name.split(" ")[0]}'s Statement`}
+              {isSpeaking ? <><UiIcon name="sound" /> Speaking Statement...</> : <><UiIcon name="sound" /> Hear {currentSuspect.name.split(" ")[0]}'s Statement</>}
             </button>
           </div>
 
@@ -172,11 +173,11 @@ export default function InterrogationRoom() {
                   disabled={isSpeaking || isRecording || isProcessing}
                   title={`Speak ${currentSuspect.name}'s current statement`}
                 >
-                  🔊 Play Voice
+                  <UiIcon name="sound" /> Play Voice
                 </button>
                 {isSpeaking && (
                   <button className="stop-audio-btn" onClick={stopAudio} title="Interrupt suspect voice">
-                    ⏹ Stop
+                    <UiIcon name="stop" /> Stop
                   </button>
                 )}
               </div>
@@ -198,7 +199,7 @@ export default function InterrogationRoom() {
                         onClick={() => speakDialogue(item.text, item.suspectId || selectedSuspect)}
                         title="Replay this response with suspect's custom voice"
                       >
-                        🔊 Listen
+                        <UiIcon name="sound" /> Listen
                       </button>
                     </div>
                   )}
@@ -225,12 +226,12 @@ export default function InterrogationRoom() {
               </div>
             ) : isSpeaking ? (
               <div className="status-live speaking">
-                <span className="speaker-icon">🔊</span>
+                <span className="speaker-icon"><UiIcon name="sound" /></span>
                 <strong>SPEAKING:</strong> {currentSuspect.name} is responding...
               </div>
             ) : (
               <div className="status-live idle">
-                <span>🎙️ Push-to-Talk or select a cross-examination question below</span>
+                <span><UiIcon name="mic" /> Push-to-Talk or select a cross-examination question below</span>
                 <span className="lang-pill">{currentLanguage === "en-IN" ? "English (India)" : "Hindi"}</span>
               </div>
             )}
@@ -247,7 +248,7 @@ export default function InterrogationRoom() {
                   onClick={() => askTopicQuestion(t)}
                   disabled={isRecording || isProcessing}
                 >
-                  ❓ {t.title}
+                  <UiIcon name="question" /> {t.title}
                 </button>
               ))}
             </div>
@@ -264,7 +265,7 @@ export default function InterrogationRoom() {
                 title="Click to toggle Voice Interrogation via Gnani STT"
               >
                 <div className="mic-halo-ring" />
-                <span className="mic-core-icon">{isRecording ? "⏹" : "🎙"}</span>
+                <span className="mic-core-icon"><UiIcon name={isRecording ? "stop" : "mic"} /></span>
               </button>
               <div className="mic-label-under">
                 <span className="mic-primary-text">
@@ -289,7 +290,7 @@ export default function InterrogationRoom() {
                 className="query-submit-btn"
                 disabled={!textInput.trim() || isRecording || isProcessing || isGameOver}
               >
-                Interrogate ➔
+                Interrogate <UiIcon name="arrow" />
               </button>
             </form>
 

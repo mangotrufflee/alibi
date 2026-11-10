@@ -1,6 +1,7 @@
 // src/components/ui/DebugOverlay.jsx
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 import { getAllManifestEntries } from "../../assets/registry";
 
 export default function DebugOverlay() {
@@ -14,9 +15,9 @@ export default function DebugOverlay() {
   return (
     <div className="dev-debug-panel">
       <div className="dev-debug-header">
-        <strong>🛠️ ALIBI DEV PIPELINE INSPECTOR</strong>
+        <strong><UiIcon name="wrench" /> ALIBI DEV PIPELINE INSPECTOR</strong>
         <button className="dev-close-btn" onClick={toggleDebugMode}>
-          ✕
+          <UiIcon name="close" />
         </button>
       </div>
 

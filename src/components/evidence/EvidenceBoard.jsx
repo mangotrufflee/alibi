@@ -1,6 +1,7 @@
 // src/components/evidence/EvidenceBoard.jsx
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "../ui/UiIcon";
 
 export default function EvidenceBoard() {
   const { evidenceItems, selectedEvidence, setSelectedEvidence } = useGame();
@@ -34,7 +35,7 @@ export default function EvidenceBoard() {
           <div className="evidence-card-detailed">
             <div className="card-top-tag">{selectedEvidence.category.toUpperCase()}</div>
             <h2 className="evidence-title">{selectedEvidence.name}</h2>
-            <div className="location-pill">📍 Location: {selectedEvidence.location}</div>
+            <div className="location-pill"><UiIcon name="location" /> Location: {selectedEvidence.location}</div>
 
             <div className="evidence-description-box">
               <h4>Item Overview:</h4>
@@ -42,7 +43,7 @@ export default function EvidenceBoard() {
             </div>
 
             <div className="evidence-clue-highlight">
-              <span className="clue-icon">🔎</span>
+              <span className="clue-icon"><UiIcon name="evidence" /></span>
               <div className="clue-content">
                 <strong>Investigative Significance:</strong>
                 <p>{selectedEvidence.clue}</p>

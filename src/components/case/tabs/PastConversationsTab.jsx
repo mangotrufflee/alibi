@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import { useGame } from "../../../state/GameContext";
 import { suspects } from "../../../data/suspects";
+import { UiIcon } from "../../ui/UiIcon";
 
 export default function PastConversationsTab() {
   const {
@@ -110,7 +111,7 @@ export default function PastConversationsTab() {
                   className={`transcript-entry-row ${isDetective ? "detective-row" : "suspect-row"}`}
                 >
                   <div className="entry-avatar-frame">
-                    <span>{isDetective ? "🕵️" : "👤"}</span>
+                    <span><UiIcon name={isDetective ? "evidence" : "user"} /></span>
                   </div>
 
                   <div className="entry-bubble-card">
@@ -123,9 +124,9 @@ export default function PastConversationsTab() {
                       </div>
 
                       <div className="bubble-meta">
-                        {entry.time && <span className="entry-timestamp">🕒 {entry.time}</span>}
+                        {entry.time && <span className="entry-timestamp"><UiIcon name="time" /> {entry.time}</span>}
                         {entry.isVoice && (
-                          <span className="voice-stt-badge">🎙️ Voice STT</span>
+                          <span className="voice-stt-badge"><UiIcon name="mic" /> Voice STT</span>
                         )}
                       </div>
                     </div>
@@ -141,7 +142,7 @@ export default function PastConversationsTab() {
                           onClick={() => handleReplayAudio(entry.text, entry.speaker, entry.suspectId)}
                           title="Replay suspect speech audio via Gnani TTS"
                         >
-                          🔊 Replay Voice Audio
+                          <UiIcon name="sound" /> Replay Voice Audio
                         </button>
                       </div>
                     )}
@@ -161,7 +162,7 @@ export default function PastConversationsTab() {
             className="resume-interrogation-btn"
             onClick={() => handleContinueInterrogation(filterSuspect)}
           >
-            🎙️ Continue Interrogating {suspects[filterSuspect]?.name} ➔
+            <UiIcon name="mic" /> Continue Interrogating {suspects[filterSuspect]?.name} <UiIcon name="arrow" />
           </button>
         </div>
       )}

@@ -1,5 +1,6 @@
 // src/components/gnani/GnaniPipelineVisualizer.jsx
 import React, { useState } from "react";
+import { UiIcon } from "../ui/UiIcon";
 import { useGame } from "../../state/GameContext";
 
 export default function GnaniPipelineVisualizer() {
@@ -68,19 +69,19 @@ export default function GnaniPipelineVisualizer() {
       <div className="pipeline-diagram">
         {/* NODE 1: AUDIO CAPTURE */}
         <div className={`pipeline-node ${pipelineState.stage === "RECORDING" ? "active-node" : ""}`}>
-          <div className="node-icon">🎙️</div>
+          <div className="node-icon"><UiIcon name="mic" /></div>
           <div className="node-title">1. Audio Capture</div>
           <div className="node-meta">PCM 16-bit 16kHz WAV</div>
           <div className="node-status">
-            {pipelineState.stage === "RECORDING" ? "🔴 Recording Detective..." : "Ready"}
+            {pipelineState.stage === "RECORDING" ? <><UiIcon name="mic" /> Recording Detective...</> : "Ready"}
           </div>
         </div>
 
-        <div className="pipeline-arrow">➔</div>
+        <div className="pipeline-arrow"><UiIcon name="arrow" /></div>
 
         {/* NODE 2: GNANI STT */}
         <div className={`pipeline-node ${pipelineState.stage === "STT_PROCESSING" ? "active-node" : ""}`}>
-          <div className="node-icon">⚡</div>
+          <div className="node-icon"><UiIcon name="zap" /></div>
           <div className="node-title">2. Gnani Prisma STT</div>
           <div className="node-meta">POST /stt/v3</div>
           <div className="node-status">
@@ -92,28 +93,28 @@ export default function GnaniPipelineVisualizer() {
           </div>
         </div>
 
-        <div className="pipeline-arrow">➔</div>
+        <div className="pipeline-arrow"><UiIcon name="arrow" /></div>
 
         {/* NODE 3: INTERROGATION ENGINE */}
         <div className={`pipeline-node ${pipelineState.stage === "REASONING" ? "active-node" : ""}`}>
-          <div className="node-icon">🧠</div>
+          <div className="node-icon"><UiIcon name="brain" /></div>
           <div className="node-title">3. Noir NLP Engine</div>
           <div className="node-meta">Alibi & Clue Resolver</div>
           <div className="node-status">Dynamic Suspect Mind</div>
         </div>
 
-        <div className="pipeline-arrow">➔</div>
+        <div className="pipeline-arrow"><UiIcon name="arrow" /></div>
 
         {/* NODE 4: GNANI TTS */}
         <div className={`pipeline-node ${pipelineState.stage === "TTS_SYNTHESIZING" || pipelineState.stage === "PLAYING" ? "active-node" : ""}`}>
-          <div className="node-icon">🔊</div>
+          <div className="node-icon"><UiIcon name="sound" /></div>
           <div className="node-title">4. Gnani Timbre TTS</div>
           <div className="node-meta">POST /api/v1/tts/inference</div>
           <div className="node-status">
             {pipelineState.stage === "TTS_SYNTHESIZING"
               ? "⏳ Synthesizing..."
               : pipelineState.stage === "PLAYING"
-              ? "🔊 Speaking Audio"
+              ? <><UiIcon name="sound" /> Speaking Audio</>
               : "Timbre v2.5"}
           </div>
         </div>
@@ -123,7 +124,7 @@ export default function GnaniPipelineVisualizer() {
       <div className="pipeline-grid">
         {/* LEFT: API KEY & SETTINGS */}
         <div className="pipeline-card">
-          <h3 className="card-heading">🔑 Gnani Authentication & Settings</h3>
+          <h3 className="card-heading"><UiIcon name="key" /> Gnani Authentication & Settings</h3>
           <p className="card-subtext">
             Enter your Gnani.ai <code>X-API-Key-ID</code>. When no key is entered or if the API is offline, the pipeline automatically runs in full interactive simulation mode so the game never crashes.
           </p>
@@ -153,7 +154,7 @@ export default function GnaniPipelineVisualizer() {
 
           {testResult && (
             <div className={`test-feedback ${testResult.success ? "success" : "warning"}`}>
-              {testResult.success ? "✅ " : "⚠️ "} {testResult.message}
+              <UiIcon name={testResult.success ? "success" : "warning"} /> {testResult.message}
             </div>
           )}
 
@@ -178,7 +179,7 @@ export default function GnaniPipelineVisualizer() {
 
           {/* VOICE AUDITION PLAYGROUND */}
           <div className="audition-box">
-            <h4 className="audition-title">🎙️ Audition Gnani Suspect Voices</h4>
+            <h4 className="audition-title"><UiIcon name="mic" /> Audition Gnani Suspect Voices</h4>
             <div className="audition-row">
               <select
                 className="select-input"
@@ -209,7 +210,7 @@ export default function GnaniPipelineVisualizer() {
         {/* RIGHT: LIVE EVENT LOG & PAYLOAD INSPECTOR */}
         <div className="pipeline-card">
           <div className="card-header-row">
-            <h3 className="card-heading">📡 Live Gnani Event Inspector</h3>
+            <h3 className="card-heading"><UiIcon name="radio" /> Live Gnani Event Inspector</h3>
             <span className="log-count">{pipelineState.logs.length} events</span>
           </div>
 

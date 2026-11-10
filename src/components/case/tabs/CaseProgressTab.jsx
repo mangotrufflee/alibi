@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import { useGame } from "../../../state/GameContext";
 import { suspects } from "../../../data/suspects";
+import { UiIcon } from "../../ui/UiIcon";
 
 export default function CaseProgressTab() {
   const {
@@ -47,35 +48,24 @@ export default function CaseProgressTab() {
   return (
     <div className="tab-pane case-progress-pane">
       {isFailed && (
-        <div className="case-failed-banner" style={{ marginBottom: "1.2rem" }}>
-          ✘ CASE FAILED: {failReason || "Killer escaped into the storm"}
+        <div className="case-failed-banner">
+          <UiIcon name="failure" /> CASE FAILED: {failReason || "Killer escaped into the storm"}
         </div>
       )}
 
       {isSolved && verdictResult && (
-        <div className="case-solved-banner" style={{ marginBottom: "1.2rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>✔ {verdictResult.title}</span>
+        <div className="case-solved-banner">
+          <div className="banner-row">
+            <span><UiIcon name="success" /> {verdictResult.title}</span>
             <button
               type="button"
               className="replay-verdict-btn"
               onClick={() => openCutscene("cutscene_final_confrontation")}
-              style={{
-                background: "#0c191c",
-                color: "#10b981",
-                border: "1px solid #10b981",
-                padding: "0.4rem 0.8rem",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontWeight: 600
-              }}
             >
-              🎬 Watch Final Confrontation
+              <UiIcon name="film" /> Watch Final Confrontation
             </button>
           </div>
-          <p style={{ marginTop: "0.6rem", fontSize: "0.9rem", color: "#e2e8f0" }}>
-            {verdictResult.summary}
-          </p>
+          <p>{verdictResult.summary}</p>
         </div>
       )}
 
@@ -115,7 +105,7 @@ export default function CaseProgressTab() {
 
           <div className="metric-big-value">
             <span className={generatorCountdown < 300 ? "timer-critical" : "timer-normal"}>
-              ⏱️ {timeFormatted}
+              <UiIcon name="time" /> {timeFormatted}
             </span>
             <span className="metric-subtext">before permanent blackout</span>
           </div>
@@ -133,7 +123,7 @@ export default function CaseProgressTab() {
         <div className="metric-card thin-ice-metric-card">
           <div className="metric-header">
             <span className="metric-label">THIN-ICE INTEGRITY</span>
-            <span className="metric-status">{isThinIce ? "⚠ ACTIVE WARNING" : "STABLE"}</span>
+            <span className="metric-status">{isThinIce && <UiIcon name="warning" />} {isThinIce ? "ACTIVE WARNING" : "STABLE"}</span>
           </div>
 
           <div className="metric-big-value">
@@ -176,43 +166,43 @@ export default function CaseProgressTab() {
       </div>
 
       {/* FORMAL MURDER INDICTMENT CHAMBER */}
-      <div className="accusation-box" style={{ marginTop: "1.5rem" }}>
+      <div className="accusation-box">
         <div className="accusation-header">
           <div className="dossier-tag">MAGISTRATE'S COURT // FORMAL INDICTMENT</div>
-          <h3 className="accusation-title">⚖️ Issue Formal Murder Indictment</h3>
+          <h3 className="accusation-title"><UiIcon name="gavel" /> Issue Formal Murder Indictment</h3>
           <p className="accusation-intro">
             Active Storyline: <strong>{currentRoute.title}</strong>. To secure a murder warrant, you must formulate your accusation with the 3 pillars of proof: a verified physical clue, an established timeline contradiction, and corroborating eyewitness or confession.
           </p>
         </div>
 
         {/* LIVE PROOF-CHAIN CHECKLIST */}
-        <div className="proof-chain-status-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", margin: "1rem 0" }}>
-          <div className={`proof-card ${proofStatus.physicalSatisfied ? "proof-pass" : "proof-missing"}`} style={{ padding: "0.8rem", border: "1px solid", borderRadius: "6px" }}>
-            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>PILLAR 1: PHYSICAL EVIDENCE</span>
-            <p style={{ margin: "0.3rem 0 0", fontWeight: 600 }}>
-              {proofStatus.physicalSatisfied ? "✔ Verified Physical Clue Discovered" : "○ Physical Clue Missing"}
+        <div className="proof-chain-status-grid">
+          <div className={`proof-card ${proofStatus.physicalSatisfied ? "proof-pass" : "proof-missing"}`}>
+            <span>PILLAR 1: PHYSICAL EVIDENCE</span>
+            <p>
+              {proofStatus.physicalSatisfied ? <><UiIcon name="success" /> Verified Physical Clue Discovered</> : "Physical Clue Missing"}
             </p>
           </div>
 
-          <div className={`proof-card ${proofStatus.contradictionSatisfied ? "proof-pass" : "proof-missing"}`} style={{ padding: "0.8rem", border: "1px solid", borderRadius: "6px" }}>
-            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>PILLAR 2: TIMELINE CONTRADICTION</span>
-            <p style={{ margin: "0.3rem 0 0", fontWeight: 600 }}>
-              {proofStatus.contradictionSatisfied ? "✔ Alibi Contradiction Broken" : "○ Contradiction Unresolved"}
+          <div className={`proof-card ${proofStatus.contradictionSatisfied ? "proof-pass" : "proof-missing"}`}>
+            <span>PILLAR 2: TIMELINE CONTRADICTION</span>
+            <p>
+              {proofStatus.contradictionSatisfied ? <><UiIcon name="success" /> Alibi Contradiction Broken</> : "Alibi Contradiction Unresolved"}
             </p>
           </div>
 
-          <div className={`proof-card ${proofStatus.confessionSatisfied ? "proof-pass" : "proof-missing"}`} style={{ padding: "0.8rem", border: "1px solid", borderRadius: "6px" }}>
-            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>PILLAR 3: CORROBORATION / CONFESSION</span>
-            <p style={{ margin: "0.3rem 0 0", fontWeight: 600 }}>
-              {proofStatus.confessionSatisfied ? "✔ Corroborating Evidence Secured" : "○ Eyewitness/Confession Pending"}
+          <div className={`proof-card ${proofStatus.confessionSatisfied ? "proof-pass" : "proof-missing"}`}>
+            <span>PILLAR 3: CORROBORATION / CONFESSION</span>
+            <p>
+              {proofStatus.confessionSatisfied ? <><UiIcon name="success" /> Corroborating Evidence Secured</> : "Eyewitness/Confession Pending"}
             </p>
           </div>
         </div>
 
         <form onSubmit={handleIndict} className="accusation-form">
-          <div className="accuse-row" style={{ display: "flex", gap: "1rem", alignItems: "flex-end" }}>
-            <div className="accuse-field" style={{ flex: 1 }}>
-              <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "0.3rem" }}>
+          <div className="accuse-row">
+            <div className="accuse-field">
+              <label>
                 1. Accuse Suspect:
               </label>
               <select
@@ -220,7 +210,6 @@ export default function CaseProgressTab() {
                 value={accusedSuspect}
                 onChange={(e) => setAccusedSuspect(e.target.value)}
                 disabled={isSolved || isFailed}
-                style={{ width: "100%", padding: "0.6rem" }}
               >
                 {Object.values(suspects).map((s) => (
                   <option key={s.id} value={s.id}>
@@ -230,8 +219,8 @@ export default function CaseProgressTab() {
               </select>
             </div>
 
-            <div className="accuse-field" style={{ flex: 1 }}>
-              <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "0.3rem" }}>
+            <div className="accuse-field">
+              <label>
                 2. Murder Trauma / Lethal Mechanism:
               </label>
               <select
@@ -239,7 +228,6 @@ export default function CaseProgressTab() {
                 value={selectedWeapon}
                 onChange={(e) => setSelectedWeapon(e.target.value)}
                 disabled={isSolved || isFailed}
-                style={{ width: "100%", padding: "0.6rem" }}
               >
                 <option value="reel_clamp">Heavy Steel Reel Clamp & Booth Rail Impact</option>
                 <option value="film_strip">Manually Severed 35mm Celluloid Strip (Staged Accident)</option>
@@ -251,31 +239,22 @@ export default function CaseProgressTab() {
               type="submit"
               className="submit-indictment-btn"
               disabled={isSolved || isFailed}
-              style={{
-                background: "#991b1b",
-                color: "#fef2f2",
-                border: "none",
-                padding: "0.7rem 1.4rem",
-                borderRadius: "4px",
-                fontWeight: 700,
-                cursor: "pointer"
-              }}
             >
-              ⚖️ Formulate Indictment ➔
+              <UiIcon name="gavel" /> Formulate Indictment <UiIcon name="arrow" />
             </button>
           </div>
         </form>
 
         {verdictResult && !verdictResult.success && (
-          <div className="indictment-failure-notice" style={{ marginTop: "1rem", padding: "0.8rem", background: "#450a0a", border: "1px solid #dc2626", borderRadius: "4px", color: "#fca5a5" }}>
+          <div className="indictment-failure-notice">
             <strong>{verdictResult.title}</strong>
-            <p style={{ margin: "0.3rem 0 0", fontSize: "0.85rem" }}>{verdictResult.summary}</p>
+            <p>{verdictResult.summary}</p>
           </div>
         )}
       </div>
 
       {/* CHRONOLOGICAL SCORE LEDGER TABLE */}
-      <div className="score-ledger-card" style={{ marginTop: "1.5rem" }}>
+      <div className="score-ledger-card">
         <div className="ledger-header">
           <h3 className="ledger-title">CHRONOLOGICAL SCORE LEDGER</h3>
           <span className="ledger-subtitle">

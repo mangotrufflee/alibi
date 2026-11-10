@@ -5,6 +5,7 @@ import { OrbitControls, Center } from "@react-three/drei";
 import { PlaceholderProp } from "../../assets/placeholders/PlaceholderProp";
 import { ModelWrapper } from "../../assets/placeholders/ModelWrapper";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "../ui/UiIcon";
 import { initialEvidenceItems } from "../../data/evidence";
 
 export function EvidenceInspection({ evidenceId, onClose }) {
@@ -25,7 +26,7 @@ export function EvidenceInspection({ evidenceId, onClose }) {
             <span className="badge-status">DISCOVERED AT: {evidence.location}</span>
           </div>
           <button className="evidence-close-btn" onClick={onClose} title="Close Inspection [ESC]">
-            ✕ CLOSE
+            <UiIcon name="close" /> CLOSE
           </button>
         </div>
 
@@ -40,8 +41,6 @@ export function EvidenceInspection({ evidenceId, onClose }) {
                   style={{ width: "100%", height: "100%" }}
                 >
                   <ambientLight intensity={0.8} />
-                  <directionalLight position={[3, 5, 2]} intensity={1.2} />
-                  <pointLight position={[-2, -2, 2]} intensity={0.5} color="#3772f1" />
                   <Center>
                     <ModelWrapper assetId={evidence.id} isSelected={true}>
                       <PlaceholderProp
@@ -58,7 +57,7 @@ export function EvidenceInspection({ evidenceId, onClose }) {
                 <div className="evidence-2d-view">
                   <div className="evidence-illustration-card">
                     <div className="illustration-placeholder">
-                      <span className="icon">🖼️</span>
+                      <span className="icon"><UiIcon name="file" /></span>
                       <p>HAND-DRAWN ILLUSTRATION</p>
                       <code>{evidence.image || "/assets/illustrations/evidence/" + evidence.id + ".png"}</code>
                       <small>Aspect ratio preserved. Transparent PNG alpha supported.</small>
@@ -75,13 +74,13 @@ export function EvidenceInspection({ evidenceId, onClose }) {
                   className={`toolbar-btn ${viewMode === "3d" ? "active" : ""}`}
                   onClick={() => setViewMode("3d")}
                 >
-                  📦 3D Inspection
+                  <UiIcon name="package" /> 3D Inspection
                 </button>
                 <button
                   className={`toolbar-btn ${viewMode === "2d" ? "active" : ""}`}
                   onClick={() => setViewMode("2d")}
                 >
-                  🎨 Illustration View
+                  <UiIcon name="file" /> Illustration View
                 </button>
               </div>
 
@@ -92,14 +91,14 @@ export function EvidenceInspection({ evidenceId, onClose }) {
                     onClick={() => setZoomLevel((z) => Math.min(z + 0.3, 2.2))}
                     title="Zoom In"
                   >
-                    🔍+ Zoom
+                    <UiIcon name="evidence" /> Zoom
                   </button>
                   <button
                     className="toolbar-btn"
                     onClick={() => setZoomLevel((z) => Math.max(z - 0.3, 0.7))}
                     title="Zoom Out"
                   >
-                    🔍- Reset
+                    <UiIcon name="evidence" /> Reset
                   </button>
                 </div>
               )}
@@ -123,7 +122,7 @@ export function EvidenceInspection({ evidenceId, onClose }) {
             </div>
 
             <div className="evidence-section clue-box">
-              <label className="section-title clue-title">🔍 DETECTIVE'S DEDUCTION CLUE</label>
+              <label className="section-title clue-title"><UiIcon name="evidence" /> DETECTIVE'S DEDUCTION CLUE</label>
               <p className="clue-text">{evidence.clue}</p>
             </div>
 
@@ -142,7 +141,7 @@ export function EvidenceInspection({ evidenceId, onClose }) {
                 <ul className="forensic-points-list">
                   {evidence.inspectionDetails?.map((detail, idx) => (
                     <li key={idx} className="forensic-item">
-                      <span className="bullet">⚡</span>
+                      <span className="bullet"><UiIcon name="zap" /></span>
                       <span>{detail}</span>
                     </li>
                   ))}
@@ -161,7 +160,7 @@ export function EvidenceInspection({ evidenceId, onClose }) {
                   alert(`Cross-referenced ${evidence.name} with suspect statements. Added to Case File.`);
                 }}
               >
-                📌 Pin to Case Board
+                <UiIcon name="pin" /> Pin to Case Board
               </button>
               <button className="btn-secondary" onClick={onClose}>
                 Return to Theatre

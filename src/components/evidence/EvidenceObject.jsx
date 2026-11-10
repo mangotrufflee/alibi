@@ -4,6 +4,7 @@ import { Html } from "@react-three/drei";
 import { ModelWrapper } from "../../assets/placeholders/ModelWrapper";
 import { PlaceholderProp } from "../../assets/placeholders/PlaceholderProp";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "../ui/UiIcon";
 
 /**
  * 3D Evidence Object placed inside the theatre environment.
@@ -70,7 +71,7 @@ export function EvidenceObject({ evidence }) {
               gap: "6px"
             }}
           >
-            <span style={{ color: "#3772f1" }}>🔍 [Click to Inspect]</span>
+            <span style={{ color: "#3772f1" }}><UiIcon name="evidence" /> [Click to Inspect]</span>
             <strong>{evidence.name}</strong>
           </div>
         </Html>

@@ -1,6 +1,7 @@
 // src/components/puzzles/PuzzleModal.jsx
 import React, { useState } from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "../ui/UiIcon";
 
 // ── Puzzle 1: The Ticket Is a Clock ─────────────────────────────────────────
 function TicketClockPuzzle({ puzzle, onSolve, isSolved }) {
@@ -47,7 +48,7 @@ function TicketClockPuzzle({ puzzle, onSolve, isSolved }) {
             >
               <div className="punch-icon-badge">
                 {item.id === "round" && "●"}
-                {item.id === "half_moon" && "☽"}
+                {item.id === "half_moon" && <UiIcon name="time" />}
                 {item.id === "square" && "■"}
                 {isSelected && <span className="order-bubble">{orderIdx + 1}</span>}
               </div>
@@ -88,7 +89,7 @@ function CanisterLabelPuzzle({ puzzle, onSolve, isSolved }) {
               className="peel-label-btn"
               onClick={() => setPeeled(!peeled)}
             >
-              {peeled ? "Reset Label Sticker" : "🔍 Peel Off Replacement Sticker"}
+              {peeled ? "Reset Label Sticker" : <><UiIcon name="evidence" /> Peel Off Replacement Sticker</>}
             </button>
           </div>
           {peeled && (
@@ -124,7 +125,7 @@ function CanisterLabelPuzzle({ puzzle, onSolve, isSolved }) {
           disabled={!selectedOption}
           onClick={handleVerify}
         >
-          Confirm Archival Identification ➔
+          Confirm Archival Identification <UiIcon name="arrow" />
         </button>
       )}
       {error && <div className="puzzle-error-toast">Incorrect catalogue matching. Examine the label!</div>}
@@ -167,7 +168,7 @@ function MissingMinutePuzzle({ puzzle, onSolve, isSolved }) {
           })}
         </div>
         <div className="audio-status-readout">
-          {isTuned ? "✔ AUDIO HARMONIZED: Generator 50Hz hum matches booth background" : "⚡ STATIC NOISE: Drag frequency dial to 50 Hz"}
+          {isTuned ? <><UiIcon name="success" /> AUDIO HARMONIZED: Generator 50Hz hum matches booth background</> : <><UiIcon name="zap" /> STATIC NOISE: Drag frequency dial to 50 Hz</>}
         </div>
       </div>
 
@@ -217,7 +218,7 @@ function GlassReflectionPuzzle({ puzzle, onSolve }) {
           <div className="glass-surface">
             {isAligned ? (
               <div className="revealed-silhouette-card">
-                <span className="silhouette-icon">👤</span>
+                <span className="silhouette-icon"><UiIcon name="user" /></span>
                 <p className="silhouette-text">
                   {puzzle.routeReflections[activeStoryline] || puzzle.routeReflections.A}
                 </p>
@@ -240,14 +241,14 @@ function GlassReflectionPuzzle({ puzzle, onSolve }) {
               className={`toolbar-btn ${lightSource === "tungsten" ? "active" : ""}`}
               onClick={() => handleLightChange("tungsten")}
             >
-              💡 Tungsten Booth Lamp
+              <UiIcon name="lightbulb" /> Tungsten Booth Lamp
             </button>
             <button
               type="button"
               className={`toolbar-btn ${lightSource === "ambient" ? "active" : ""}`}
               onClick={() => handleLightChange("ambient")}
             >
-              🌧️ Monsoon Street Light
+              <UiIcon name="waves" /> Monsoon Street Light
             </button>
           </div>
         </div>
@@ -303,7 +304,7 @@ function BoothReconstructionPuzzle({ puzzle, onSolve, isSolved }) {
 
           return (
             <div key={slot.id} className={`blueprint-slot-box ${isCorrect ? "slot-correct" : ""}`}>
-              <span className="slot-name">📍 {slot.name}</span>
+              <span className="slot-name"><UiIcon name="location" /> {slot.name}</span>
               <select
                 className="slot-dropdown"
                 value={placedItem || ""}
@@ -342,7 +343,7 @@ export default function PuzzleModal() {
         <div className="puzzle-dialog-header">
           <div className="puzzle-badge-pill">FORENSIC LAB (OPTIONAL)</div>
           <button className="puzzle-close-btn" onClick={closePuzzle} title="Close Puzzle">
-            ✕
+            <UiIcon name="close" />
           </button>
         </div>
         <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginBottom: "0.5rem" }}>
@@ -371,7 +372,7 @@ export default function PuzzleModal() {
 
         {isSolved && (
           <div className="puzzle-solved-banner">
-            ✔ PUZZLE SOLVED: {activePuzzle.rewardClue}
+            <UiIcon name="success" /> PUZZLE SOLVED: {activePuzzle.rewardClue}
           </div>
         )}
       </div>

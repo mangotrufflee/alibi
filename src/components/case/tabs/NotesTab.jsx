@@ -3,6 +3,8 @@
 
 import React, { useState } from "react";
 import { useGame } from "../../../state/GameContext";
+import { UiIcon } from "../../ui/UiIcon";
+import { ambientAudio } from "../../../services/ambientAudio";
 
 export default function NotesTab() {
   const { investigatorNotes, addInvestigatorNote, deleteInvestigatorNote } = useGame();
@@ -62,7 +64,10 @@ export default function NotesTab() {
               placeholder="Type investigative notes, observations on Raju's body language, or contradictions in Meera's timeline..."
               rows={5}
               value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
+              onChange={(e) => {
+                setNoteText(e.target.value);
+                ambientAudio.playTyping();
+              }}
             />
           </div>
 
@@ -71,7 +76,7 @@ export default function NotesTab() {
             className="submit-note-btn"
             disabled={!noteText.trim()}
           >
-            ✍ Record into Official Log
+            <UiIcon name="edit" /> Record into Official Log
           </button>
         </form>
       </div>
@@ -117,7 +122,7 @@ export default function NotesTab() {
                 <div className="note-card-header">
                   <div className="note-meta">
                     <span className="note-tag-pill">{note.tag}</span>
-                    <span className="note-time">🕒 {note.timestamp}</span>
+                    <span className="note-time"><UiIcon name="time" /> {note.timestamp}</span>
                     {note.isAuto && (
                       <span className="auto-badge">AUTO-OBSERVATION</span>
                     )}
@@ -130,7 +135,7 @@ export default function NotesTab() {
                       onClick={() => deleteInvestigatorNote(note.id)}
                       title="Delete note"
                     >
-                      ✕
+                      <UiIcon name="close" />
                     </button>
                   )}
                 </div>

@@ -1,6 +1,7 @@
 // src/components/ui/HintsDrawer.jsx
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 import HintCards from "../interrogation/HintCards";
 import TruthGateIndicator from "../interrogation/TruthGateIndicator";
 
@@ -16,7 +17,7 @@ export default function HintsDrawer() {
       <div className="hints-drawer-panel" onClick={(e) => e.stopPropagation()}>
         <div className="hints-drawer-header">
           <div className="hints-header-title">
-            <span className="hints-header-icon">💡</span>
+            <span className="hints-header-icon"><UiIcon name="lightbulb" /></span>
             <div>
               <h2>FORENSIC HINTS & TRUTH GATES</h2>
               <span className="hints-header-sub">
@@ -29,7 +30,7 @@ export default function HintsDrawer() {
             className="hints-close-btn"
             onClick={() => setIsHintsDrawerOpen(false)}
           >
-            ✕ Close
+            <UiIcon name="close" /> Close
           </button>
         </div>
 

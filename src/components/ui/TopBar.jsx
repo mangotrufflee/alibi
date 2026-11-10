@@ -1,6 +1,7 @@
 // src/components/ui/TopBar.jsx
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 
 export default function TopBar() {
   const {
@@ -32,7 +33,7 @@ export default function TopBar() {
           onClick={() => toggleSidebar("left")}
           title="Toggle Case Dossier [Tab]"
         >
-          ☰ DOSSIER
+          <UiIcon name="menu" /> DOSSIER
         </button>
 
         <div className="topbar-brand">
@@ -93,13 +94,13 @@ export default function TopBar() {
         {/* Camera Reset button if zoomed into a suspect */}
         {cameraState !== "MAIN_THEATRE" && (
           <button className="topbar-btn accent" onClick={resetCameraToTheatre}>
-            🎥 Wide View
+            <UiIcon name="camera" /> Wide View
           </button>
         )}
 
         {/* Handbook button */}
         <button className="topbar-btn" onClick={toggleHandbook}>
-          📋 Detective Board
+          <UiIcon name="report" /> Detective Board
         </button>
 
         {/* Development Asset Pipeline Toggles */}
@@ -123,7 +124,7 @@ export default function TopBar() {
 
         {/* Pause Button */}
         <button className="topbar-btn icon-btn" onClick={togglePause} title="Pause Game [ESC]">
-          ⏸
+          <UiIcon name="pause" />
         </button>
 
         {/* Right Sidebar (System / Settings) */}
@@ -132,7 +133,7 @@ export default function TopBar() {
           onClick={() => toggleSidebar("right")}
           title="System & Settings"
         >
-          ⚙
+          <UiIcon name="wrench" />
         </button>
       </div>
     </header>

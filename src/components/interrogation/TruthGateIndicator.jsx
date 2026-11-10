@@ -4,6 +4,7 @@
 import React from "react";
 import { useGameStore } from "../../state/useGameStore.js";
 import { TRUTH_GATES } from "../../data/truthGatesData.js";
+import { UiIcon } from "../ui/UiIcon";
 
 export default function TruthGateIndicator() {
   const selectedSuspect = useGameStore((s) => s.selectedSuspect);
@@ -30,7 +31,7 @@ export default function TruthGateIndicator() {
       <div className="truth-gate-header">
         <div className="trust-meter-block">
           <div className="trust-meter-labels">
-            <span className="meter-title">🤝 DETECTIVE TRUST:</span>
+            <span className="meter-title"><UiIcon name="users" /> DETECTIVE TRUST:</span>
             <strong style={{ color: trustColor }}>
               {trustMood} ({suspectTrust}%)
             </strong>
@@ -48,7 +49,7 @@ export default function TruthGateIndicator() {
 
         <div className="contradictions-badge-box">
           <span className="contradictions-count-chip" title="Direct contradictions and alibi lies broken">
-            ⚔️ {contradictionsCaught} {contradictionsCaught === 1 ? "Lie Caught" : "Lies Caught"}
+            <UiIcon name="gavel" /> {contradictionsCaught} {contradictionsCaught === 1 ? "Lie Caught" : "Lies Caught"}
           </span>
         </div>
       </div>
@@ -56,7 +57,7 @@ export default function TruthGateIndicator() {
       {/* TRUTH GATES STATUS BAR */}
       <div className="gates-status-list">
         <div className="gates-list-label">
-          <span>🧠 PSYCHOLOGICAL TRUTH GATES (GDD §8):</span>
+          <span><UiIcon name="brain" /> PSYCHOLOGICAL TRUTH GATES (GDD §8):</span>
         </div>
 
         <div className="gates-chips-row">
@@ -69,7 +70,7 @@ export default function TruthGateIndicator() {
                 className={`truth-gate-chip ${isUnlocked ? "gate-unlocked" : "gate-locked"}`}
                 title={isUnlocked ? `CONFESSED: ${gate.secretFact}` : `LOCKED SECRET: Requires evidence or higher pressure`}
               >
-                <span className="gate-icon">{isUnlocked ? "🔓" : "🔒"}</span>
+                <span className="gate-icon"><UiIcon name={isUnlocked ? "success" : "lock"} /></span>
                 <span className="gate-title">{gate.title}</span>
                 <span className="gate-badge">
                   {isUnlocked ? `CRACKED (+${gate.points})` : `LOCKED (> ${gate.conditions.minStress}% Stress)`}
@@ -85,7 +86,7 @@ export default function TruthGateIndicator() {
         <div className="truth-breakthrough-overlay">
           <div className="truth-breakthrough-modal">
             <div className="breakthrough-badge">
-              ⚡ TRUTH GATE CRACKED // +{truthGatePopup.points} PTS
+              <UiIcon name="zap" /> TRUTH GATE CRACKED // +{truthGatePopup.points} PTS
             </div>
             <h3 className="breakthrough-title">{truthGatePopup.title}</h3>
             <p className="breakthrough-fact">

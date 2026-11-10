@@ -4,6 +4,7 @@
 
 import React from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "../ui/UiIcon";
 
 // Pill styling & icons per card type
 const TYPE_CONFIG = {
@@ -59,7 +60,7 @@ export default function HintCards() {
       {/* SECTION HEADER */}
       <div className="hint-cards-header">
         <span className="hint-cards-label">
-          📋 LINE OF QUESTIONING
+          <UiIcon name="report" /> LINE OF QUESTIONING
         </span>
         <span className="hint-scored-badge">
           {scoredCount} scored
@@ -117,7 +118,7 @@ export default function HintCards() {
         {/* THIN-ICE TRIES — only shown when score is at or below zero */}
         {isLow && !isSolved && !isFailed && (
           <div className="thin-ice-row">
-            <span className="thin-ice-label">⚠ THIN ICE — 3-TRIES RULE:</span>
+            <span className="thin-ice-label"><UiIcon name="warning" /> THIN ICE — 3-TRIES RULE:</span>
             <div className="tries-pip-row">
               {[1, 2, 3].map((i) => (
                 <span
@@ -144,14 +145,14 @@ export default function HintCards() {
       {/* SOLVED BANNER */}
       {isSolved && (
         <div className="case-solved-banner">
-          ✔ CASE CRACKED — {score} / {solveThreshold} pts
+          <UiIcon name="success" /> CASE CRACKED — {score} / {solveThreshold} pts
         </div>
       )}
 
       {/* FAILED BANNER */}
       {isFailed && (
         <div className="case-failed-banner">
-          ✘ CASE COLLAPSED — {failReason ? failReason.toUpperCase() : "KILLER ESCAPES"}
+          <UiIcon name="failure" /> CASE COLLAPSED — {failReason ? failReason.toUpperCase() : "KILLER ESCAPES"}
         </div>
       )}
     </div>
