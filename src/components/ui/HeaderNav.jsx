@@ -10,7 +10,8 @@ import {
   Volume2,
   VolumeX,
   Menu,
-  Trophy
+  Trophy,
+  Clock
 } from "lucide-react";
 import { useGame } from "../../state/GameContext";
 
@@ -28,6 +29,11 @@ export default function HeaderNav() {
   const isMuted = useGame((s) => s.isMuted);
   const toggleMute = useGame((s) => s.toggleMute);
   const toggleMenu = useGame((s) => s.toggleMenu);
+  const generatorCountdown = useGame((s) => s.generatorCountdown);
+
+  const minutes = Math.floor(generatorCountdown / 60);
+  const seconds = generatorCountdown % 60;
+  const timeFormatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
   const handleOpenCaseFiles = (subTab = "evidence_list") => {
     setCaseSubTab(subTab);
@@ -87,7 +93,7 @@ export default function HeaderNav() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className={`header-dock-tab-btn ${tab.isActive ? "active" : ""}`}
+              className={`header-dock-tab-btn ${tab.id === "case_files" ? "case-files-nav-tab" : ""} ${tab.isActive ? "active" : ""}`}
               onClick={tab.onClick}
             >
               <span className="tab-dock-icon">{tab.icon}</span>
@@ -97,8 +103,17 @@ export default function HeaderNav() {
         </nav>
       </div>
 
-      {/* RIGHT: SCORE -> HINT ICON -> MUTE ICON -> MENU ICON */}
+      {/* RIGHT: GENERATOR TIMER -> SCORE -> HINT ICON -> MUTE ICON -> MENU ICON */}
       <div className="header-right-cluster">
+        {/* GENERATOR COUNTDOWN TIMER PILL */}
+        <div
+          className={`header-dock-timer-pill ${generatorCountdown < 120 ? "warning-pulse" : ""}`}
+          title={`Auxiliary Diesel Generator: ${timeFormatted} remaining before auditorium blackout`}
+        >
+          <Clock size={15} className="timer-clock-icon" />
+          <span className="timer-val">{timeFormatted}</span>
+        </div>
+
         {/* SCORE PART */}
         <div className="header-dock-score-pill" title="Investigation Thoroughness Score">
           <Trophy size={15} className="score-trophy-icon" />

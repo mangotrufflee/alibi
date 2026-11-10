@@ -4,6 +4,7 @@
 
 import React, { useState } from "react";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 import { suspects } from "../../data/suspects";
 
 export default function CrossExamineTopics({ suspectId }) {
@@ -78,7 +79,7 @@ export default function CrossExamineTopics({ suspectId }) {
           }}
           title={`Present physical evidence to ${currentSuspect.name}`}
         >
-          <span>📁</span>
+          <UiIcon name="folder" />
           <span>{isEvidencePickerOpen ? "Hide Exhibits" : "Present Evidence Exhibit"}</span>
         </button>
       </div>
@@ -108,7 +109,7 @@ export default function CrossExamineTopics({ suspectId }) {
               onClick={() => setIsEvidencePickerOpen(false)}
               style={{ background: "transparent", border: "none", color: "#64748b", cursor: "pointer", fontSize: "0.75rem" }}
             >
-              ✕
+              <UiIcon name="close" />
             </button>
           </div>
 
@@ -140,7 +141,7 @@ export default function CrossExamineTopics({ suspectId }) {
                   e.currentTarget.style.background = "#161c2e";
                 }}
               >
-                <span>🏷️</span>
+                <UiIcon name="file" />
                 <span>{item.name}</span>
               </button>
             ))}
@@ -197,7 +198,7 @@ export default function CrossExamineTopics({ suspectId }) {
               title={isAsked ? `Already asked: ${t.title}` : `Ask: ${t.title}`}
             >
               <span style={{ color: isAsked ? "#10b981" : "#3772f1" }}>
-                {isAsked ? "✓" : "❓"}
+                <UiIcon name={isAsked ? "check" : "question"} />
               </span>
               <span>{t.title}</span>
             </button>

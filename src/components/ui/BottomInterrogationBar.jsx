@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "../../state/GameContext";
 import { suspects } from "../../data/suspects";
 import CrossExamineTopics from "./CrossExamineTopics";
+import { UiIcon } from "./UiIcon";
+import { ambientAudio } from "../../services/ambientAudio";
 
 export default function BottomInterrogationBar() {
   const selectedSuspect = useGame((s) => s.selectedSuspect);
@@ -94,7 +96,7 @@ export default function BottomInterrogationBar() {
             boxShadow: "0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(31, 97, 239, 0.2)"
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#3772f1", fontSize: "0.75rem", fontFamily: "monospace", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
-              <span>⚡ CRITICAL INTERROGATION PIVOT</span>
+              <span><UiIcon name="zap" /> CRITICAL INTERROGATION PIVOT</span>
             </div>
             <h2 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 0.75rem", color: "#ffffff" }}>
               Who Arranged the Breach at Rex Talkies?
@@ -124,7 +126,7 @@ export default function BottomInterrogationBar() {
                   <div style={{ fontWeight: 600 }}>Meera Kapoor</div>
                   <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>The Sale Must Survive • Concealed archive prints</div>
                 </div>
-                <span style={{ fontSize: "0.75rem", color: "#3772f1", fontFamily: "monospace" }}>Route A ➔</span>
+                <span style={{ fontSize: "0.75rem", color: "#3772f1", fontFamily: "monospace" }}>Route A <UiIcon name="arrow" /></span>
               </button>
 
               <button
@@ -147,7 +149,7 @@ export default function BottomInterrogationBar() {
                   <div style={{ fontWeight: 600 }}>Dr. Arvind Sethi</div>
                   <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>The Film That Would Not Die • Erased sister's print</div>
                 </div>
-                <span style={{ fontSize: "0.75rem", color: "#3772f1", fontFamily: "monospace" }}>Route B ➔</span>
+                <span style={{ fontSize: "0.75rem", color: "#3772f1", fontFamily: "monospace" }}>Route B <UiIcon name="arrow" /></span>
               </button>
 
               <button
@@ -170,7 +172,7 @@ export default function BottomInterrogationBar() {
                   <div style={{ fontWeight: 600 }}>Nusrat Ali</div>
                   <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>The Missing Minute • 58-second recording gap</div>
                 </div>
-                <span style={{ fontSize: "0.75rem", color: "#3772f1", fontFamily: "monospace" }}>Route C ➔</span>
+                <span style={{ fontSize: "0.75rem", color: "#3772f1", fontFamily: "monospace" }}>Route C <UiIcon name="arrow" /></span>
               </button>
             </div>
 
@@ -328,7 +330,7 @@ export default function BottomInterrogationBar() {
                   }}
                   title={`Formally accuse ${currentSuspect.name}`}
                 >
-                  ⚖️ ACCUSE SUSPECT
+                  <UiIcon name="gavel" /> ACCUSE SUSPECT
                 </button>
               )}
             </div>
@@ -354,7 +356,7 @@ export default function BottomInterrogationBar() {
                 }}
                 title={isSpeaking ? "Stop Voice Playback" : `Listen to ${currentSuspect.name} speak`}
               >
-                <span>{isSpeaking ? "⏹" : "🔊"}</span>
+                <UiIcon name={isSpeaking ? "stop" : "sound"} />
                 <span>{isSpeaking ? "Stop Voice" : "Listen (Voice)"}</span>
                 {isSpeaking && (
                   <span className="speaking-wave-mini" style={{ position: "relative", top: 0 }}>
@@ -383,7 +385,7 @@ export default function BottomInterrogationBar() {
                 }}
                 title="Unfocus suspect and return to 3D theatre view"
               >
-                <span>✕</span>
+                <UiIcon name="close" />
                 <span>Unfocus</span>
               </button>
             </div>
@@ -402,7 +404,7 @@ export default function BottomInterrogationBar() {
               alignItems: "center",
               gap: "0.35rem"
             }}>
-              <span>⚠️</span>
+              <UiIcon name="warning" />
               <span><strong>[Demeanor Reaction]:</strong> {stressBandNotification.reaction}</span>
             </div>
           )}
@@ -478,7 +480,7 @@ export default function BottomInterrogationBar() {
               }}
               title="Voice Interrogation via Gnani STT (Push to talk / click to finish)"
             >
-              <span style={{ fontSize: "0.9rem" }}>{isRecording ? "⏹" : "🎙️"}</span>
+              <span style={{ fontSize: "0.9rem" }}><UiIcon name={isRecording ? "stop" : "mic"} /></span>
               <span>{isRecording ? "CLICK TO FINISH" : "PUSH TO TALK"}</span>
             </button>
 
@@ -487,7 +489,10 @@ export default function BottomInterrogationBar() {
               <input
                 type="text"
                 value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
+                onChange={(e) => {
+                  setTextInput(e.target.value);
+                  ambientAudio.playTyping();
+                }}
                 placeholder={
                   isGameOver
                     ? "Case concluded."
@@ -524,7 +529,7 @@ export default function BottomInterrogationBar() {
                   whiteSpace: "nowrap"
                 }}
               >
-                Interrogate ➔
+                Interrogate <UiIcon name="arrow" />
               </button>
             </form>
 
@@ -588,15 +593,15 @@ export default function BottomInterrogationBar() {
               </span>
             ) : isProcessing ? (
               <span style={{ color: "#38bdf8" }}>
-                ⏳ <strong>TRANSCRIBING:</strong> Processing speech query via Gnani STT...
+                <UiIcon name="time" /> <strong>TRANSCRIBING:</strong> Processing speech query via Gnani STT...
               </span>
             ) : isSpeaking ? (
               <span style={{ color: "#3772f1" }}>
-                🔊 <strong>SPEAKING:</strong> {currentSuspect.name} is giving their statement...
+                <UiIcon name="sound" /> <strong>SPEAKING:</strong> {currentSuspect.name} is giving their statement...
               </span>
             ) : (
               <span>
-                🎙️ Push-to-Talk, type question, or click cross-examine topics above
+                <UiIcon name="mic" /> Push-to-Talk, type question, or click cross-examine topics above
               </span>
             )}
           </div>

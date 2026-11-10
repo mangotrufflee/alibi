@@ -1,7 +1,7 @@
 // src/components/ui/SuspectsSidebar.jsx
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Building2 } from "lucide-react";
+import React from "react";
+import { motion } from "framer-motion";
+import { Building2, UserRound } from "lucide-react";
 import { useGame } from "../../state/GameContext";
 import { suspects } from "../../data/suspects";
 
@@ -12,7 +12,6 @@ export default function SuspectsSidebar() {
   const isSpeaking = useGame((s) => s.isSpeaking);
   const cameraState = useGame((s) => s.cameraState);
   const setCameraState = useGame((s) => s.setCameraState);
-  const [hoveredId, setHoveredId] = useState(null);
 
   return (
     <motion.aside
@@ -22,11 +21,6 @@ export default function SuspectsSidebar() {
       className="alibi-sidebar alibi-left-sidebar macos-dock-sidebar"
       aria-label="Suspects in Auditorium"
     >
-      <div className="sidebar-rail-header">
-        <span className="sidebar-rail-title">SUSPECTS</span>
-        <span className="sidebar-rail-subtitle">5 SEATED</span>
-      </div>
-
       <div className="suspect-icons-group">
         {Object.values(suspects).map((s) => {
           const isSelected = s.id === selectedSuspect;
@@ -37,8 +31,6 @@ export default function SuspectsSidebar() {
             <div
               key={s.id}
               className="suspect-rail-item macos-dock-item-wrapper"
-              onMouseEnter={() => setHoveredId(s.id)}
-              onMouseLeave={() => setHoveredId(null)}
             >
               {/* macOS Active App Indicator Dot */}
               {isSelected && (
@@ -64,7 +56,7 @@ export default function SuspectsSidebar() {
               >
                 {/* BLACK SILHOUETTE AVATAR ICON */}
                 <div className="silhouette-icon-wrapper">
-                  <span className="silhouette-head-bust">👤</span>
+                  <UserRound className="silhouette-head-bust" size={20} aria-hidden="true" />
                   <span className="suspect-initials-badge">
                     {s.name.split(" ").map((n) => n[0]).join("")}
                   </span>
@@ -88,36 +80,7 @@ export default function SuspectsSidebar() {
                 )}
               </motion.button>
 
-              {/* EXPANDING HOVER DOSSIER FLYOUT */}
-              <AnimatePresence>
-                {hoveredId === s.id && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -8, scale: 0.96 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: -8, scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
-                    className="suspect-hover-tooltip macos-dock-tooltip"
-                  >
-                    <div className="tooltip-top-row">
-                      <strong className="tooltip-name">{s.name}</strong>
-                      <span className="tooltip-tag" style={{ color: s.color }}>
-                        {s.role}
-                      </span>
-                    </div>
-                    <div className="tooltip-details">
-                      <span className="tooltip-seat">
-                        Seat: Row {s.seat?.row}, Col {s.seat?.col}
-                      </span>
-                      <span className="tooltip-stress">
-                        Demeanor: {stress}% {stress > 65 ? "Panicked" : stress > 45 ? "Nervous" : "Guarded"}
-                      </span>
-                    </div>
-                    <div className="tooltip-action-hint">
-                      {isSelected ? "▶ Camera Focused • Interrogating" : "▶ Click to Focus Camera & Interrogate"}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <span className="sidebar-button-heading suspect-button-heading">{s.name}</span>
             </div>
           );
         })}

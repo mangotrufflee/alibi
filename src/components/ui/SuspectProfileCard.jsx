@@ -5,6 +5,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "../../state/GameContext";
+import { UiIcon } from "./UiIcon";
 import { suspects } from "../../data/suspects";
 import { CLUE_DATABASE } from "../../data/clueDatabase";
 import { getStressBandLabel, getStressBandColor } from "../../services/stressEngine";
@@ -57,8 +58,8 @@ export default function SuspectProfileCard() {
           top: "74px",
           left: isLeftSuspect ? "auto" : "86px",
           right: isLeftSuspect ? "86px" : "auto",
-          width: "340px",
-          maxHeight: "calc(100vh - 240px)",
+          width: "300px",
+          maxHeight: "calc(100vh - 320px)",
           background: "rgba(9, 13, 20, 0.94)",
           backdropFilter: "blur(20px)",
           border: `1px solid rgba(31, 97, 239, 0.45)`,
@@ -74,7 +75,7 @@ export default function SuspectProfileCard() {
       >
         {/* CARD HEADER */}
         <div style={{
-          padding: "0.85rem 1rem 0.65rem 1rem",
+          padding: "0.65rem 0.8rem 0.5rem",
           background: "rgba(14, 20, 32, 0.9)",
           borderBottom: "1px solid rgba(255, 255, 255, 0.07)",
           display: "flex",
@@ -94,7 +95,7 @@ export default function SuspectProfileCard() {
               fontSize: "1.1rem",
               boxShadow: "0 2px 8px rgba(0,0,0,0.5)"
             }}>
-              👤
+              <UiIcon name="user" />
             </div>
             <div>
               <h3 style={{
@@ -132,17 +133,17 @@ export default function SuspectProfileCard() {
             }}
             title="Unfocus suspect and return to hall overview"
           >
-            ✕
+            <UiIcon name="close" />
           </button>
         </div>
 
         {/* SCROLLABLE BODY */}
         <div style={{
-          padding: "0.85rem 1rem",
+          padding: "0.65rem 0.8rem",
           overflowY: "auto",
           display: "flex",
           flexDirection: "column",
-          gap: "0.75rem"
+          gap: "0.55rem"
         }}>
           {/* STATUS PILL */}
           <div style={{
@@ -256,7 +257,7 @@ export default function SuspectProfileCard() {
               textTransform: "uppercase",
               marginBottom: "0.4rem"
             }}>
-              <span>🔍</span>
+              <UiIcon name="evidence" />
               <span>UNLOCKED CONVERSATION CLUES ({unlockedCluesForSuspect.length}):</span>
             </div>
 
@@ -294,7 +295,7 @@ export default function SuspectProfileCard() {
                       color: "#93c5fd",
                       marginBottom: "0.15rem"
                     }}>
-                      <span>💡</span>
+                      <UiIcon name="lightbulb" />
                       <span>{clue.title}</span>
                     </div>
                     <p style={{
