@@ -268,23 +268,23 @@ export default function BottomInterrogationBar() {
           className="floating-bottom-bar"
           style={{
             position: "fixed",
-            bottom: "16px",
+            bottom: "12px",
             left: 0,
             right: 0,
             margin: "0 auto",
-            width: "min(960px, calc(100vw - 200px))",
-            maxWidth: "960px",
+            width: "min(1200px, calc(100vw - 120px))",
+            maxWidth: "1200px",
             background: "rgba(9, 13, 20, 0.94)",
             backdropFilter: "blur(20px)",
             border: "1px solid rgba(31, 97, 239, 0.4)",
-            borderRadius: "14px",
+            borderRadius: "12px",
             boxShadow: "0 16px 45px rgba(0, 0, 0, 0.88), 0 0 30px rgba(31, 97, 239, 0.18)",
-            padding: "0.55rem 1rem 0.65rem 1rem",
+            padding: "0.42rem 1.1rem 0.45rem 1.1rem",
             zIndex: 40,
             color: "#f8fafc",
             display: "flex",
             flexDirection: "column",
-            gap: "0.38rem",
+            gap: "0.26rem",
             pointerEvents: "auto"
           }}
           aria-label="Floating Interrogation Console"
@@ -294,9 +294,9 @@ export default function BottomInterrogationBar() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            paddingBottom: "0.3rem",
+            paddingBottom: "0.22rem",
             borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-            fontSize: "0.74rem"
+            fontSize: "0.72rem"
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
               <span style={{
@@ -343,9 +343,9 @@ export default function BottomInterrogationBar() {
                   background: isSpeaking ? "rgba(220, 38, 38, 0.2)" : "rgba(31, 97, 239, 0.15)",
                   border: `1px solid ${isSpeaking ? "#dc2626" : "rgba(55, 114, 241, 0.4)"}`,
                   color: isSpeaking ? "#fca5a5" : "#93c5fd",
-                  padding: "0.2rem 0.55rem",
-                  borderRadius: "6px",
-                  fontSize: "0.7rem",
+                  padding: "0.16rem 0.5rem",
+                  borderRadius: "5px",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   cursor: "pointer",
                   display: "flex",
@@ -373,9 +373,9 @@ export default function BottomInterrogationBar() {
                   background: "rgba(255, 255, 255, 0.06)",
                   border: "1px solid rgba(255, 255, 255, 0.12)",
                   color: "#94a3b8",
-                  padding: "0.2rem 0.5rem",
-                  borderRadius: "6px",
-                  fontSize: "0.7rem",
+                  padding: "0.16rem 0.45rem",
+                  borderRadius: "5px",
+                  fontSize: "0.68rem",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -395,9 +395,9 @@ export default function BottomInterrogationBar() {
               background: "rgba(31, 97, 239, 0.15)",
               border: "1px solid rgba(55, 114, 241, 0.4)",
               color: "#93c5fd",
-              padding: "0.2rem 0.6rem",
+              padding: "0.15rem 0.55rem",
               borderRadius: "5px",
-              fontSize: "0.7rem",
+              fontSize: "0.68rem",
               display: "flex",
               alignItems: "center",
               gap: "0.35rem"
@@ -411,17 +411,17 @@ export default function BottomInterrogationBar() {
           <div style={{
             background: "rgba(18, 24, 38, 0.8)",
             border: "1px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "8px",
-            padding: "0.45rem 0.85rem",
+            borderRadius: "7px",
+            padding: "0.3rem 0.75rem",
             display: "flex",
             flexDirection: "column",
-            gap: "0.2rem"
+            gap: "0.15rem"
           }}>
             <div style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              fontSize: "0.66rem",
+              fontSize: "0.64rem",
               fontFamily: "monospace",
               color: "#94a3b8",
               letterSpacing: "0.05em"
@@ -435,8 +435,8 @@ export default function BottomInterrogationBar() {
             {/* FULL TESTIMONY TEXT — NO MAX-HEIGHT TRUNCATION, ALL WORDS VISIBLE */}
             <p style={{
               margin: 0,
-              fontSize: "0.84rem",
-              lineHeight: 1.45,
+              fontSize: "0.82rem",
+              lineHeight: 1.35,
               color: "#f8fafc",
               fontStyle: "italic",
               whiteSpace: "normal",
@@ -451,7 +451,7 @@ export default function BottomInterrogationBar() {
           <div style={{
             display: "flex",
             alignItems: "center",
-            gap: "0.45rem"
+            gap: "0.4rem"
           }}>
             {/* PUSH-TO-TALK MIC BUTTON */}
             <button
@@ -461,24 +461,24 @@ export default function BottomInterrogationBar() {
               disabled={isProcessing || isGameOver}
               style={{
                 flexShrink: 0,
-                minWidth: "130px",
-                height: "36px",
+                minWidth: "125px",
+                height: "32px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "0.4rem",
-                borderRadius: "7px",
-                padding: "0 0.75rem",
+                gap: "0.35rem",
+                borderRadius: "6px",
+                padding: "0 0.65rem",
                 background: isRecording ? "#dc2626" : "rgba(31, 97, 239, 0.2)",
                 border: `1px solid ${isRecording ? "#ef4444" : "#1f61ef"}`,
                 color: "#ffffff",
                 cursor: isGameOver ? "not-allowed" : "pointer",
                 fontWeight: 600,
-                fontSize: "0.74rem"
+                fontSize: "0.72rem"
               }}
               title="Voice Interrogation via Gnani STT (Push to talk / click to finish)"
             >
-              <span style={{ fontSize: "0.95rem" }}>{isRecording ? "⏹" : "🎙️"}</span>
+              <span style={{ fontSize: "0.9rem" }}>{isRecording ? "⏹" : "🎙️"}</span>
               <span>{isRecording ? "CLICK TO FINISH" : "PUSH TO TALK"}</span>
             </button>
 
@@ -496,13 +496,13 @@ export default function BottomInterrogationBar() {
                 disabled={isRecording || isProcessing || isGameOver}
                 style={{
                   flex: 1,
-                  height: "36px",
+                  height: "32px",
                   background: "rgba(14, 18, 28, 0.95)",
                   border: "1px solid rgba(255, 255, 255, 0.12)",
-                  borderRadius: "7px",
-                  padding: "0 0.75rem",
+                  borderRadius: "6px",
+                  padding: "0 0.65rem",
                   color: "#ffffff",
-                  fontSize: "0.82rem",
+                  fontSize: "0.8rem",
                   outline: "none"
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#1f61ef")}
@@ -512,14 +512,14 @@ export default function BottomInterrogationBar() {
                 type="submit"
                 disabled={!textInput.trim() || isRecording || isProcessing || isGameOver}
                 style={{
-                  height: "36px",
-                  padding: "0 0.95rem",
+                  height: "32px",
+                  padding: "0 0.85rem",
                   background: textInput.trim() ? "#1f61ef" : "rgba(31, 97, 239, 0.3)",
                   border: "none",
-                  borderRadius: "7px",
+                  borderRadius: "6px",
                   color: "#ffffff",
                   fontWeight: 600,
-                  fontSize: "0.78rem",
+                  fontSize: "0.75rem",
                   cursor: textInput.trim() && !isRecording && !isProcessing ? "pointer" : "not-allowed",
                   whiteSpace: "nowrap"
                 }}
@@ -534,6 +534,7 @@ export default function BottomInterrogationBar() {
               borderRadius: "6px",
               overflow: "hidden",
               border: "1px solid rgba(255, 255, 255, 0.12)",
+              height: "32px",
               flexShrink: 0
             }}>
               <button
@@ -543,8 +544,8 @@ export default function BottomInterrogationBar() {
                   background: currentLanguage === "en-IN" ? "#1f61ef" : "transparent",
                   color: currentLanguage === "en-IN" ? "#ffffff" : "#64748b",
                   border: "none",
-                  padding: "0.35rem 0.5rem",
-                  fontSize: "0.68rem",
+                  padding: "0.2rem 0.45rem",
+                  fontSize: "0.66rem",
                   fontWeight: 700,
                   cursor: "pointer"
                 }}
@@ -558,8 +559,8 @@ export default function BottomInterrogationBar() {
                   background: currentLanguage === "hi-IN" ? "#1f61ef" : "transparent",
                   color: currentLanguage === "hi-IN" ? "#ffffff" : "#64748b",
                   border: "none",
-                  padding: "0.35rem 0.5rem",
-                  fontSize: "0.68rem",
+                  padding: "0.2rem 0.45rem",
+                  fontSize: "0.66rem",
                   fontWeight: 700,
                   cursor: "pointer"
                 }}
@@ -574,12 +575,12 @@ export default function BottomInterrogationBar() {
 
           {/* LIVE STATUS BAR */}
           <div style={{
-            fontSize: "0.7rem",
+            fontSize: "0.66rem",
             color: "#64748b",
             display: "flex",
             alignItems: "center",
             gap: "0.4rem",
-            marginTop: "0.15rem"
+            marginTop: "0.05rem"
           }}>
             {isRecording ? (
               <span style={{ color: "#ef4444", display: "flex", alignItems: "center", gap: "0.3rem" }}>

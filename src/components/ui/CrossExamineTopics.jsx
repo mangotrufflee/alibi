@@ -29,12 +29,12 @@ export default function CrossExamineTopics({ suspectId }) {
 
   return (
     <div className="cross-examine-container" style={{
-      marginTop: "0.25rem",
-      paddingTop: "0.25rem",
+      marginTop: "0.15rem",
+      paddingTop: "0.18rem",
       borderTop: "1px solid rgba(255, 255, 255, 0.08)",
       display: "flex",
       flexDirection: "column",
-      gap: "0.25rem"
+      gap: "0.18rem"
     }}>
       {/* SECTION HEADER & CONTROLS */}
       <div style={{
@@ -46,8 +46,8 @@ export default function CrossExamineTopics({ suspectId }) {
         <div style={{
           display: "flex",
           alignItems: "center",
-          gap: "0.4rem",
-          fontSize: "0.7rem",
+          gap: "0.35rem",
+          fontSize: "0.66rem",
           fontFamily: "monospace",
           letterSpacing: "0.08em",
           color: "#94a3b8",
@@ -65,15 +65,15 @@ export default function CrossExamineTopics({ suspectId }) {
           style={{
             background: isEvidencePickerOpen ? "#1f61ef" : "rgba(31, 97, 239, 0.12)",
             border: `1px solid ${isEvidencePickerOpen ? "#3772f1" : "rgba(31, 97, 239, 0.35)"}`,
-            borderRadius: "6px",
+            borderRadius: "5px",
             color: isEvidencePickerOpen ? "#ffffff" : "#93c5fd",
-            padding: "0.25rem 0.65rem",
-            fontSize: "0.72rem",
+            padding: "0.18rem 0.55rem",
+            fontSize: "0.68rem",
             fontWeight: 600,
             cursor: isBusy ? "not-allowed" : "pointer",
             display: "flex",
             alignItems: "center",
-            gap: "0.35rem",
+            gap: "0.3rem",
             transition: "all 0.15s ease"
           }}
           title={`Present physical evidence to ${currentSuspect.name}`}
@@ -152,7 +152,7 @@ export default function CrossExamineTopics({ suspectId }) {
       <div style={{
         display: "flex",
         flexWrap: "wrap",
-        gap: "0.4rem",
+        gap: "0.3rem",
         alignItems: "center"
       }}>
         {topics.map((t) => {
@@ -169,14 +169,14 @@ export default function CrossExamineTopics({ suspectId }) {
               style={{
                 background: isAsked ? "rgba(22, 28, 46, 0.6)" : "rgba(18, 22, 34, 0.9)",
                 border: `1px solid ${isAsked ? "rgba(55, 114, 241, 0.25)" : "rgba(55, 114, 241, 0.5)"}`,
-                borderRadius: "6px",
+                borderRadius: "5px",
                 color: isAsked ? "#94a3b8" : "#f1f5f9",
-                padding: "0.22rem 0.55rem",
-                fontSize: "0.7rem",
+                padding: "0.18rem 0.5rem",
+                fontSize: "0.68rem",
                 cursor: isBusy ? "not-allowed" : "pointer",
                 display: "flex",
                 alignItems: "center",
-                gap: "0.35rem",
+                gap: "0.3rem",
                 transition: "all 0.15s ease",
                 textAlign: "left"
               }}

@@ -18,12 +18,12 @@ import { CharacterBase } from "./CharacterBase";
 const SUSPECT_MODEL_CONFIG = {
   raju: {
     modelIndex: 1,
-    yOffset: -0.22,
+    yOffset: 0.0,
     rotation: [0, 0.05, 0] // natively faces +Z towards camera
   },
   meera: {
     modelIndex: 2,
-    yOffset: -0.22,
+    yOffset: 0.0,
     rotation: [0, -0.08, 0] // natively faces +Z towards camera
   },
   arvind: {
