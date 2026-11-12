@@ -1,0 +1,20 @@
+# ALIBI: The Projectionist's Last Reel
+### Project Description
+
+ALIBI is an immersive, voice-driven detective mystery game that combines interactive 3D environments, artificial intelligence-powered speech processing, and deterministic narrative design to create an engaging investigation experience. Set in an old single-screen cinema in Old Delhi, the game places players in the role of an investigator tasked with solving the mysterious death of veteran projectionist Harbans Lal during the cinema's final screening.
+
+Following a sudden power failure, five individuals remain trapped inside Rex Talkies, each possessing a distinct personality, motive, alibi, and connection to the victim. Players must investigate these individuals, uncover concealed information, examine physical evidence, reconstruct the timeline, and identify the culprit through logical deduction.
+
+The game features three possible canonical storylines, each presenting a different culprit and explanation of the crime. These include a financial conspiracy surrounding the cinema's impending sale, an archival mystery involving an uncredited filmmaker, and a concealed confrontation revealed through a missing section of a phone recording. This multi-storyline structure provides narrative variation and encourages players to investigate beyond surface-level statements.
+
+A central feature of ALIBI is its voice-based interrogation system, integrated with Gnani AI. The system uses Gnani's Vachana speech-to-text service with Prisma v2.5 to convert spoken questions into text, while the Timbre v2.5 text-to-speech model generates character-specific spoken responses. Each of the five suspects has a distinct configured voice, creating a more immersive conversational experience.
+
+To maintain narrative consistency and prevent AI-generated hallucinations, the project's factual dialogue system follows a deterministic architecture. Character profiles, storylines, accepted question phrasings, canonical answers, and information-unlocking conditions are predefined within the application. A question classifier maps player input to the appropriate canonical question, while the game engine checks prerequisites before revealing sensitive information. Unrecognised questions receive predefined character-specific fallback responses. Thus, Gnani AI handles speech recognition and synthesis, while the game engine retains control over the actual narrative and factual information.
+
+Beyond interrogation, ALIBI incorporates an interactive evidence investigation system and five puzzle-based challenges. Players reconstruct timelines, identify manipulated film canisters, recover missing recording information, examine reflections, and reconstruct the projection booth. The investigation is supported by a stress and trust simulation, which tracks suspect behaviour and changes in response to questioning. Evidence discovery, contradictions, and truth-gate conditions progressively unlock additional information and narrative sequences.
+
+The application is developed using React, Vite, Three.js, React Three Fiber, Drei, and Zustand. Its visual environment follows a cinematic noir aesthetic, incorporating atmospheric lighting, monsoon rain, environmental audio, 3D character models, and interactive interface elements. The project is deployed on Vercel and accessible directly through a web browser.
+
+Ultimately, ALIBI explores how voice interaction, immersive environments, and structured artificial intelligence can be combined to create a more engaging form of interactive storytelling. Rather than treating AI as an unrestricted storyteller, the project uses it as an interface between the player and a carefully constructed narrative, ensuring that the mystery remains coherent, evidence-driven, and logically solvable.
+
+**Keywords:** Interactive Storytelling, Artificial Intelligence, Gnani AI, Speech Recognition, Text-to-Speech, Three.js, React, Detective Game, 3D Gaming, Deterministic Dialogue Systems.
